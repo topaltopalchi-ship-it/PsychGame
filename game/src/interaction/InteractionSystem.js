@@ -147,7 +147,7 @@ export class InteractionSystem {
       this.buttonPressed = true;
       this.tracker.log("FAILURE", { cause: "RED_BUTTON" });
       this.room?.showButtonPressed?.();
-      this.companion?.say("دکمه رو زدی... چراغ‌ها خاموش شد و در قفل شد.");
+      this.companion?.say("دکمه رو زدی... نور اتاق کم شد و در قفل شد.");
       this.applyButtonConsequence();
       return;
     }
