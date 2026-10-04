@@ -1,7 +1,7 @@
 import * as THREE from "three";
 export class Room02 {
   constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;}
-  start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.028);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
+  start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.028);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
   getInteractableObjects(){return Object.values(this.objects);}
   completeRoom(path){this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
   mesh(g,mat,pos,rot=[0,0,0]){const m=new THREE.Mesh(g,mat);m.position.set(...pos);m.rotation.set(...rot);m.castShadow=true;m.receiveShadow=true;this.scene.add(m);return m;}
@@ -13,5 +13,14 @@ export class Room02 {
   createClue(){const b=this.mesh(new THREE.BoxGeometry(2.4,1.5,.12),this.mat(0x4a4032,.8),[-3.45,2.15,-4.0]);b.userData.objectId="PATH_CLUE";this.objects.clue=b;const l=this.mesh(new THREE.BoxGeometry(1.65,.045,.04),this.mat(0xc8b27b,.35,.2),[-3.45,2.48,-3.92]);l.userData.objectId="PATH_CLUE";const a=this.mesh(new THREE.ConeGeometry(.14,.42,4),this.mat(0xc8b27b,.35,.2),[-3.45,1.95,-3.92],[Math.PI/2,0,0]);a.userData.objectId="PATH_CLUE";}
 
   createDecisionMarker(){const g=new THREE.CylinderGeometry(.32,.42,.06,32);const m=this.mesh(g,this.mat(0x8a6f45,.55,.15,0x3a2815),[0,.09,-1.65]);m.userData.objectId="DECISION_MARKER";this.objects.marker=m;}
+  createAtmosphere(){
+    const trim=this.mat(0x59606b,.55,.25);
+    for(const x of [-4.5,-1.5,1.5,4.5]) this.mesh(new THREE.BoxGeometry(.08,3.25,.08),trim,[x,2,-5.74]);
+    const ceiling=this.mesh(new THREE.BoxGeometry(2.4,.08,.65),this.mat(0xb39a70,.3,.65),[0,3.86,-.5]);
+    const light=new THREE.PointLight(0xd8e6ff,9,8);light.position.set(0,3.2,-.5);this.scene.add(light);
+    for(const x of [-3.1,0,3.1]){const glow=this.mesh(new THREE.BoxGeometry(1.35,.05,.04),this.mat(0x6f829b,.35,.15,0x52657d),[x,3.0,-3.88]);glow.userData.objectId="PATH_CLUE";}
+    this.mesh(new THREE.BoxGeometry(8.8,.035,2.2),this.mat(0x171a20,1),[0,.045,-.9]);
+  }
+
   createBench(){const wood=this.mat(0x493728,.75);const seat=this.mesh(new THREE.BoxGeometry(3,.16,.65),wood,[0,.85,1.1]);seat.userData.objectId="BENCH";this.objects.bench=seat;this.mesh(new THREE.BoxGeometry(2.7,.85,.12),wood,[0,1.25,1.35]);for(const x of [-1.25,1.25])this.mesh(new THREE.BoxGeometry(.12,.75,.12),wood,[x,.42,1.1]);}
 }
