@@ -25,9 +25,9 @@ export class Companion {
   createUI() {
     this.panel = document.createElement("div");
     this.panel.id = "pg-companion";
-    this.panel.innerHTML = '<div id="pg-companion-name">همراه</div><div id="pg-companion-text"></div>';
+    this.panel.innerHTML = '<div id="pg-companion-avatar"><span></span></div><div id="pg-companion-body"><div id="pg-companion-name">همراه</div><div id="pg-companion-text"></div></div>';
     Object.assign(this.panel.style, {
-      position:"fixed", left:"50%", bottom:"88px", transform:"translate(-50%,10px)",
+      position:"fixed", left:"50%", bottom:"88px", transform:"translate(-50%,10px)", display:"flex", alignItems:"center", gap:"12px",
       width:"min(430px,calc(100vw - 28px))", padding:"16px 18px",
       borderRadius:"14px", background:"rgba(10,12,17,.82)",
       border:"1px solid rgba(255,255,255,.13)", backdropFilter:"blur(12px)",
@@ -39,7 +39,7 @@ export class Companion {
     document.body.appendChild(this.panel);
     this.text = this.panel.querySelector("#pg-companion-text");
     const style = document.createElement("style");
-    style.textContent = "#pg-companion-name{font-size:11px;color:#c58d7c;margin-bottom:5px}#pg-companion-text{font-size:16px;line-height:1.9;font-weight:500}";
+    style.textContent = "@keyframes pgCompanionPulse{0%{transform:scale(.92);filter:brightness(1.4)}100%{transform:scale(1);filter:brightness(1)}}#pg-companion-avatar{width:44px;height:44px;min-width:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f2c59b 0 12%,#9a5f4b 14% 28%,#252a34 30% 65%,#101218 66%);border:1px solid rgba(255,255,255,.22);box-shadow:0 0 18px rgba(170,105,85,.35);position:relative}#pg-companion-avatar span{position:absolute;width:7px;height:7px;border-radius:50%;background:#e8c49b;left:11px;top:15px;box-shadow:15px 0 0 #e8c49b}#pg-companion-body{min-width:0;flex:1}#pg-companion-name{font-size:11px;color:#c58d7c;margin-bottom:5px}#pg-companion-text{font-size:16px;line-height:1.9;font-weight:500}";
     document.head.appendChild(style);
   }
 
@@ -49,6 +49,7 @@ export class Companion {
       this.pendingVoice = message;
       this.speak(message);
       this.panel.style.opacity = "1";
+      this.panel.querySelector("#pg-companion-avatar").style.animation = "pgCompanionPulse .9s ease-out";
       this.panel.style.transform = "translate(-50%,0)";
       clearTimeout(this.hideTimer);
       this.hideTimer = setTimeout(() => {
