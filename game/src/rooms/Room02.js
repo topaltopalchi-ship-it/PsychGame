@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room02 {
-  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;this.observedPaths={PATH_LEFT:0,PATH_CENTER:0,PATH_RIGHT:0};this.psychTimer=null;}
+  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;this.observedPaths={PATH_LEFT:0,PATH_CENTER:0,PATH_RIGHT:0};this.psychTimer=null;this.idleTime=0;this.whisperTriggered=false;}
   start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.024);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.createStoryDetails();this.createPathLighting();this.createDreadProps();this.createScareFigure();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
   getInteractableObjects(){return Object.values(this.objects);}
   completeRoom(path){this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
@@ -81,6 +81,21 @@ export class Room02 {
         setTimeout(()=>{target.intensity=old;},420);
       }
       this.companion?.say?.(path==="PATH_CENTER" ? "چرا دوباره به همین مسیر نگاه می‌کنی؟" : "فکر کنم این مسیر متوجه شد که دیدیش...");
+    }
+  }
+
+  update(delta){
+    this.idleTime+=delta;
+    if(!this.whisperTriggered && this.idleTime>18){
+      this.whisperTriggered=true;
+      this.tracker.log("PSYCHOLOGICAL_IDLE_EVENT",{roomId:"ROOM_02",idleSeconds:Math.round(this.idleTime)});
+      this.pathLights.forEach((light,i)=>{
+        light.intensity*=i===1?0.45:0.7;
+      });
+      setTimeout(()=>{
+        this.pathLights.forEach(light=>{light.intensity=Math.max(light.intensity,2.2);});
+      },900);
+      this.companion?.say?.("هنوز اینجایی؟ ... فکر کردم انتخابت رو کرده‌ای.");
     }
   }
 
