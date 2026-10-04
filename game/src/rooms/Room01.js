@@ -5,12 +5,12 @@ export class Room01 {
     this.scene = scene;
     this.tracker = tracker;
     this.objects = {};
-    this.dynamic = { clueVisible: false, redGlow: null, deskLight: null };
+    this.dynamic = { clueVisible: false, redGlow: null, deskLight: null, roomLights: [], baseLightIntensity: new Map() };
     this.completed = false;
   }
 
   start() {
-    this.scene.fog = new THREE.FogExp2(0x090b10, 0.035);
+    this.scene.fog = new THREE.FogExp2(0x090b10, 0.028);
     this.createFloor(); this.createWalls(); this.createCeiling(); this.createDoor();
     this.createRedButton(); this.createDesk(); this.createDrawer(); this.createBox();
     this.createClock(); this.createPainting(); this.createChair(); this.createLamp();
@@ -124,7 +124,7 @@ export class Room01 {
       new THREE.MeshStandardMaterial({
         color: 0xc91515,
         emissive: 0x6d0000,
-        emissiveIntensity: 2.2,
+        emissiveIntensity: 0.85,
         roughness: .24
       }),
       [-3.8, 1.8, 1.2],
@@ -160,7 +160,7 @@ export class Room01 {
 
     const keyGroup = new THREE.Group();
     keyGroup.position.set(.8, 1.24, -1.0);
-    keyGroup.scale.setScalar(0.42);
+    keyGroup.scale.setScalar(0.27);
 
     const keyMaterial = new THREE.MeshStandardMaterial({
       color: 0xffd34f,
@@ -183,7 +183,7 @@ export class Room01 {
     keyGroup.add(shaft, ring, tooth);
     keyGroup.userData.objectId = "KEY_FROM_DRAWER";
     keyGroup.userData.interactable = true;
-    this.scene.add(keyGroup);
+    keyGroup.visible = false;\n    this.scene.add(keyGroup);
     this.objects.drawerKey = keyGroup;
 
     const handle = this.mesh(
@@ -267,13 +267,13 @@ export class Room01 {
     // Ceiling fixture with warm pools of light.
     const fixture = this.mesh(new THREE.BoxGeometry(1.25, .08, .42), brass, [0, 3.86, -.2]);
     fixture.userData.objectId = "CEILING_FIXTURE";
-    const ceilingLight = new THREE.PointLight(0xffc98a, 7, 7);
+    const ceilingLight = this.registerRoomLight(new THREE.PointLight(0xffc98a, 7, 7));
     ceilingLight.position.set(0, 3.45, -.2);
     ceilingLight.castShadow = true;
     this.scene.add(ceilingLight);
 
     // Cold moonlight gives the room a cinematic contrast.
-    const moon = new THREE.PointLight(0x7894c8, 4, 6);
+    const moon = this.registerRoomLight(new THREE.PointLight(0x7894c8, 4, 6));
     moon.position.set(-3.2, 2.5, -3.8);
     this.scene.add(moon);
 
