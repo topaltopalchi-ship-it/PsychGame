@@ -1,13 +1,13 @@
 import * as THREE from "three";
 export class Room03 {
-  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;}
+  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;}
   start(context={}){
     this.memoryContext=context||{};this.memoryResponseDone=false;this.seatBaseZ=1;
     this.scene.fog=new THREE.FogExp2(0x090b10,this.memoryContext.wrongPaths?.length?.08:.025);
     if(this.memoryContext.wrongPaths?.length){
       this.tracker.log("ROOM_03_MEMORY_RESPONSE",{wrongPaths:this.memoryContext.wrongPaths});
     }
-    this.createFloor();this.createWalls();this.createClock();this.createSeat();this.createExit();this.createAtmosphere();if(this.memoryContext.wrongPaths?.length){this.memoryResponseTimer=setTimeout(()=>this.triggerMemoryResponse(),2600);}
+    this.createFloor();this.createWalls();this.createClock();this.createMemoryMark();this.createSeat();this.createExit();this.createAtmosphere();if(this.memoryContext.wrongPaths?.length){this.memoryResponseTimer=setTimeout(()=>this.triggerMemoryResponse(),2600);}
     this.tracker.log("ROOM_ENTER",{roomId:"ROOM_03",roomName:"WAITING_ROOM",previousPath:context.previousPath||"ROOM_02"});
   }
   mesh(g,mat,pos){const m=new THREE.Mesh(g,mat);m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;this.scene.add(m);return m;}
@@ -29,6 +29,24 @@ export class Room03 {
     const wallLight=new THREE.PointLight(this.memoryContext?.wrongPaths?.length?0x8b2b38:0x7187b2,3,6);wallLight.position.set(-4,2,-3.5);this.scene.add(wallLight);this.memoryLight=wallLight;
     const rug=this.mesh(new THREE.BoxGeometry(5.4,.03,2.8),this.mat(0x40332d,.98),[0,.06,.8]);
     rug.userData.objectId="WAIT_SEAT";
+  }
+
+  createMemoryMark(){
+    const mark=this.mesh(new THREE.BoxGeometry(1.8,.02,.5),this.mat(this.memoryContext?.wrongPaths?.length?0x5a2026:0x292d34,.9),[0,.075,-2.1]);
+    mark.userData.objectId="MEMORY_MARK";this.objects.memoryMark=mark;
+  }
+
+  reactToClock(){
+    if(this.clockWasInspected)return;
+    this.clockWasInspected=true;
+    if(this.memoryContext?.wrongPaths?.length){
+      this.tracker.log("ROOM_03_MEMORY_CONFIRM",{wrongPaths:this.memoryContext.wrongPaths});
+      this.companion?.say?.("حتی این ساعت هم انگار می‌دونه کجا اشتباه کردی...");
+      if(this.memoryLight)this.memoryLight.intensity=7;
+      setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},700);
+    }else{
+      this.tracker.log("ROOM_03_CLOCK_INSPECTED",{memoryClean:true});
+    }
   }
 
   createExit(){const d=this.mesh(new THREE.BoxGeometry(2,3.2,.18),this.mat(0x52606a,.7),[0,1.6,-5.78]);d.userData.objectId="WAIT_EXIT";this.objects.exit=d;}
