@@ -75,6 +75,7 @@ export class InteractionSystem {
     if (hits.length === 0) {
       this.finishLook();
       this.currentTarget = null;
+      window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId: null } }));
       return;
     }
 
@@ -108,6 +109,9 @@ export class InteractionSystem {
 
     this.currentTarget =
       target;
+    window.dispatchEvent(new CustomEvent("psychgame-target", {
+      detail: { objectId }
+    }));
 
     if (
       objectId === "RED_BUTTON" &&
