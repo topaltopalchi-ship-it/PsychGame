@@ -357,7 +357,7 @@ InteractionSystem.prototype.handleRoom7 = function(objectId) {
     if (this.completed) return;
     this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
     this.tracker.log("ROOM_07_EXIT_CHECKED",{roomId:"ROOM_07"});
-    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07"}}));
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07",trustBehavior:{firstChoice:this.room?.firstChoice||null,lastChoice:this.room?.lastChoice||null,followCount:this.room?.followCount||0,ignoreCount:this.room?.ignoreCount||0,choiceSwitches:this.room?.choiceSwitches||0}}}));
   }
 };
 
