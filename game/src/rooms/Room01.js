@@ -46,6 +46,10 @@ export class Room01 {
     }, 180);
   }
 
+  hideDrawerKey() {
+    if (this.objects.drawerKey) this.objects.drawerKey.visible = false;
+  }
+
   showKeyFound() {
     if (!this.dynamic.clue) return;
     this.dynamic.clue.material.emissive = new THREE.Color(0x806a24);
