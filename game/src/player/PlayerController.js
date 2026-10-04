@@ -64,15 +64,15 @@ export class PlayerController {
     look.id="pg-touch-look";
     Object.assign(look.style,{position:"fixed",right:"0",top:"0",width:"58%",height:"78%",zIndex:"6500",touchAction:"none",display:"none"});
     document.body.appendChild(look);
-    let lastX=0,lastY=0,lookActive=false;
-    look.addEventListener("pointerdown",e=>{lookActive=true;lastX=e.clientX;lastY=e.clientY;look.setPointerCapture(e.pointerId);e.preventDefault();},{passive:false});
-    look.addEventListener("pointermove",e=>{if(!lookActive)return;this.look(e.clientX-lastX,e.clientY-lastY);lastX=e.clientX;lastY=e.clientY;e.preventDefault();},{passive:false});
-    const lookEnd=()=>lookActive=false;
-    look.addEventListener("pointerup",lookEnd);look.addEventListener("pointercancel",lookEnd);
+    let lastX=0,lastY=0,startX=0,startY=0,lookActive=false,moved=false;
+    look.addEventListener("pointerdown",e=>{lookActive=true;moved=false;startX=lastX=e.clientX;startY=lastY=e.clientY;look.setPointerCapture(e.pointerId);e.preventDefault();},{passive:false});
+    look.addEventListener("pointermove",e=>{if(!lookActive)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;if(Math.hypot(e.clientX-startX,e.clientY-startY)>10)moved=true;this.look(dx,dy);lastX=e.clientX;lastY=e.clientY;e.preventDefault();},{passive:false});
+    const lookEnd=(e)=>{if(!lookActive)return;lookActive=false;if(!moved && window.psychGame?.interactAt) window.psychGame.interactAt(e.clientX,e.clientY);};
+    look.addEventListener("pointerup",lookEnd);look.addEventListener("pointercancel",()=>{lookActive=false;});
 
     const interact=document.createElement("button");
-    interact.id="pg-touch-interact"; interact.textContent="تعامل";
-    Object.assign(interact.style,{position:"fixed",right:"20px",bottom:"30px",width:"92px",height:"62px",borderRadius:"18px",border:"2px solid rgba(255,255,255,.35)",background:"rgba(120,30,25,.96)",color:"#fff",fontSize:"16px",fontWeight:"700",zIndex:"10000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.45)",touchAction:"manipulation"});
+    interact.id="pg-touch-interact"; interact.textContent="تعامل با شیء";
+    Object.assign(interact.style,{position:"fixed",right:"20px",bottom:"30px",width:"92px",height:"62px",borderRadius:"18px",border:"2px solid rgba(255,255,255,.35)",background:"rgba(120,30,25,.96)",color:"#fff",fontSize:"17px",fontWeight:"700",zIndex:"10000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.45)",touchAction:"manipulation"});
     interact.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();window.psychGame?.interact?.();},{passive:false});
     interact.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();},{passive:false});
     document.body.appendChild(interact);
