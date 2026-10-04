@@ -34,6 +34,7 @@ export class AudioManager {
     if (!this.started) return;
     this.startEffectsContext();
     if (!this.ctx) return;
+    if(this.ctx.state==="suspended") this.ctx.resume().catch(()=>{});
     const now=this.ctx.currentTime;
     const osc=this.ctx.createOscillator();
     const gain=this.ctx.createGain();
