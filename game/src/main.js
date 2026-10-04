@@ -124,7 +124,11 @@ const targetLabels = {
   PATH_LEFT: "مسیر چپ — انتخاب کن",
   PATH_CENTER: "مسیر وسط — انتخاب کن",
   PATH_RIGHT: "مسیر راست — انتخاب کن",
-  PATH_CLUE: "تابلو — بررسی کن"
+  PATH_CLUE: "تابلو — بررسی کن",
+  MIRROR_LEFT: "آینه چپ — بررسی کن", MIRROR_CENTER: "آینه وسط — بررسی کن", MIRROR_RIGHT: "آینه راست — بررسی کن", MIRROR_EXIT: "در خروج — باز کن",
+  REC_FAMILIAR: "صدای آشنا — گوش بده", REC_UNKNOWN: "صدای ناشناس — گوش بده", REC_STATIC: "نویز — گوش بده", REC_EXIT: "در خروج — باز کن",
+  FOLLOW_COMPANION: "اعتماد به همراه — انتخاب کن", GO_ALONE: "تنهایی — انتخاب کن", COMP_EXIT: "در خروج — باز کن",
+  TRUTH_CORE: "هسته — بررسی کن", TRUTH_EXIT: "در خروج — پایان"
 };
 const targetNames = {
   RED_BUTTON: "دکمه قرمز",
@@ -135,7 +139,11 @@ const targetNames = {
   OLD_DESK: "میز قدیمی",
   BROKEN_CLOCK: "ساعت خراب",
   OLD_PAINTING: "تابلو",
-  PATH_LEFT: "مسیر چپ", PATH_CENTER: "مسیر وسط", PATH_RIGHT: "مسیر راست", PATH_CLUE: "تابلو"
+  PATH_LEFT: "مسیر چپ", PATH_CENTER: "مسیر وسط", PATH_RIGHT: "مسیر راست", PATH_CLUE: "تابلو",
+  MIRROR_LEFT: "آینه چپ", MIRROR_CENTER: "آینه وسط", MIRROR_RIGHT: "آینه راست", MIRROR_EXIT: "در خروج",
+  REC_FAMILIAR: "صدای آشنا", REC_UNKNOWN: "صدای ناشناس", REC_STATIC: "نویز", REC_EXIT: "در خروج",
+  FOLLOW_COMPANION: "اعتماد به همراه", GO_ALONE: "تنهایی", COMP_EXIT: "در خروج",
+  TRUTH_CORE: "هسته", TRUTH_EXIT: "در خروج"
 };
 
 window.addEventListener("psychgame-target", (event) => {
