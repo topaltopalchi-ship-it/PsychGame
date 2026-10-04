@@ -14,7 +14,7 @@ export class Room01 {
     this.createFloor(); this.createWalls(); this.createCeiling(); this.createDoor();
     this.createRedButton(); this.createDesk(); this.createDrawer(); this.createBox();
     this.createClock(); this.createPainting(); this.createChair(); this.createLamp();
-    this.createSideTable(); this.createWindow();
+    this.createSideTable(); this.createWindow(); this.createAtmosphere();
     this.tracker.log("ROOM_ENTER", { roomId: "ROOM_01", roomName: "THE_RED_BUTTON" });
   }
 
@@ -246,6 +246,48 @@ export class Room01 {
     this.mesh(new THREE.CylinderGeometry(.48, .55, .12, 28), dark, [-2.8, .95, -1.7]);
     this.mesh(new THREE.CylinderGeometry(.07, .09, .95, 16), dark, [-2.8, .48, -1.7]);
     this.mesh(new THREE.CylinderGeometry(.55, .55, .05, 28), dark, [-2.8, .05, -1.7]);
+  }
+
+  createAtmosphere() {
+    const warm = this.mat(0x8b6b52, .72, .05);
+    const dark = this.mat(0x171a20, .72, .2);
+    const brass = this.mat(0xb28a52, .3, .8);
+
+    // Decorative wall panels: more architectural depth than flat walls.
+    for (const x of [-3.65, -1.25, 1.25, 3.65]) {
+      this.mesh(new THREE.BoxGeometry(.055, 3.05, .08), warm, [x, 2.05, -4.76]);
+      this.mesh(new THREE.BoxGeometry(2.15, .055, .08), warm, [x, .55, -4.76]);
+      this.mesh(new THREE.BoxGeometry(2.15, .055, .08), warm, [x, 3.52, -4.76]);
+    }
+
+    // A layered rug creates a stronger focal area around the desk.
+    this.mesh(new THREE.BoxGeometry(4.8, .035, 3.15), dark, [.35, .045, -.15]);
+    this.mesh(new THREE.BoxGeometry(4.35, .025, 2.7), this.mat(0x4b3630, 1), [.35, .065, -.15]);
+
+    // Ceiling fixture with warm pools of light.
+    const fixture = this.mesh(new THREE.BoxGeometry(1.25, .08, .42), brass, [0, 3.86, -.2]);
+    fixture.userData.objectId = "CEILING_FIXTURE";
+    const ceilingLight = new THREE.PointLight(0xffc98a, 7, 7);
+    ceilingLight.position.set(0, 3.45, -.2);
+    ceilingLight.castShadow = true;
+    this.scene.add(ceilingLight);
+
+    // Cold moonlight gives the room a cinematic contrast.
+    const moon = new THREE.PointLight(0x7894c8, 4, 6);
+    moon.position.set(-3.2, 2.5, -3.8);
+    this.scene.add(moon);
+
+    // Small desk objects make the scene feel inhabited.
+    const book = this.mesh(new THREE.BoxGeometry(.55, .12, .8), this.mat(0x6f3030, .62), [.15, 1.52, -1.72]);
+    book.userData.objectId = "OLD_DESK";
+    const cup = this.mesh(new THREE.CylinderGeometry(.11, .09, .22, 18), this.mat(0xb8b1a2, .38), [1.35, 1.55, -1.65]);
+    cup.userData.objectId = "OLD_DESK";
+    const note = this.mesh(new THREE.BoxGeometry(.5, .012, .32), this.mat(0xd4c7a5, .9), [1.15, 1.49, -1.95]);
+    note.userData.objectId = "OLD_DESK";
+
+    // A subtle illuminated strip near the floor improves depth perception.
+    const strip = this.mesh(new THREE.BoxGeometry(7.8, .035, .035), this.mat(0x8a5c4d, .4, .2, 0x8a3f32), [0, .18, -4.72]);
+    strip.userData.objectId = "OLD_PAINTING";
   }
 
   createWindow() {
