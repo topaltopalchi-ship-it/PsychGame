@@ -3,7 +3,7 @@ import * as THREE from "three";
 export class Room08 {
   constructor(scene,tracker){
     this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;
-    this.context={};this.startedAt=0;this.result=null;this.revealDone=false;
+    this.context={};this.startedAt=0;this.result=null;this.revealDone=false;this.lightTimer=null;
   }
   start(context={}){
     this.context=context||{};this.companion=context.companion||null;this.startedAt=performance.now();
@@ -42,8 +42,8 @@ export class Room08 {
     if(this.revealDone)return;this.revealDone=true;
     const r=this.result||{title:"متعادل"};
     this.tracker.log("ROOM_08_PROFILE_REVEALED",{profile:r.title,secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
-    const l=this.objects.TRUTH_LIGHT;if(l){l.intensity=3;setTimeout(()=>{if(!this.completed)l.intensity=1.5;},900);}
-    this.companion?.say?.("...");
+    const l=this.objects.TRUTH_LIGHT;if(l){l.intensity=3;this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.5;},900);}
+    
   }
   chooseExit(){
     this.reveal();this.tracker.log("ROOM_08_EXIT_CHECKED",{profile:this.result?.title||"متعادل"});
@@ -51,5 +51,5 @@ export class Room08 {
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_08",profile:this.result?.title||"متعادل"});}
   update(delta){if(this.objects.TRUTH_CORE){this.objects.TRUTH_CORE.rotation.y+=delta*.35;this.objects.TRUTH_CORE.rotation.x+=delta*.12;}}
-  destroy(){this.objects={};}
+  destroy(){if(this.lightTimer)clearTimeout(this.lightTimer);this.objects={};}
 }
