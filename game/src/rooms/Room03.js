@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room03 {
-  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;}
+  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;this.exitWatched=false;}
   start(context={}){
     this.memoryContext=context||{};this.memoryResponseDone=false;this.seatBaseZ=1;
     this.scene.fog=new THREE.FogExp2(0x090b10,this.memoryContext.wrongPaths?.length?.08:.025);
@@ -46,6 +46,22 @@ export class Room03 {
       setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},700);
     }else{
       this.tracker.log("ROOM_03_CLOCK_INSPECTED",{memoryClean:true});
+    }
+  }
+
+  reactToExit(){
+    if(this.exitWatched)return;
+    this.exitWatched=true;
+    this.tracker.log("ROOM_03_EXIT_WATCHED",{remembered:!!this.memoryContext?.wrongPaths?.length});
+    if(this.memoryContext?.wrongPaths?.length){
+      this.companion?.say?.("صبر کن... فکر کنم این در همون دری نیست که اول دیدیم.");
+      if(this.objects.exit){
+        const oldY=this.objects.exit.position.y;
+        this.objects.exit.position.y=oldY+.06;
+        setTimeout(()=>{if(this.objects.exit)this.objects.exit.position.y=oldY;},300);
+      }
+    }else{
+      this.companion?.say?.("در رو دیدی. حالا مطمئن شو آماده‌ای.");
     }
   }
 
