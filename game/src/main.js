@@ -1,19 +1,25 @@
 import * as THREE from "three";
 import { PlayerController } from "./player/PlayerController.js";
-import { BehaviorTracker } from "./psychology/BehaviorTracker.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
 import { SessionManager } from "./session/SessionManager.js";
+import { Room01 } from "./rooms/Room01.js";
 
 // =====================================
 // PsychGame — Main Game Engine
 // =====================================
 
-const game = document.getElementById("game");
+const game =
+  document.getElementById("game");
 
-const scene = new THREE.Scene();
+const scene =
+  new THREE.Scene();
 
 scene.background =
   new THREE.Color(0x080a0d);
+
+// =====================================
+// Camera
+// =====================================
 
 const camera =
   new THREE.PerspectiveCamera(
@@ -29,6 +35,10 @@ camera.position.set(
   1.7,
   5
 );
+
+// =====================================
+// Renderer
+// =====================================
 
 const renderer =
   new THREE.WebGLRenderer({
@@ -62,7 +72,9 @@ const ambientLight =
     1.5
   );
 
-scene.add(ambientLight);
+scene.add(
+  ambientLight
+);
 
 const mainLight =
   new THREE.PointLight(
@@ -79,68 +91,69 @@ mainLight.position.set(
 
 mainLight.castShadow = true;
 
-scene.add(mainLight);
+scene.add(
+  mainLight
+);
 
 // =====================================
-// Temporary Floor
+// Session
 // =====================================
-
-const floorGeometry =
-  new THREE.BoxGeometry(
-    10,
-    0.2,
-    10
-  );
-
-const floorMaterial =
-  new THREE.MeshStandardMaterial({
-    color: 0x302a26,
-    roughness: 0.8
-  });
-
-const floor =
-  new THREE.Mesh(
-    floorGeometry,
-    floorMaterial
-  );
-
-floor.position.y = -0.1;
-
-floor.receiveShadow = true;
-
-scene.add(floor);
-
-// =====================================
-// Systems
-// =====================================
-
-const tracker =
-  new BehaviorTracker();
 
 const session =
   new SessionManager();
+
+const tracker =
+  session.getTracker();
+
+// =====================================
+// Player
+// =====================================
 
 const player =
   new PlayerController(
     camera
   );
 
+// =====================================
+// Interaction
+// =====================================
+
 const interaction =
   new InteractionSystem(
     camera,
-    session.getTracker()
+    tracker
   );
 
 // =====================================
-// Player Session
+// Room 01
 // =====================================
+
+const room01 =
+  new Room01(
+    scene,
+    tracker
+  );
+
+room01.start();
+
+// =====================================
+// Session Start
+// =====================================
+
+tracker.log(
+  "GAME_START",
+  {
+    playerCode:
+      session.getPlayerCode()
+  }
+);
 
 console.log(
   "================================="
 );
 
 console.log(
-  "PsychGame Session Started"
+  "PsychGame Started"
 );
 
 console.log(
@@ -157,16 +170,6 @@ console.log(
   "================================="
 );
 
-session
-  .getTracker()
-  .log(
-    "GAME_START",
-    {
-      playerCode:
-        session.getPlayerCode()
-    }
-  );
-
 // =====================================
 // Game Loop
 // =====================================
@@ -182,7 +185,9 @@ function animate() {
   const delta =
     clock.getDelta();
 
-  player.update(delta);
+  player.update(
+    delta
+  );
 
   interaction.update();
 
