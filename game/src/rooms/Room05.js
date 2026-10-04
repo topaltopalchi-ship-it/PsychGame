@@ -4,7 +4,7 @@ export class Room05 {
   constructor(scene, tracker){
     this.scene=scene; this.tracker=tracker; this.objects={}; this.completed=false;
     this.companion=null; this.context={}; this.observations={}; this.firstMirror=null;
-    this.firstLookAt=performance.now(); this.lastMirror=null; this.firstChoiceTime=0; this.glitchCount=0; this.choiceLocked=false;
+    this.firstLookAt=performance.now(); this.lastMirror=null; this.firstChoiceTime=0; this.glitchCount=0; this.choiceLocked=false; this.glitchTimer=null;
   }
   start(context={}){
     this.context=context||{}; this.companion=this.context.companion||null;
@@ -61,7 +61,7 @@ export class Room05 {
     const light=this.objects.MIRROR_LIGHT; if(light)light.intensity=2.8;
     this.tracker.log("ROOM_05_REFLECTION_GLITCH",{mirror:id,count:this.glitchCount});
     this.companion?.say?.(id==="MIRROR_CENTER"?"این یکی... چرا شبیه آینه‌های دیگه نیست؟":"دیدیش؟ فقط چند لحظه بود.");
-    setTimeout(()=>{if(shadow)shadow.visible=false;if(light)light.intensity=1.2;glass.material.color.set(0x243044);},700);
+    this.glitchTimer=setTimeout(()=>{if(shadow)shadow.visible=false;if(light)light.intensity=1.2;if(glass.material)glass.material.color.set(0x243044);},700);
   }
   chooseExit(){
     if(this.choiceLocked)return; this.choiceLocked=true;
@@ -72,5 +72,5 @@ export class Room05 {
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_05",firstMirror:this.firstMirror,glitchCount:this.glitchCount});}
   update(delta){if(this.objects.MIRROR_GLOW){this.objects.MIRROR_GLOW.scale.setScalar(1+Math.sin(performance.now()*.004)*.08);}}
-  destroy(){this.objects={};}
+  destroy(){if(this.glitchTimer)clearTimeout(this.glitchTimer);this.objects={};}
 }
