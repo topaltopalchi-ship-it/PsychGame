@@ -1,7 +1,12 @@
 import * as THREE from "three";
 
 export class Room01 {
-  constructor(scene, tracker) { this.scene = scene; this.tracker = tracker; this.objects = {}; }
+  constructor(scene, tracker) {
+    this.scene = scene;
+    this.tracker = tracker;
+    this.objects = {};
+    this.dynamic = { clueVisible:false, redGlow:null, deskLight:null };
+  }
 
   start() {
     this.scene.fog = new THREE.FogExp2(0x090b10, 0.035);
@@ -9,10 +14,30 @@ export class Room01 {
     this.createRedButton(); this.createDesk(); this.createDrawer(); this.createBox();
     this.createClock(); this.createPainting(); this.createChair(); this.createLamp();
     this.createSideTable(); this.createWindow();
+    this.createHiddenClue();
     this.tracker.log("ROOM_ENTER", { roomId:"ROOM_01", roomName:"THE_RED_BUTTON" });
   }
 
   getInteractableObjects() { return Object.values(this.objects); }
+
+  createHiddenClue() {
+    const clue = this.mesh(
+      new THREE.BoxGeometry(.48,.06,.3),
+      this.mat(0xb9a46d,.5,.25),
+      [1.7,1.47,-1.02]
+    );
+    clue.userData.objectId = "HIDDEN_CLUE";
+    clue.visible = false;
+    this.objects.hiddenClue = clue;
+    this.dynamic.clue = clue;
+  }
+
+  revealClue() {
+    if (this.dynamic.clueVisible) return;
+    this.dynamic.clueVisible = true;
+    this.dynamic.clue.visible = true;
+    this.tracker.log("ADAPTIVE_CLUE_REVEALED", { reason:"POST_FAILURE_EXPLORATION" });
+  }
 
   mesh(geometry, material, position, rotation = [0,0,0]) {
     const m = new THREE.Mesh(geometry, material);
