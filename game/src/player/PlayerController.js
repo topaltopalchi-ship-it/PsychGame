@@ -3,7 +3,7 @@ import * as THREE from "three";
 export class PlayerController {
   constructor(camera) {
     this.camera = camera;
-    this.speed = 3.2;
+    this.speed = 2.1;
     this.lookSpeed = 0.002;
     this.keys = { forward:false, backward:false, left:false, right:false };
     this.touchMove = { x:0, y:0 };
@@ -51,10 +51,10 @@ export class PlayerController {
     const move=e=>{
       if(!active)return;
       const r=pad.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
-      let dx=e.clientX-cx, dy=e.clientY-cy, len=Math.hypot(dx,dy), max=42;
+      let dx=e.clientX-cx, dy=e.clientY-cy, len=Math.hypot(dx,dy), max=52;
       if(len>max){dx=dx/len*max;dy=dy/len*max;}
       stick.style.transform=`translate(${dx}px,${dy}px)`;
-      this.touchMove.x=dx/max; this.touchMove.y=dy/max;
+      this.touchMove.x=(dx/max)*0.72; this.touchMove.y=(dy/max)*0.72;
     };
     const end=()=>{active=false;this.touchMove.x=0;this.touchMove.y=0;stick.style.transform="translate(0,0)";};
     pad.addEventListener("pointerdown",e=>{active=true;pad.setPointerCapture(e.pointerId);move(e);});
