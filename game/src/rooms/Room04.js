@@ -4,7 +4,7 @@ export class Room04 {
   constructor(scene, tracker){
     this.scene=scene; this.tracker=tracker; this.objects={}; this.completed=false;
     this.loopCount=0; this.turnCount=0; this.lastZ=0; this.explored=false; this.lastMarkIndex=-1; this.markObservations=0; this.retreatCount=0; this.maxDepth=0; this.memoryShiftDone=false;
-    this.startTime=0; this.eventTimer=null; this.memoryShiftTimer=null; this.glitchTimer=null; this.glitchDone=false;
+    this.startTime=0; this.eventTimer=null; this.memoryShiftTimer=null; this.glitchTimer=null; this.loopPulseTimer=null; this.glitchDone=false;
   }
 
   start(context={}){
@@ -33,6 +33,7 @@ export class Room04 {
     const exit=this.mesh(new THREE.BoxGeometry(1.7,3.1,.16),this.mat(0x4b535b,.65),[0,1.55,-27.7]);
     exit.userData.objectId="HALL_EXIT"; this.objects.exit=exit;
     const lamp=new THREE.PointLight(0xc5d4ff,4,7); lamp.position.set(0,3.1,-3); this.scene.add(lamp); this.objects.lamp=lamp;
+    const endLight=new THREE.PointLight(0x6b2028,2.2,5); endLight.position.set(0,2.8,-25); this.scene.add(endLight); this.objects.endLight=endLight;
     for(const z of [5,-2,-9,-16,-23]){
       const l=new THREE.PointLight(0x9da8b8,1.8,5); l.position.set(0,3,z); this.scene.add(l);
     }
@@ -81,14 +82,19 @@ export class Room04 {
     this.tracker.log("ROOM_04_LOOP_GLITCH",{turnCount:this.turnCount,explored:this.explored});
     if(this.objects.lamp){
       this.objects.lamp.intensity=9;
-      this.glitchTimer=setTimeout(()=>{if(this.objects.lamp)this.objects.lamp.intensity=1.5;},180);
+      this.objects.endLight?.intensity=0.4;
+      this.glitchTimer=setTimeout(()=>{if(this.objects.lamp)this.objects.lamp.intensity=1.5;if(this.objects.endLight)this.objects.endLight.intensity=2.2;},180);
     }
+    this.companion?.say?.("صبر کن... این نور قبلاً این‌طوری نبود.");
   }
 
   update(delta, player){
     if(player?.camera?.position) this.registerMovement(player.camera.position);
     if(this.startTime && !this.memoryShiftDone && performance.now()-this.startTime>6500 && this.maxDepth>4) this.triggerMemoryShift();
     if(this.startTime && !this.glitchDone && performance.now()-this.startTime>9000) this.triggerGlitch();
+    if(this.startTime && !this.completed && performance.now()-this.startTime>11500 && this.objects.endLight){
+      const t=performance.now()*.003; this.objects.endLight.intensity=1.8+Math.sin(t)*1.1;
+    }
   }
 
   getInteractableObjects(){ return Object.values(this.objects).filter(o=>o?.userData?.objectId); }
@@ -99,5 +105,5 @@ export class Room04 {
     this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_04",turnCount:this.turnCount,explored:this.explored});
   }
 
-  destroy(){ if(this.eventTimer)clearTimeout(this.eventTimer); if(this.memoryShiftTimer)clearTimeout(this.memoryShiftTimer); if(this.glitchTimer)clearTimeout(this.glitchTimer); }
+  destroy(){ if(this.eventTimer)clearTimeout(this.eventTimer); if(this.memoryShiftTimer)clearTimeout(this.memoryShiftTimer); if(this.glitchTimer)clearTimeout(this.glitchTimer); if(this.loopPulseTimer)clearTimeout(this.loopPulseTimer); }
 }
