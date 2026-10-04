@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room02 {
-  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;}
+  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;this.observedPaths={PATH_LEFT:0,PATH_CENTER:0,PATH_RIGHT:0};this.psychTimer=null;}
   start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.024);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.createStoryDetails();this.createPathLighting();this.createDreadProps();this.createScareFigure();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
   getInteractableObjects(){return Object.values(this.objects);}
   completeRoom(path){this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
@@ -66,6 +66,21 @@ export class Room02 {
       light.position.set(p.x,3.48,-3.72);
       this.scene.add(light);
       this.pathLights.push(light);
+    }
+  }
+
+  reactToObservation(path){
+    this.observedPaths[path]=(this.observedPaths[path]||0)+1;
+    const count=this.observedPaths[path];
+    this.tracker.log("PSYCHOLOGICAL_RESPONSE",{roomId:"ROOM_02",path,observations:count});
+    if(count>=2){
+      const target=this.pathLights[path==="PATH_LEFT"?0:path==="PATH_RIGHT"?2:1];
+      if(target){
+        const old=target.intensity;
+        target.intensity=old*.35;
+        setTimeout(()=>{target.intensity=old;},420);
+      }
+      this.companion?.say?.(path==="PATH_CENTER" ? "چرا دوباره به همین مسیر نگاه می‌کنی؟" : "فکر کنم این مسیر متوجه شد که دیدیش...");
     }
   }
 
