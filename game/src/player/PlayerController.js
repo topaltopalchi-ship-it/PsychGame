@@ -99,14 +99,25 @@ export class PlayerController {
 
   update(delta) {
     this.direction.set(0,0,0);
-    if(this.keys.forward) this.direction.z-=1;
-    if(this.keys.backward) this.direction.z+=1;
-    if(this.keys.left) this.direction.x-=1;
-    if(this.keys.right) this.direction.x+=1;
-    this.direction.x += this.touchMove.x;
-    this.direction.z += this.touchMove.y;
-    if(this.direction.lengthSq()===0)return;
-    this.direction.normalize();
+
+    const keyboardX = (this.keys.right ? 1 : 0) - (this.keys.left ? 1 : 0);
+    const keyboardZ = (this.keys.backward ? 1 : 0) - (this.keys.forward ? 1 : 0);
+    const hasKeyboard = keyboardX !== 0 || keyboardZ !== 0;
+
+    this.direction.x = keyboardX + this.touchMove.x;
+    this.direction.z = keyboardZ + this.touchMove.y;
+
+    const length = this.direction.length();
+    if(length === 0)return;
+
+    // Keep touch input analog: tiny joystick movement now means tiny movement speed.
+    // Keyboard input remains full-speed and diagonal movement is normalized.
+    if (hasKeyboard) {
+      this.direction.normalize();
+    } else {
+      this.direction.multiplyScalar(Math.min(length, 1) / length);
+    }
+
     const movement=this.direction.clone().applyEuler(new THREE.Euler(0,this.camera.rotation.y,0));
     this.camera.position.add(movement.multiplyScalar(this.speed*delta));
     this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, -4.2, 4.2);
