@@ -3,12 +3,12 @@ import * as THREE from "three";
 export class Room04 {
   constructor(scene, tracker){
     this.scene=scene; this.tracker=tracker; this.objects={}; this.completed=false;
-    this.loopCount=0; this.turnCount=0; this.lastZ=0; this.explored=false; this.lastMarkIndex=-1; this.markObservations=0; this.retreatCount=0; this.maxDepth=0;
+    this.loopCount=0; this.turnCount=0; this.lastZ=0; this.explored=false; this.lastMarkIndex=-1; this.markObservations=0; this.retreatCount=0; this.maxDepth=0; this.memoryShiftDone=false;
     this.startTime=0; this.eventTimer=null; this.glitchDone=false;
   }
 
   start(context={}){
-    this.startTime=performance.now(); this.companion=context.companion||null; this.lastZ=0; this.maxDepth=0; this.retreatCount=0; this.markObservations=0;
+    this.startTime=performance.now(); this.companion=context.companion||null; this.lastZ=0; this.memoryShiftDone=false; this.maxDepth=0; this.retreatCount=0; this.markObservations=0;
     this.scene.fog=new THREE.FogExp2(0x07090d,.032);
     this.createRoom();
     this.tracker.log("ROOM_ENTER",{roomId:"ROOM_04",roomName:"ENDLESS_HALL",previousRoom:context.previousRoom||"ROOM_03"});
@@ -63,6 +63,18 @@ export class Room04 {
 
   setCompanion(companion){this.companion=companion;}
 
+  triggerMemoryShift(){
+    if(this.memoryShiftDone)return;
+    this.memoryShiftDone=true;
+    this.tracker.log("ROOM_04_MEMORY_SHIFT",{turnCount:this.turnCount,maxDepth:Math.round(this.maxDepth*10)/10,retreatCount:this.retreatCount});
+    const marks=Object.values(this.objects).filter(o=>o?.userData?.objectId==="HALL_MARK");
+    if(marks.length){
+      marks.forEach((m,i)=>{m.position.z += i%2===0 ? .22 : -.22;});
+      setTimeout(()=>marks.forEach((m,i)=>{m.position.z += i%2===0 ? -.22 : .22;}),700);
+    }
+    this.companion?.say?.("نه... این علامت‌ها جای قبلی‌شون نیستن. یا شاید حافظه‌ی تو عوض شده.");
+  }
+
   triggerGlitch(){
     if(this.glitchDone)return;
     this.glitchDone=true;
@@ -75,6 +87,7 @@ export class Room04 {
 
   update(delta, player){
     if(player?.camera?.position) this.registerMovement(player.camera.position);
+    if(this.startTime && !this.memoryShiftDone && performance.now()-this.startTime>6500 && this.maxDepth>4) this.triggerMemoryShift();
     if(this.startTime && !this.glitchDone && performance.now()-this.startTime>9000) this.triggerGlitch();
   }
 
