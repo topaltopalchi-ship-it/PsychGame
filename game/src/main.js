@@ -103,7 +103,75 @@ scene.add(
 const session =
   new SessionManager();
 const authorPanel =
-  new AuthorPanel(session);
+new AuthorPanel(session);
+
+// =====================================
+// Hidden Author Access
+// =====================================
+
+let authorTapCount = 0;
+let authorTapTimer = null;
+
+const hiddenAuthorZone =
+  document.createElement("div");
+
+hiddenAuthorZone.style.position =
+  "fixed";
+
+hiddenAuthorZone.style.top =
+  "0";
+
+hiddenAuthorZone.style.left =
+  "0";
+
+hiddenAuthorZone.style.width =
+  "90px";
+
+hiddenAuthorZone.style.height =
+  "90px";
+
+hiddenAuthorZone.style.zIndex =
+  "10000";
+
+hiddenAuthorZone.style.background =
+  "transparent";
+
+document.body.appendChild(
+  hiddenAuthorZone
+);
+
+hiddenAuthorZone.addEventListener(
+  "click",
+  () => {
+    authorTapCount++;
+
+    clearTimeout(
+      authorTapTimer
+    );
+
+    authorTapTimer =
+      setTimeout(() => {
+        authorTapCount = 0;
+      }, 1500);
+
+    if (
+      authorTapCount >= 5
+    ) {
+      authorTapCount = 0;
+
+      const code =
+        prompt(
+          "کد نویسنده را وارد کنید:"
+        );
+
+      if (!code) {
+        return;
+      }
+
+      authorPanel.open(code);
+    }
+  }
+);
 window.openAuthorPanel =
   () => {
     const code =
