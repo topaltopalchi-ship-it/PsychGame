@@ -166,13 +166,28 @@ export class InteractionSystem {
   }
 
   handleDoor() {
-    if (!this.keyFound) {
+    const locked = this.exitDoor?.userData.locked === true;
+
+    // If the player never pressed the red button, the door remains unlocked.
+    if (!locked && !this.keyFound) {
+      this.tracker.log("DOOR_CHECKED", { status: "UNLOCKED", result: "SAFE_EXIT" });
+      this.tracker.log("ROOM_COMPLETED", { roomId: "ROOM_01", path: "NO_BUTTON" });
+      if (!this.completed) {
+        this.completed = true;
+        this.room?.completeRoom?.();
+        this.companion?.say("در بازه. بدون دردسر می‌تونی از اتاق خارج بشی.");
+      }
+      return;
+    }
+
+    // After the red button is pressed, the door is locked and the golden key is required.
+    if (locked && !this.keyFound) {
       this.tracker.log("DOOR_CHECKED", { status: "LOCKED", result: "NEEDS_KEY" });
       this.companion?.say("در قفله. اول کلید طلایی داخل کشو رو بردار.");
       return;
     }
 
-    if (this.exitDoor?.userData.locked) {
+    if (locked && this.keyFound) {
       this.exitDoor.userData.locked = false;
       if (this.exitDoor.material) this.exitDoor.material.color = new THREE.Color(0x493326);
       this.tracker.log("DOOR_UNLOCKED", { objectId: "EXIT_DOOR", source: "KEY" });
