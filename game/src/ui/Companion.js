@@ -11,6 +11,7 @@ export class Companion {
       checkedDoorAfterFailure: false,
       exploredBeforeFailure: false
     };
+    this.voiceEnabled = true;
     this.createUI();
     this.say("خب... فکر کنم باید راه خروج رو پیدا کنیم.", 1000);
     this.timer = setInterval(() => this.observe(), 350);
@@ -40,6 +41,7 @@ export class Companion {
   say(message, delay = 0) {
     setTimeout(() => {
       this.text.textContent = message;
+      this.speak(message);
       this.panel.style.opacity = "1";
       this.panel.style.transform = "translateY(0)";
       clearTimeout(this.hideTimer);
@@ -48,6 +50,24 @@ export class Companion {
         this.panel.style.transform = "translateY(10px)";
       }, 4800);
     }, delay);
+  }
+
+  speak(message) {
+    if (!this.voiceEnabled || !("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = "fa-IR";
+      utterance.rate = 0.92;
+      utterance.pitch = 0.95;
+      utterance.volume = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const persianVoice = voices.find(v => /^fa(-|_)/i.test(v.lang));
+      if (persianVoice) utterance.voice = persianVoice;
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.warn("Companion voice unavailable", error);
+    }
   }
 
   remember(event) {
@@ -135,6 +155,7 @@ export class Companion {
   destroy() {
     clearInterval(this.timer);
     clearTimeout(this.hideTimer);
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     this.panel.remove();
   }
 }
