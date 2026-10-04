@@ -136,6 +136,21 @@ const room01 =
 
 room01.start();
 
+
+room01
+  .getInteractableObjects()
+  .forEach(
+    (object) => {
+      interaction.register(
+        object,
+        object.userData.objectId
+      );
+    }
+  );
+
+
+
+
 // =====================================
 // Session Start
 // =====================================
