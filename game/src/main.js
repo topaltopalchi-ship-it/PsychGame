@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { PlayerController } from "./player/PlayerController.js";
+import { BehaviorTracker } from "./psychology/BehaviorTracker.js";
+import { InteractionSystem } from "./interaction/InteractionSystem.js";
 
 // =====================================
 // PsychGame — Main Game Engine
@@ -54,28 +56,22 @@ game.appendChild(renderer.domElement);
 // LIGHTING
 // =====================================
 
-const ambientLight =
-  new THREE.HemisphereLight(
-    0x8899aa,
-    0x111111,
-    1.5
-  );
+const ambientLight = new THREE.HemisphereLight(
+  0x8899aa,
+  0x111111,
+  1.5
+);
 
 scene.add(ambientLight);
 
 
-const mainLight =
-  new THREE.PointLight(
-    0xffd6a0,
-    20,
-    12
-  );
-
-mainLight.position.set(
-  0,
-  3,
-  0
+const mainLight = new THREE.PointLight(
+  0xffd6a0,
+  20,
+  12
 );
+
+mainLight.position.set(0, 3, 0);
 
 mainLight.castShadow = true;
 
@@ -87,11 +83,7 @@ scene.add(mainLight);
 // =====================================
 
 const floorGeometry =
-  new THREE.BoxGeometry(
-    10,
-    0.2,
-    10
-  );
+  new THREE.BoxGeometry(10, 0.2, 10);
 
 const floorMaterial =
   new THREE.MeshStandardMaterial({
@@ -113,11 +105,30 @@ scene.add(floor);
 
 
 // =====================================
+// PSYCHOLOGY SYSTEM
+// =====================================
+
+const tracker =
+  new BehaviorTracker();
+
+
+// =====================================
 // PLAYER
 // =====================================
 
 const player =
   new PlayerController(camera);
+
+
+// =====================================
+// INTERACTION
+// =====================================
+
+const interaction =
+  new InteractionSystem(
+    camera,
+    tracker
+  );
 
 
 // =====================================
@@ -136,8 +147,12 @@ function animate() {
     clock.getDelta();
 
 
-  // Update player
+  // Player movement
   player.update(delta);
+
+
+  // Object detection
+  interaction.update();
 
 
   // Render
