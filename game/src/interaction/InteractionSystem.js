@@ -278,6 +278,8 @@ export class InteractionSystem {
         }
       );
 
+      if (this.room?.showButtonPressed) this.room.showButtonPressed();
+      if (this.companion) this.companion.say("دکمه رو زدی... حالا ببین چه اتفاقی افتاد.");
       this.applyButtonConsequence();
 
       return;
