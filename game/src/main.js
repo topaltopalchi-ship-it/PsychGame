@@ -8,6 +8,7 @@ import { Room03 } from "./rooms/Room03.js";
 import { Room04 } from "./rooms/Room04.js";
 import { Room05 } from "./rooms/Room05.js";
 import { Room06 } from "./rooms/Room06.js";
+import { Room07 } from "./rooms/Room07.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
@@ -242,6 +243,14 @@ function startRoom06(context={previousRoom:"ROOM_05"}) {
   companion?.say("اتاق ششم... بعضی صداها آشنا به نظر می‌رسن، ولی به این حس زود اعتماد نکن.");
 }
 
+function startRoom07(context={previousRoom:"ROOM_06"}) {
+  if (activeRoom?.constructor?.name !== "Room06" || !activeRoom.completed) return;
+  clearRoomGeometry(); interaction.clearTargets?.();
+  activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion});
+  interaction.setRoom(activeRoom,7);
+  companion?.say("اتاق هفتم... اینجا باید تصمیم بگیری به چه کسی اعتماد کنی.");
+}
+
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
@@ -260,3 +269,5 @@ window.addEventListener("resize", () => {
 window.addEventListener("psychgame-room-complete",(event)=>{
   if(event.detail?.roomId === "ROOM_05") startRoom06?.({previousRoom:"ROOM_05",companion});
 });
+
+window.addEventListener("psychgame-room-complete",(event)=>{if(event.detail?.roomId==="ROOM_06")startRoom07?.({previousRoom:"ROOM_06",companion});});
