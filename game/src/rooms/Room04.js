@@ -102,6 +102,7 @@ export class Room04 {
   completeRoom(){
     if(this.completed)return;
     this.completed=true;
+    if(this.objects.endLight) this.objects.endLight.intensity=2.2;
     this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_04",turnCount:this.turnCount,explored:this.explored});
   }
 
