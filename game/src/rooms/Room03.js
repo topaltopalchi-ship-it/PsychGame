@@ -1,13 +1,13 @@
 import * as THREE from "three";
 export class Room03 {
-  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;}
+  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;}
   start(context={}){
-    this.memoryContext=context||{};
+    this.memoryContext=context||{};this.memoryResponseDone=false;this.seatBaseZ=1;
     this.scene.fog=new THREE.FogExp2(0x090b10,this.memoryContext.wrongPaths?.length?.08:.025);
     if(this.memoryContext.wrongPaths?.length){
       this.tracker.log("ROOM_03_MEMORY_RESPONSE",{wrongPaths:this.memoryContext.wrongPaths});
     }
-    this.createFloor();this.createWalls();this.createClock();this.createSeat();this.createExit();this.createAtmosphere();
+    this.createFloor();this.createWalls();this.createClock();this.createSeat();this.createExit();this.createAtmosphere();if(this.memoryContext.wrongPaths?.length){this.memoryResponseTimer=setTimeout(()=>this.triggerMemoryResponse(),2600);}
     this.tracker.log("ROOM_ENTER",{roomId:"ROOM_03",roomName:"WAITING_ROOM",previousPath:context.previousPath||"ROOM_02"});
   }
   mesh(g,mat,pos){const m=new THREE.Mesh(g,mat);m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;this.scene.add(m);return m;}
@@ -32,11 +32,24 @@ export class Room03 {
   }
 
   createExit(){const d=this.mesh(new THREE.BoxGeometry(2,3.2,.18),this.mat(0x52606a,.7),[0,1.6,-5.78]);d.userData.objectId="WAIT_EXIT";this.objects.exit=d;}
+  triggerMemoryResponse(){
+    if(this.memoryResponseDone)return;
+    this.memoryResponseDone=true;
+    this.tracker.log("ROOM_03_MEMORY_REACTION",{wrongPaths:this.memoryContext.wrongPaths});
+    if(this.objects.seat){
+      this.objects.seat.position.z=this.seatBaseZ+.22;
+      setTimeout(()=>{if(this.objects.seat)this.objects.seat.position.z=this.seatBaseZ;},650);
+    }
+    this.memoryLight?.intensity=6;
+    setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},500);
+    this.memoryContext.companion?.say?.("یادت هست کدوم مسیر رو اشتباه رفتی؟ اینجا هم انگار یادش مونده...");
+  }
+
   update(delta){
     if(this.memoryContext?.wrongPaths?.length && this.memoryLight){
       this.memoryLight.intensity=3+Math.sin(performance.now()*.003)*.8;
     }
   }
   getInteractableObjects(){return Object.values(this.objects);}
-  completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});}
+  destroy(){if(this.memoryResponseTimer)clearTimeout(this.memoryResponseTimer);}\n  completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});}
 }
