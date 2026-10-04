@@ -151,6 +151,7 @@ window.addEventListener("psychgame-target", (event) => {
 });
 
 function clearRoomGeometry() {
+  activeRoom?.destroy?.();
   scene.children.slice().forEach((child) => {
     if (child.isMesh || (child.isLight && child !== ambientLight && child !== mainLight && child !== rimLight)) {
       scene.remove(child);
@@ -277,23 +278,21 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener("psychgame-room-complete",(event)=>{
-  if(event.detail?.roomId === "ROOM_05") startRoom06?.({previousRoom:"ROOM_05",companion});
-});
-
-window.addEventListener("psychgame-room-complete",(event)=>{
-  if(event.detail?.roomId==="ROOM_06")startRoom07?.({previousRoom:"ROOM_06",companion});
-  if(event.detail?.roomId==="ROOM_07")startRoom08?.({
-    previousRoom:"ROOM_07",
-    companion,
-    trustBehavior:event.detail?.trustBehavior||{}
-  });
-});
-
-window.addEventListener("psychgame-room-complete",(event)=>{
   const d=event.detail||{};
-  if(d.roomId==="ROOM_04") behavioralHistory.hallBehavior=d.behavior||{};
-  if(d.roomId==="ROOM_05") behavioralHistory.mirrorBehavior=d.behavior||{};
-  if(d.roomId==="ROOM_06") behavioralHistory.recordingBehavior=d.behavior||{};
-  if(d.roomId==="ROOM_07") behavioralHistory.trustBehavior=d.trustBehavior||{};
-  if(d.roomId==="ROOM_04") startRoom05?.({previousRoom:"ROOM_04",companion});
+  if(d.roomId==="ROOM_04"){
+    behavioralHistory.hallBehavior=d.behavior||{};
+    startRoom05?.({previousRoom:"ROOM_04",companion});
+  }
+  if(d.roomId==="ROOM_05"){
+    behavioralHistory.mirrorBehavior=d.behavior||{};
+    startRoom06?.({previousRoom:"ROOM_05",companion});
+  }
+  if(d.roomId==="ROOM_06"){
+    behavioralHistory.recordingBehavior=d.behavior||{};
+    startRoom07?.({previousRoom:"ROOM_06",companion});
+  }
+  if(d.roomId==="ROOM_07"){
+    behavioralHistory.trustBehavior=d.trustBehavior||{};
+    startRoom08?.({previousRoom:"ROOM_07",companion});
+  }
 });
