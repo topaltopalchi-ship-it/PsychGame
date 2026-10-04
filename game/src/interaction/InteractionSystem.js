@@ -373,3 +373,16 @@ InteractionSystem.prototype.handleRoom7 = function(objectId) {
     window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07"}}));
   }
 };
+
+
+InteractionSystem.prototype.handleRoom8 = function(objectId) {
+  if (objectId === "TRUTH_CORE") {
+    this.room?.reveal?.(); return;
+  }
+  if (objectId === "TRUTH_EXIT") {
+    if (this.completed) return;
+    this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
+    this.tracker.log("ROOM_08_EXIT_CHECKED",{roomId:"ROOM_08"});
+    window.dispatchEvent(new CustomEvent("psychgame-game-complete",{detail:{roomId:"ROOM_08"}}));
+  }
+};
