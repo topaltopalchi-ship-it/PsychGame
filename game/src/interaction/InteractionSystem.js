@@ -257,6 +257,7 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
     this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId });
     this.tracker.log("FAILURE", { roomId: "ROOM_02", cause: objectId });
     this.tracker.log("PATH_RETURN", { roomId: "ROOM_02", path: objectId });
+    this.room?.triggerPathScare?.(objectId);
     this.companion?.say(objectId === "PATH_LEFT" ? "این مسیر به بن‌بست رسید. برگرد و دوباره انتخاب کن." : "این مسیر بسته است. برگرد و مسیر دیگری را امتحان کن.");
     return;
   }
