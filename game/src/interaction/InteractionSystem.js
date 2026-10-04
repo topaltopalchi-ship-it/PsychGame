@@ -281,6 +281,7 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
 
 InteractionSystem.prototype.handleRoom3 = function(objectId) {
   if (objectId === "WAIT_CLOCK") {
+      this.room?.reactToClock?.();
     this.tracker.log("WAITING_OBJECT_INSPECTED",{roomId:"ROOM_03"});
     this.companion?.say("ساعت جلو نمی‌ره... شاید بهتره کمی صبر کنی.");
     return;
