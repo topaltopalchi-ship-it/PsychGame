@@ -50,8 +50,26 @@ export class Room01 {
     return m;
   }
 
-  mat(color, roughness = 0.8, metalness = 0) {
-    return new THREE.MeshStandardMaterial({ color, roughness, metalness });
+  mat(color, roughness = 0.8, metalness = 0, emissive = null) {
+    const material = new THREE.MeshStandardMaterial({ color, roughness, metalness });
+    if (emissive !== null) {
+      material.emissive = new THREE.Color(emissive);
+      material.emissiveIntensity = 0.35;
+    }
+    return material;
+  }
+
+  registerRoomLight(light) {
+    this.dynamic.roomLights.push(light);
+    this.dynamic.baseLightIntensity.set(light, light.intensity);
+    return light;
+  }
+
+  setRoomLightLevel(multiplier = 1) {
+    this.dynamic.roomLights.forEach((light) => {
+      const base = this.dynamic.baseLightIntensity.get(light) ?? light.intensity;
+      light.intensity = base * multiplier;
+    });
   }
 
   createFloor() {
