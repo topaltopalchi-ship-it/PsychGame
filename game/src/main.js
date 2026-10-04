@@ -205,7 +205,7 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
-  player.update(delta);
+  player.update(delta);activeRoom?.update?.(delta);
   interaction.update();
   renderer.render(scene, camera);
 }
