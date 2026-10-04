@@ -62,7 +62,8 @@ export class InteractionSystem {
 
     const objectId = resolved.userData.objectId;
 
-    if (this.lastLookedObject !== objectId) {
+    const isNewTarget = this.lastLookedObject !== objectId;
+    if (isNewTarget) {
       this.finishLook();
       this.lastLookedObject = objectId;
       this.lookStartTime = performance.now();
@@ -70,9 +71,7 @@ export class InteractionSystem {
     }
 
     this.currentTarget = resolved;
-    if (this.lastLookedObject === objectId && (this.roomNumber === 2)) {
-      // Do not count the same gaze every animation frame.
-    } else if (this.roomNumber === 2 && (objectId === "PATH_LEFT" || objectId === "PATH_CENTER" || objectId === "PATH_RIGHT")) {
+    if (isNewTarget && this.roomNumber === 2 && (objectId === "PATH_LEFT" || objectId === "PATH_CENTER" || objectId === "PATH_RIGHT")) {
       this.room?.reactToObservation?.(objectId);
     }
     window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId } }));
