@@ -25,7 +25,7 @@ export class InteractionSystem {
     this.buttonFirstSeenTime = null;
     this.buttonPressed = false;
 
-    this.exitDoor = null;
+    this.exitDoor = null;\n    this.companion = null;\n    this.room = null;
 
     this.lastLookedObject = null;
     this.lookStartTime = null;
@@ -41,6 +41,9 @@ export class InteractionSystem {
       }
     );
   }
+
+  setCompanion(companion) { this.companion = companion; }
+  setRoom(room) { this.room = room; }
 
   register(object, objectId) {
     object.userData.interactable = true;
@@ -275,6 +278,10 @@ export class InteractionSystem {
 
     if (this.mainLight) {
       this.mainLight.intensity = 0;
+    }
+
+    if (this.room && this.room.revealClue) {
+      this.room.revealClue();
     }
 
     if (this.exitDoor) {
