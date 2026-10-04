@@ -2,13 +2,18 @@ export class Companion {
   constructor(tracker) {
     this.tracker = tracker;
     this.lastEventCount = 0;
-    this.lastMessageAt = 0;
-    this.buttonWarned = false;
-    this.failureCommented = false;
-    this.drawerCommented = false;
+    this.memory = {
+      sawButton: false,
+      pressedButton: false,
+      failed: false,
+      retriedButton: false,
+      searchedDrawer: false,
+      checkedDoorAfterFailure: false,
+      exploredBeforeFailure: false
+    };
     this.createUI();
-    this.say("خب... فکر کنم باید راه خروج رو پیدا کنیم.", 1600);
-    this.timer = setInterval(() => this.observe(), 400);
+    this.say("خب... فکر کنم باید راه خروج رو پیدا کنیم.", 1000);
+    this.timer = setInterval(() => this.observe(), 350);
   }
 
   createUI() {
@@ -16,13 +21,14 @@ export class Companion {
     this.panel.id = "pg-companion";
     this.panel.innerHTML = '<div id="pg-companion-name">همراه</div><div id="pg-companion-text"></div>';
     Object.assign(this.panel.style, {
-      position:"fixed", left:"20px", bottom:"62px", width:"min(380px,calc(100vw - 40px))",
-      padding:"14px 16px", borderRadius:"14px", background:"rgba(10,12,17,.78)",
+      position:"fixed", left:"20px", bottom:"62px",
+      width:"min(380px,calc(100vw - 40px))", padding:"14px 16px",
+      borderRadius:"14px", background:"rgba(10,12,17,.82)",
       border:"1px solid rgba(255,255,255,.13)", backdropFilter:"blur(12px)",
       boxShadow:"0 12px 35px rgba(0,0,0,.35)", direction:"rtl",
       fontFamily:"Tahoma,Arial,sans-serif", color:"#eee", zIndex:"6000",
-      opacity:"0", transform:"translateY(10px)", transition:"opacity .25s,transform .25s",
-      pointerEvents:"none"
+      opacity:"0", transform:"translateY(10px)",
+      transition:"opacity .25s,transform .25s", pointerEvents:"none"
     });
     document.body.appendChild(this.panel);
     this.text = this.panel.querySelector("#pg-companion-text");
@@ -40,35 +46,89 @@ export class Companion {
       this.hideTimer = setTimeout(() => {
         this.panel.style.opacity = "0";
         this.panel.style.transform = "translateY(10px)";
-      }, 5000);
+      }, 4800);
     }, delay);
+  }
+
+  remember(event) {
+    switch (event.type) {
+      case "RED_BUTTON_FIRST_SEEN":
+        this.memory.sawButton = true;
+        break;
+      case "RED_BUTTON_PRESS":
+        this.memory.pressedButton = true;
+        break;
+      case "FAILURE":
+        this.memory.failed = true;
+        break;
+      case "RETRY_AFTER_FAILURE":
+        this.memory.retriedButton = true;
+        break;
+      case "DRAWER_INSPECTED":
+        this.memory.searchedDrawer = true;
+        break;
+      case "DOOR_BLOCKED":
+        this.memory.checkedDoorAfterFailure = true;
+        break;
+      case "OBJECT_INTERACTION":
+        if (!this.memory.failed) this.memory.exploredBeforeFailure = true;
+        break;
+    }
+  }
+
+  react(event) {
+    if (event.type === "RED_BUTTON_FIRST_SEEN" && !this.memory.pressedButton) {
+      this.say("اون رو دیدی؟ من جای تو بودم، دست بهش نمی‌زدم. 😏");
+      return;
+    }
+
+    if (event.type === "FAILURE") {
+      if (this.memory.sawButton) {
+        this.say("خب... همون چیزی شد که ازش می‌ترسیدم. حالا عجله نکن؛ یه راه دیگه پیدا کنیم.");
+      } else {
+        this.say("اوه... این یکی خوب پیش نرفت. باید یه راه دیگه پیدا کنیم.");
+      }
+      return;
+    }
+
+    if (event.type === "RETRY_AFTER_FAILURE") {
+      if (this.memory.searchedDrawer) {
+        this.say("هنوز سرنخ کشو رو داریم. قبل از اینکه دوباره امتحانش کنیم، شاید بهتره اون رو دنبال کنیم.");
+      } else {
+        this.say("دوباره می‌خوای امتحانش کنی؟ من ترجیح می‌دم اول اطراف رو بگردیم.");
+      }
+      return;
+    }
+
+    if (event.type === "DRAWER_INSPECTED") {
+      if (this.memory.failed) {
+        this.say("خوبه. بعد از اون اتفاق، رفتن سراغ سرنخ منطقی‌تره.");
+      } else {
+        this.say("بالاخره یه سرنخ پیدا کردیم. شاید کلید به کارمون بیاد.");
+      }
+      return;
+    }
+
+    if (event.type === "DOOR_BLOCKED") {
+      if (this.memory.retriedButton) {
+        this.say("در هنوز قفله. فکر کنم وقتشه روش قبلی رو کنار بذاریم.");
+      } else {
+        this.say("در قفل شده. بهتره اطراف رو دقیق‌تر بگردیم.");
+      }
+    }
   }
 
   observe() {
     const events = this.tracker.getEvents();
     if (events.length <= this.lastEventCount) return;
+
     const fresh = events.slice(this.lastEventCount);
     this.lastEventCount = events.length;
 
-    for (const e of fresh) {
-      if (e.type === "RED_BUTTON_FIRST_SEEN" && !this.buttonWarned) {
-        this.buttonWarned = true;
-        this.say("اون رو دیدی؟ من جای تو بودم، دست بهش نمی‌زدم. 😏");
-      }
-      if (e.type === "FAILURE" && !this.failureCommented) {
-        this.failureCommented = true;
-        this.say("گفتم که... 😐 حالا باید یه راه دیگه پیدا کنیم.");
-      }
-      if (e.type === "RETRY_AFTER_FAILURE") {
-        this.say("دوباره؟ خب... این بار خودت می‌دونی. 😶");
-      }
-      if (e.type === "DRAWER_INSPECTED" && !this.drawerCommented) {
-        this.drawerCommented = true;
-        this.say("بالاخره یه سرنخ پیدا کردیم. شاید کلید به کارمون بیاد.");
-      }
-      if (e.type === "DOOR_BLOCKED") {
-        this.say("در قفل شده. بهتره اطراف رو دقیق‌تر بگردیم.");
-      }
+    for (const event of fresh) {
+      const previousMemory = { ...this.memory };
+      this.remember(event);
+      this.react(event, previousMemory);
     }
   }
 
