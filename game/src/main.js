@@ -121,7 +121,9 @@ const player =
 const interaction =
   new InteractionSystem(
     camera,
-    tracker
+    tracker,
+    scene,
+    mainLight
   );
 
 // =====================================
