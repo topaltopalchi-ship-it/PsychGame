@@ -204,7 +204,7 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) {
   document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_03") setTimeout(() => startRoom04({ previousRoom:"ROOM_03" }), 900);
+  if (event.detail?.roomId === "ROOM_03") setTimeout(() => startRoom04({ previousRoom:"ROOM_03", companion }), 900);
 });
 
 window.psychGame = {
