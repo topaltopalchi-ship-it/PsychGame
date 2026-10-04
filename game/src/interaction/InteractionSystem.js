@@ -293,16 +293,15 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
     return;
   }
   if (objectId === "WAIT_EXIT") {
-      this.room?.startExitSequence?.();
-      this.room?.confirmExit?.();
+    if (this.completed) return;
+    this.completed=true;
+    this.room?.startExitSequence?.();
     this.tracker.log("WAITING_EXIT_CHECKED",{roomId:"ROOM_03"});
     this.room?.completeRoom?.();
-    this.completed=true;
     this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});
     this.companion?.say("انتخابت ثبت شد. اتاق بعدی آماده‌ست.");
-    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}}));
-  }
-};
+    setTimeout(()=>window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}})),3000);
+  }};
 
 
 InteractionSystem.prototype.handleRoom4 = function(objectId) {
