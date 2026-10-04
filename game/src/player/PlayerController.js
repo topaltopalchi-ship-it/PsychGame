@@ -71,8 +71,8 @@ export class PlayerController {
     look.addEventListener("pointerup",lookEnd);look.addEventListener("pointercancel",lookEnd);
 
     const interact=document.createElement("button");
-    interact.id="pg-touch-interact"; interact.textContent="E";
-    Object.assign(interact.style,{position:"fixed",right:"22px",bottom:"24px",width:"58px",height:"58px",borderRadius:"50%",border:"1px solid rgba(255,255,255,.25)",background:"rgba(120,30,25,.78)",color:"#fff",fontSize:"20px",zIndex:"8000",display:"none"});
+    interact.id="pg-touch-interact"; interact.textContent="تعامل";
+    Object.assign(interact.style,{position:"fixed",right:"20px",bottom:"24px",width:"86px",height:"58px",borderRadius:"18px",border:"1px solid rgba(255,255,255,.25)",background:"rgba(120,30,25,.9)",color:"#fff",fontSize:"16px",fontWeight:"700",zIndex:"8000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.35)"});
     interact.addEventListener("click",()=>window.psychGame?.interact?.());
     document.body.appendChild(interact);
 
