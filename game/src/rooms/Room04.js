@@ -8,7 +8,7 @@ export class Room04 {
   }
 
   start(context={}){
-    this.startTime=performance.now(); this.lastZ=0; this.maxDepth=0; this.retreatCount=0; this.markObservations=0;
+    this.startTime=performance.now(); this.companion=context.companion||null; this.lastZ=0; this.maxDepth=0; this.retreatCount=0; this.markObservations=0;
     this.scene.fog=new THREE.FogExp2(0x07090d,.032);
     this.createRoom();
     this.tracker.log("ROOM_ENTER",{roomId:"ROOM_04",roomName:"ENDLESS_HALL",previousRoom:context.previousRoom||"ROOM_03"});
@@ -45,10 +45,12 @@ export class Room04 {
         this.tracker.log("ROOM_04_MOVEMENT",{turnCount:this.turnCount,forwardDistance:Math.round(Math.abs(position.z-this.lastZ)*100)/100});
       }
     }
+    const previousZ=this.lastZ;
     this.lastZ=position.z;
+    if(previousZ!==0 && position.z>previousZ+.08) this.retreatCount++;
     if(Math.abs(position.z)>6) this.explored=true;
     this.maxDepth=Math.max(this.maxDepth,Math.abs(position.z));
-    if(this.lastZ<position.z-.08) this.retreatCount++;
+    
   }
 
   reactToMark(){
