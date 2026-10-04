@@ -279,4 +279,11 @@ window.addEventListener("psychgame-room-complete",(event)=>{
   if(event.detail?.roomId === "ROOM_05") startRoom06?.({previousRoom:"ROOM_05",companion});
 });
 
-window.addEventListener("psychgame-room-complete",(event)=>{if(event.detail?.roomId==="ROOM_06")startRoom07?.({previousRoom:"ROOM_06",companion});});
+window.addEventListener("psychgame-room-complete",(event)=>{
+  if(event.detail?.roomId==="ROOM_06")startRoom07?.({previousRoom:"ROOM_06",companion});
+  if(event.detail?.roomId==="ROOM_07")startRoom08?.({
+    previousRoom:"ROOM_07",
+    companion,
+    trustBehavior:event.detail?.trustBehavior||{}
+  });
+});
