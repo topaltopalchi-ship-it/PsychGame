@@ -1,9 +1,16 @@
 import * as THREE from "three";
 
 export class InteractionSystem {
-  constructor(camera, tracker) {
+  constructor(
+    camera,
+    tracker,
+    scene = null,
+    mainLight = null
+  ) {
     this.camera = camera;
     this.tracker = tracker;
+    this.scene = scene;
+    this.mainLight = mainLight;
 
     this.raycaster =
       new THREE.Raycaster();
@@ -18,6 +25,8 @@ export class InteractionSystem {
     this.buttonFirstSeenTime = null;
     this.buttonPressed = false;
     this.buttonFailed = false;
+
+    this.exitDoor = null;
 
     window.addEventListener(
       "keydown",
@@ -34,6 +43,12 @@ export class InteractionSystem {
     object.userData.objectId = objectId;
 
     this.interactables.push(object);
+
+    if (
+      objectId === "EXIT_DOOR"
+    ) {
+      this.exitDoor = object;
+    }
   }
 
   update() {
@@ -79,12 +94,16 @@ export class InteractionSystem {
   }
 
   interact() {
-    if (!this.currentTarget) return;
+    if (!this.currentTarget) {
+      return;
+    }
 
     const objectId =
       this.currentTarget.userData.objectId;
 
-    if (!objectId) return;
+    if (!objectId) {
+      return;
+    }
 
     this.tracker.log(
       "OBJECT_INTERACTION",
@@ -98,6 +117,12 @@ export class InteractionSystem {
       objectId === "RED_BUTTON"
     ) {
       this.handleRedButton();
+    }
+
+    if (
+      objectId === "EXIT_DOOR"
+    ) {
+      this.handleDoor();
     }
   }
 
@@ -138,6 +163,7 @@ export class InteractionSystem {
         {
           cause:
             "RED_BUTTON",
+
           attempt:
             this.buttonAttempts
         }
@@ -161,19 +187,71 @@ export class InteractionSystem {
   }
 
   applyButtonConsequence() {
-    const lights =
-      this.camera.parent;
-
     this.tracker.log(
       "CONSEQUENCE",
       {
         type:
-          "BUTTON_PRESSED"
+          "LIGHTS_OUT_AND_DOOR_LOCKED"
       }
     );
 
+    // خاموش شدن چراغ اصلی
+    if (this.mainLight) {
+      this.mainLight.intensity = 0;
+    }
+
+    // تغییر وضعیت در
+    if (this.exitDoor) {
+      this.exitDoor.userData.locked = true;
+
+      this.exitDoor.material =
+        this.exitDoor.material.clone();
+
+      this.exitDoor.material.color =
+        new THREE.Color(
+          0x241714
+        );
+    }
+
     console.log(
-      "RED BUTTON PRESSED — FAILURE"
+      "RED BUTTON PRESSED"
+    );
+
+    console.log(
+      "LIGHTS OUT"
+    );
+
+    console.log(
+      "EXIT DOOR LOCKED"
+    );
+  }
+
+  handleDoor() {
+    if (
+      this.exitDoor &&
+      this.exitDoor.userData.locked
+    ) {
+      this.tracker.log(
+        "DOOR_BLOCKED",
+        {
+          objectId:
+            "EXIT_DOOR"
+        }
+      );
+
+      console.log(
+        "The door is locked."
+      );
+
+      return;
+    }
+
+    this.tracker.log(
+      "DOOR_INTERACTION",
+      {
+        objectId:
+          "EXIT_DOOR"
+      }
     );
   }
 }
