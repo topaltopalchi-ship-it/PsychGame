@@ -4,7 +4,7 @@ export class Room07 {
   constructor(scene, tracker){
     this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;
     this.companion=null;this.context={};this.startedAt=0;this.followCount=0;this.ignoreCount=0;
-    this.firstChoice=null;this.lastChoice=null;this.choiceSwitches=0;this.promptActive=false;this.promptTimer=null;
+    this.firstChoice=null;this.lastChoice=null;this.choiceSwitches=0;this.promptActive=false;this.promptTimer=null;this.lightTimer=null;
   }
   start(context={}){
     this.context=context||{};this.companion=context.companion||null;this.startedAt=performance.now();
@@ -38,7 +38,7 @@ export class Room07 {
     this.tracker.log("ROOM_07_TRUST_CHOICE",{choice:id,firstChoice:this.firstChoice,choiceSwitches:this.choiceSwitches,followCount:this.followCount,ignoreCount:this.ignoreCount});
     if(id==="FOLLOW_COMPANION")this.companion?.say?.("پس این بار به من اعتماد کردی. فقط یادت باشه... من همیشه درست نمی‌گم.");
     else this.companion?.say?.("باشه. این یکی رو خودت انتخاب کردی. من فقط دنبالت میام.");
-    const l=this.objects.COMP_LIGHT;if(l){l.intensity=2.6;setTimeout(()=>{if(!this.completed)l.intensity=1.25;},600);}
+    const l=this.objects.COMP_LIGHT;if(l){l.intensity=2.6;this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.25;},600);}
   }
   chooseExit(){
     if(this.completed)return;
@@ -47,5 +47,5 @@ export class Room07 {
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_07",firstChoice:this.firstChoice,followCount:this.followCount,ignoreCount:this.ignoreCount});}
-  destroy(){if(this.promptTimer)clearTimeout(this.promptTimer);this.objects={};}
+  destroy(){if(this.promptTimer)clearTimeout(this.promptTimer);if(this.lightTimer)clearTimeout(this.lightTimer);this.objects={};}
 }
