@@ -1,3 +1,4 @@
+import { AuthorPanel } from "./ui/AuthorPanel.js";
 import * as THREE from "three";
 import { PlayerController } from "./player/PlayerController.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
@@ -101,7 +102,21 @@ scene.add(
 
 const session =
   new SessionManager();
+const authorPanel =
+  new AuthorPanel(session);
+window.openAuthorPanel =
+  () => {
+    const code =
+      prompt(
+        "کد نویسنده را وارد کنید:"
+      );
 
+    if (!code) {
+      return;
+    }
+
+    authorPanel.open(code);
+  };
 const tracker =
   session.getTracker();
 
