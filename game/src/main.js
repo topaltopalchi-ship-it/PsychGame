@@ -82,7 +82,7 @@ hiddenAuthorZone.addEventListener("click", () => {
 });
 window.openAuthorPanel = openAuthor;
 
-window.psychGame = {
+window.psychGame = {\n  interact: () => interaction.interact(),
   session,
   tracker,
   getPlayerCode: () => session.getPlayerCode(),
