@@ -13,7 +13,10 @@ export class Room01 {
     this.createDoor();
     this.createRedButton();
     this.createDesk();
+    this.createDrawer();
+    this.createBox();
     this.createClock();
+    this.createPainting();
 
     this.tracker.log(
       "ROOM_ENTER",
@@ -51,7 +54,6 @@ export class Room01 {
       );
 
     floor.position.y = -0.1;
-
     floor.receiveShadow = true;
 
     this.scene.add(floor);
@@ -227,6 +229,76 @@ export class Room01 {
     this.scene.add(desk);
   }
 
+  createDrawer() {
+    const geometry =
+      new THREE.BoxGeometry(
+        1.2,
+        0.45,
+        0.8
+      );
+
+    const material =
+      new THREE.MeshStandardMaterial({
+        color: 0x513522,
+        roughness: 0.9
+      });
+
+    const drawer =
+      new THREE.Mesh(
+        geometry,
+        material
+      );
+
+    drawer.position.set(
+      0.8,
+      0.65,
+      -1.15
+    );
+
+    drawer.userData.objectId =
+      "HALF_OPEN_DRAWER";
+
+    this.objects.drawer =
+      drawer;
+
+    this.scene.add(drawer);
+  }
+
+  createBox() {
+    const geometry =
+      new THREE.BoxGeometry(
+        0.9,
+        0.7,
+        0.9
+      );
+
+    const material =
+      new THREE.MeshStandardMaterial({
+        color: 0x4a4a4a,
+        roughness: 0.7
+      });
+
+    const box =
+      new THREE.Mesh(
+        geometry,
+        material
+      );
+
+    box.position.set(
+      -0.8,
+      0.4,
+      -1.6
+    );
+
+    box.userData.objectId =
+      "CLOSED_BOX";
+
+    this.objects.box =
+      box;
+
+    this.scene.add(box);
+  }
+
   createClock() {
     const geometry =
       new THREE.CylinderGeometry(
@@ -263,5 +335,39 @@ export class Room01 {
       clock;
 
     this.scene.add(clock);
+  }
+
+  createPainting() {
+    const geometry =
+      new THREE.BoxGeometry(
+        1.8,
+        1.3,
+        0.1
+      );
+
+    const material =
+      new THREE.MeshStandardMaterial({
+        color: 0x735d45
+      });
+
+    const painting =
+      new THREE.Mesh(
+        geometry,
+        material
+      );
+
+    painting.position.set(
+      -1.5,
+      2.3,
+      -4.65
+    );
+
+    painting.userData.objectId =
+      "OLD_PAINTING";
+
+    this.objects.painting =
+      painting;
+
+    this.scene.add(painting);
   }
 }
