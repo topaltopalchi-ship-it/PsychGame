@@ -18,7 +18,7 @@ export class Room07 {
   createRoom(){
     this.mesh(new THREE.PlaneGeometry(16,14),this.mat(0x15171b,.9),[0,0,0]).rotation.x=-Math.PI/2;
     const w=this.mat(0x101217,.95);this.mesh(new THREE.BoxGeometry(16,4,.3),w,[0,2,-6]);this.mesh(new THREE.BoxGeometry(16,4,.3),w,[0,2,6]);this.mesh(new THREE.BoxGeometry(.3,4,12),w,[-8,2,0]);this.mesh(new THREE.BoxGeometry(.3,4,12),w,[8,2,0]);
-    const beacon=this.mesh(new THREE.CylinderGeometry(.22,.22,2.2,12),this.mat(0x4a2028,.5,.3),[0,1.1,0]);this.add("COMP_BEACON",beacon);
+    const beacon=this.mesh(new THREE.CylinderGeometry(.22,.22,2.2,12),this.mat(0x4a2028,.5,.3),[0,1.1,0]);this.add("COMP_BEACON",beacon); const glow=this.mesh(new THREE.SphereGeometry(.32,12,12),new THREE.MeshBasicMaterial({color:0x9b3038,transparent:true,opacity:.35}),[0,2.25,0]);this.add("COMP_BEACON_GLOW",glow);
     const trust=this.mesh(new THREE.BoxGeometry(2.6,1.2,.4),this.mat(0x1d2830,.6,.2),[-3,1,-3.8]);this.add("FOLLOW_COMPANION",trust);
     const alone=this.mesh(new THREE.BoxGeometry(2.6,1.2,.4),this.mat(0x302024,.6,.2),[3,1,-3.8]);this.add("GO_ALONE",alone);
     const exit=this.mesh(new THREE.BoxGeometry(2.5,2.8,.3),this.mat(0x29171c,.7),[0,1.6,5.7]);this.add("COMP_EXIT",exit);
@@ -45,7 +45,7 @@ export class Room07 {
   chooseExit(){
     if(this.completed)return;
     this.tracker.log("ROOM_07_TRUST_PROFILE",{firstChoice:this.firstChoice,lastChoice:this.lastChoice,followCount:this.followCount,ignoreCount:this.ignoreCount,choiceSwitches:this.choiceSwitches});
-    this.companion?.say?.(this.followCount>this.ignoreCount?"امروز بیشتر به من اعتماد کردی.":"امروز بیشتر ترجیح دادی خودت تصمیم بگیری.");
+    this.companion?.say?.("باشه... انتخابت رو دیدم. حالا بیا بریم.");
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_07",firstChoice:this.firstChoice,followCount:this.followCount,ignoreCount:this.ignoreCount});}
