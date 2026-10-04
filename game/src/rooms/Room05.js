@@ -7,7 +7,7 @@ export class Room05 {
     this.firstLookAt=performance.now(); this.lastMirror=null; this.firstChoiceTime=0; this.glitchCount=0; this.choiceLocked=false; this.glitchTimers=[]; this.ambientPulse=0;
   }
   start(context={}){
-    this.context=context||{}; this.companion=this.context.companion||null;
+    this.context=context||{}; this.companion=this.context.companion||null; this.firstLookAt=performance.now();
     this.scene.fog=new THREE.FogExp2(0x08080d,.028);
     this.createFloor(); this.createWalls(); this.createMirrors(); this.createAtmosphere();
     this.tracker.log("ROOM_ENTER",{roomId:"ROOM_05",roomName:"MIRROR_ROOM",previousRoom:context.previousRoom||"ROOM_04"});
