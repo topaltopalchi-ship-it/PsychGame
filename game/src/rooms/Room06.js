@@ -37,18 +37,18 @@ export class Room06 {
       signal.rotation.z=.08;
       setTimeout(()=>{if(!this.completed){signal.scale.x=1;signal.rotation.z=0;}},650);
     }
-    if(light){light.intensity=.45;this.pulseTimer=setTimeout(()=>{if(!this.completed)light.intensity=1.3;},650);}
+    if(light){light.intensity=.45;if(this.pulseTimer)clearTimeout(this.pulseTimer); this.pulseTimer=setTimeout(()=>{if(!this.completed)light.intensity=1.3;},650);}
     this.companion?.say?.("اون خط صدا... چرا قطع و وصل شد؟ چیزی داشت از داخلش رد می‌شد.");
   }
   triggerWhisper(){
     if(this.whisperTriggered||this.completed)return;
     this.whisperTriggered=true;
     this.tracker.log("ROOM_06_WHISPER_EVENT",{firstChoice:this.firstChoice,playCount:this.playCount});
-    const l=this.objects.REC_LIGHT;if(l){l.intensity=.25;this.pulseTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.3;},900);}
+    const l=this.objects.REC_LIGHT;if(l){l.intensity=.25;if(this.pulseTimer)clearTimeout(this.pulseTimer); this.pulseTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.3;},900);}
     this.companion?.say?.("صبر کن... صدایی شنیدی؟ این یکی از دستگاه‌ها نبود.");
   }
-  pulse(){const l=this.objects.REC_LIGHT;if(!l)return;l.intensity=2.6;this.pulseTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.3;},500);}
-  chooseExit(){const familiar=this.observations.REC_FAMILIAR||0,unknown=this.observations.REC_UNKNOWN||0,stat=this.observations.REC_STATIC||0;this.tracker.log("ROOM_06_TRUST_PROFILE",{firstChoice:this.firstChoice,lastChoice:this.lastChoice,familiar,unknown,static:stat,totalChecks:this.playCount,switchCount:this.switchCount});this.companion?.say?.(unknown+stat>familiar?"پس بیشتر به صداهای ناآشنا گوش دادی...":"اول سراغ چیزی رفتی که برات آشناتر بود.");}
+  pulse(){const l=this.objects.REC_LIGHT;if(!l)return;l.intensity=2.6;if(this.pulseTimer)clearTimeout(this.pulseTimer);this.pulseTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.3;},500);}
+  chooseExit(){const familiar=this.observations.REC_FAMILIAR||0,unknown=this.observations.REC_UNKNOWN||0,stat=this.observations.REC_STATIC||0;this.tracker.log("ROOM_06_TRUST_PROFILE",{firstChoice:this.firstChoice,lastChoice:this.lastChoice,familiar,unknown,static:stat,totalChecks:this.playCount,switchCount:this.switchCount});this.companion?.say?.("فکر کنم دیگه وقتشه از این اتاق بریم.");}
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_06",firstChoice:this.firstChoice,totalChecks:this.playCount});}
   update(delta){if(this.objects.REC_SPEAKER)this.objects.REC_SPEAKER.rotation.y=Math.sin(performance.now()*.001)*.015;}
