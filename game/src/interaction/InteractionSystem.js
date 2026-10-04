@@ -292,10 +292,8 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
     return;
   }
   if (objectId === "WAIT_EXIT") {
+      this.room?.startExitSequence?.();
       this.room?.confirmExit?.();
-      this.room?.triggerEnding?.();
-      this.room?.triggerFinalBeat?.();
-      this.room?.reactToExit?.();
     this.tracker.log("WAITING_EXIT_CHECKED",{roomId:"ROOM_03"});
     this.room?.completeRoom?.();
     this.completed=true;
