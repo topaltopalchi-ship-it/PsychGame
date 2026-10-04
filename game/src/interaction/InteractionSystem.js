@@ -25,7 +25,9 @@ export class InteractionSystem {
     this.buttonFirstSeenTime = null;
     this.buttonPressed = false;
 
-    this.exitDoor = null;\n    this.companion = null;\n    this.room = null;
+    this.exitDoor = null;
+    this.companion = null;
+    this.room = null;
     this.keyFound = false;
     this.completed = false;
 
