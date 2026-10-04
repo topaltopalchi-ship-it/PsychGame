@@ -119,6 +119,7 @@ export class InteractionSystem {
     });
 
     if (this.roomNumber === 2) { this.handleRoom2(objectId); return; }
+    if (this.roomNumber === 3) { this.handleRoom3(objectId); return; }
 
     switch (objectId) {
       case "RED_BUTTON": this.handleRedButton(); break;
@@ -268,5 +269,26 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
     this.tracker.log("ROOM_COMPLETED", { roomId: "ROOM_02", path: "PATH_CENTER" });
     this.companion?.say("مسیر درست رو پیدا کردی. حالا می‌ریم مرحله بعد.");
     window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_02" } }));
+  }
+};
+
+InteractionSystem.prototype.handleRoom3 = function(objectId) {
+  if (objectId === "WAIT_CLOCK") {
+    this.tracker.log("WAITING_OBJECT_INSPECTED",{roomId:"ROOM_03"});
+    this.companion?.say("ساعت جلو نمی‌ره... شاید بهتره کمی صبر کنی.");
+    return;
+  }
+  if (objectId === "WAIT_SEAT") {
+    this.tracker.log("WAITING_SEAT_INSPECTED",{roomId:"ROOM_03"});
+    this.companion?.say("می‌تونی صبر کنی، یا دنبال راه خروج بگردی.");
+    return;
+  }
+  if (objectId === "WAIT_EXIT") {
+    this.tracker.log("WAITING_EXIT_CHECKED",{roomId:"ROOM_03"});
+    this.room?.completeRoom?.();
+    this.completed=true;
+    this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});
+    this.companion?.say("انتخابت ثبت شد. اتاق بعدی آماده‌ست.");
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}}));
   }
 };
