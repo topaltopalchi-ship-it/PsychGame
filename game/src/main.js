@@ -5,6 +5,7 @@ import { SessionManager } from "./session/SessionManager.js";
 import { Room01 } from "./rooms/Room01.js";
 import { Room02 } from "./rooms/Room02.js";
 import { Room03 } from "./rooms/Room03.js";
+import { Room04 } from "./rooms/Room04.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
@@ -186,6 +187,24 @@ function startRoom03(context = { previousPath: "ROOM_02" }) {
 }
 window.addEventListener("psychgame-room-complete", (event) => {
   if (event.detail?.roomId === "ROOM_02") setTimeout(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion }), 900);
+});
+
+function startRoom04(context = { previousRoom: "ROOM_03" }) {
+  if (activeRoom?.constructor?.name !== "Room03" || !activeRoom.completed) return;
+  clearRoomGeometry();
+  interaction.clearTargets?.();
+  activeRoom = new Room04(scene, tracker);
+  activeRoom.start(context);
+  interaction.setRoom(activeRoom, 4);
+  camera.position.set(0,1.7,3.5);
+  player.rotation.set(0,0,0);
+  camera.rotation.copy(player.rotation);
+  mainLight.intensity=18;
+  companion?.say("اتاق چهارم؛ اگر راهرو تکرار شد، به حافظه‌ات اعتماد نکن.");
+  document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها";
+}
+window.addEventListener("psychgame-room-complete", (event) => {
+  if (event.detail?.roomId === "ROOM_03") setTimeout(() => startRoom04({ previousRoom:"ROOM_03" }), 900);
 });
 
 window.psychGame = {
