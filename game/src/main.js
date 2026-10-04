@@ -52,16 +52,20 @@ crosshair.id = "pg-crosshair";
 crosshair.textContent = "+";
 const hint = document.createElement("div");
 hint.id = "pg-hint";
-hint.textContent = "WASD برای حرکت · موس برای نگاه · E برای تعامل";
+hint.textContent = "گوشی: جوی‌استیک برای حرکت · لمس سمت راست برای نگاه · دکمه «تعامل» برای انتخاب";
 const title = document.createElement("div");
 title.id = "pg-title";
 title.textContent = "اتاق ۰۱ — دکمه قرمز";
-hud.append(crosshair, hint, title);
+const targetPrompt = document.createElement("div");
+targetPrompt.id = "pg-target";
+targetPrompt.textContent = "برای تعامل، به یک شیء نگاه کنید";
+targetPrompt.style.display = "none";
+hud.append(crosshair, hint, title, targetPrompt);
 Object.assign(hud.style, { position:"fixed", inset:"0", pointerEvents:"none", zIndex:"5000", direction:"rtl", fontFamily:"Tahoma,Arial,sans-serif", color:"#eee" });
 document.body.appendChild(hud);
 
 const style = document.createElement("style");
-style.textContent = "#pg-crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;color:rgba(255,255,255,.65);text-shadow:0 1px 5px #000}#pg-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 16px;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:rgba(5,7,10,.58);backdrop-filter:blur(8px);font-size:13px;color:rgba(255,255,255,.78)}#pg-title{position:absolute;top:18px;right:20px;padding:8px 12px;border-right:2px solid #a74b3c;background:rgba(5,7,10,.42);font-size:14px;color:rgba(255,255,255,.8)}@media(max-width:700px){#pg-hint{font-size:11px;bottom:12px;max-width:88%;text-align:center}#pg-title{font-size:12px;top:10px;right:10px}}";
+style.textContent = "#pg-crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;color:rgba(255,255,255,.65);text-shadow:0 1px 5px #000}#pg-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 16px;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:rgba(5,7,10,.58);backdrop-filter:blur(8px);font-size:13px;color:rgba(255,255,255,.78)}#pg-title{position:absolute;top:18px;right:20px;padding:8px 12px;border-right:2px solid #a74b3c;background:rgba(5,7,10,.42);font-size:14px;color:rgba(255,255,255,.8)}#pg-target{position:absolute;left:50%;top:54%;transform:translateX(-50%);padding:8px 14px;border-radius:18px;background:rgba(5,7,10,.72);border:1px solid rgba(255,255,255,.16);font-size:13px;color:#fff;white-space:nowrap}@media(max-width:700px){#pg-hint{font-size:11px;bottom:10px;max-width:80%;text-align:center}#pg-title{font-size:12px;top:10px;right:10px}#pg-target{top:57%;font-size:12px}}";
 document.head.appendChild(style);
 
 let authorTapCount = 0;
@@ -81,6 +85,22 @@ hiddenAuthorZone.addEventListener("click", () => {
   if (authorTapCount >= 5) { authorTapCount = 0; openAuthor(); }
 });
 window.openAuthorPanel = openAuthor;
+
+const targetLabels = {
+  RED_BUTTON: "دکمه قرمز — تعامل",
+  EXIT_DOOR: "در — تعامل",
+  HALF_OPEN_DRAWER: "کشوی نیمه‌باز — بررسی",
+  CLOSED_BOX: "جعبه — بررسی",
+  OLD_DESK: "میز قدیمی — بررسی",
+  BROKEN_CLOCK: "ساعت خراب — بررسی",
+  OLD_PAINTING: "تابلو — بررسی",
+  HIDDEN_CLUE: "کلید — بردارید"
+};
+window.addEventListener("psychgame-target", (event) => {
+  const label = targetLabels[event.detail?.objectId];
+  targetPrompt.textContent = label || "برای تعامل، به یک شیء نگاه کنید";
+  targetPrompt.style.display = label ? "block" : "none";
+});
 
 window.psychGame = {\n  interact: () => interaction.interact(),
   session,
