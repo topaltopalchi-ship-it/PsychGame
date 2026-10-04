@@ -123,6 +123,7 @@ export class InteractionSystem {
 
     if (this.roomNumber === 2) { this.handleRoom2(objectId); return; }
     if (this.roomNumber === 3) { this.handleRoom3(objectId); return; }
+    if (this.roomNumber === 4) { this.handleRoom4(objectId); return; }
 
     switch (objectId) {
       case "RED_BUTTON": this.handleRedButton(); break;
@@ -300,5 +301,21 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
     this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});
     this.companion?.say("انتخابت ثبت شد. اتاق بعدی آماده‌ست.");
     window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}}));
+  }
+};
+
+
+InteractionSystem.prototype.handleRoom4 = function(objectId) {
+  if (objectId === "HALL_MARK") {
+    this.room?.reactToMark?.();
+    this.companion?.say("این علامت رو قبلاً دیدی؟ یا فقط فکر می‌کنی دیدیش؟");
+    return;
+  }
+  if (objectId === "HALL_EXIT") {
+    this.tracker.log("ROOM_04_EXIT_CHECKED",{turnCount:this.room?.turnCount||0,explored:!!this.room?.explored});
+    this.room?.completeRoom?.();
+    this.completed=true;
+    this.companion?.say("راهرو تموم شد... ولی مطمئنی از همون راهی اومدی که فکر می‌کنی؟");
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_04",turnCount:this.room?.turnCount||0,explored:!!this.room?.explored}}));
   }
 };
