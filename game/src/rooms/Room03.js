@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room03 {
-  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;}
+  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;}
   start(context={}){
     this.memoryContext=context||{};this.memoryResponseDone=false;this.seatBaseZ=1;
     this.scene.fog=new THREE.FogExp2(0x090b10,this.memoryContext.wrongPaths?.length?.08:.025);
@@ -63,8 +63,22 @@ export class Room03 {
     this.memoryContext.companion?.say?.("یادت هست کدوم مسیر رو اشتباه رفتی؟ اینجا هم انگار یادش مونده...");
   }
 
+  triggerExitGlitch(){
+    if(this.exitGlitchDone)return;
+    this.exitGlitchDone=true;
+    this.tracker.log("ROOM_03_EXIT_GLITCH",{remembered:!!this.memoryContext?.wrongPaths?.length});
+    if(this.objects.exit){
+      const oldX=this.objects.exit.position.x;
+      this.objects.exit.position.x=oldX+(this.memoryContext?.wrongPaths?.length?.28:.12);
+      setTimeout(()=>{if(this.objects.exit)this.objects.exit.position.x=oldX;},380);
+    }
+    this.memoryLight?.intensity=8;
+    setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},450);
+    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "در خروج... چرا تکون خورد؟" : "فکر کنم در خروج رو دیدم... یا نه؟");
+  }
+
   update(delta){
-    if(this.memoryContext?.wrongPaths?.length && this.memoryLight){
+    this.waitTime+=delta;\n    if(this.waitTime>10 && this.memoryContext?.wrongPaths?.length){this.triggerExitGlitch();}\n    if(this.memoryContext?.wrongPaths?.length && this.memoryLight){
       this.memoryLight.intensity=3+Math.sin(performance.now()*.003)*.8;
     }
   }
