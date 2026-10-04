@@ -23,8 +23,8 @@ export class Room01 {
 
   createHiddenClue() {
     const clue = this.mesh(
-      new THREE.BoxGeometry(.48,.06,.3),
-      this.mat(0xb9a46d,.5,.25),
+      new THREE.BoxGeometry(.62,.09,.38),
+      new THREE.MeshStandardMaterial({color:0xf0c94b,emissive:0x8b5f00,emissiveIntensity:0.8,roughness:.42,metalness:.15}),
       [1.7,1.47,-1.02]
     );
     clue.userData.objectId = "HIDDEN_CLUE";
@@ -49,7 +49,7 @@ export class Room01 {
   showKeyFound() {
     if (!this.dynamic.clue) return;
     this.dynamic.clue.material.emissive = new THREE.Color(0x806a24);
-    this.dynamic.clue.material.emissiveIntensity = 1.2;
+    this.dynamic.clue.material.emissiveIntensity = 1.8;
   }
 
   completeRoom() {
@@ -61,6 +61,7 @@ export class Room01 {
     if (this.dynamic.clueVisible) return;
     this.dynamic.clueVisible = true;
     this.dynamic.clue.visible = true;
+    this.dynamic.clue.scale.set(1.35,1.35,1.35);
     this.tracker.log("ADAPTIVE_CLUE_REVEALED", { reason:"POST_FAILURE_EXPLORATION" });
   }
 
