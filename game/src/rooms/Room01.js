@@ -81,7 +81,7 @@ export class Room01 {
     this.mesh(new THREE.BoxGeometry(.18,3.5,.24),frame,[2.48,1.75,-4.53]);
     this.mesh(new THREE.BoxGeometry(.18,3.5,.24),frame,[4.52,1.75,-4.53]);
     const handle=this.mesh(new THREE.SphereGeometry(.09,20,20),this.mat(0xb08a4a,.22,.75),[4.05,1.65,-4.47]);
-    handle.userData.objectId="EXIT_DOOR"; this.objects.doorHandle=handle;
+    this.objects.doorHandle=handle;
   }
 
   createRedButton() {
