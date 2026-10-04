@@ -3,6 +3,7 @@ import { PlayerController } from "./player/PlayerController.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
 import { SessionManager } from "./session/SessionManager.js";
 import { Room01 } from "./rooms/Room01.js";
+import { Room02 } from "./rooms/Room02.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 
@@ -45,9 +46,10 @@ const companion = new Companion(tracker);
 const player = new PlayerController(camera);
 const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
 const room01 = new Room01(scene, tracker);
+let activeRoom = room01;
 
 room01.start();
-interaction.setRoom(room01);
+interaction.setRoom(room01, 1);
 interaction.setCompanion(companion);
 room01.getInteractableObjects().forEach((object) => interaction.register(object, object.userData.objectId));
 tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
@@ -100,7 +102,11 @@ const targetLabels = {
   CLOSED_BOX: "جعبه — بررسی",
   OLD_DESK: "میز قدیمی — بررسی",
   BROKEN_CLOCK: "ساعت خراب — بررسی",
-  OLD_PAINTING: "تابلو — بررسی"
+  OLD_PAINTING: "تابلو — بررسی",
+  PATH_LEFT: "مسیر چپ — انتخاب کن",
+  PATH_CENTER: "مسیر وسط — انتخاب کن",
+  PATH_RIGHT: "مسیر راست — انتخاب کن",
+  PATH_CLUE: "تابلو — بررسی کن"
 };
 const targetNames = {
   RED_BUTTON: "دکمه قرمز",
@@ -110,7 +116,8 @@ const targetNames = {
   CLOSED_BOX: "جعبه",
   OLD_DESK: "میز قدیمی",
   BROKEN_CLOCK: "ساعت خراب",
-  OLD_PAINTING: "تابلو"
+  OLD_PAINTING: "تابلو",
+  PATH_LEFT: "مسیر چپ", PATH_CENTER: "مسیر وسط", PATH_RIGHT: "مسیر راست", PATH_CLUE: "تابلو"
 };
 
 window.addEventListener("psychgame-target", (event) => {
@@ -123,6 +130,21 @@ window.addEventListener("psychgame-target", (event) => {
     interactButton.textContent = objectId ? ("تعامل: " + (targetNames[objectId] || "شیء")) : "تعامل";
     interactButton.style.opacity = objectId ? "1" : ".55";
   }
+});
+
+function startRoom02(previousPath = "ROOM_01") {
+  if (activeRoom !== room01 || !room01.completed) return;
+  activeRoom = new Room02(scene, tracker);
+  activeRoom.start({ previousPath });
+  interaction.setRoom(activeRoom, 2);
+  camera.position.set(0, 1.7, 3.5);
+  camera.rotation.set(0, 0, 0);
+  mainLight.intensity = 24;
+  companion?.say("اتاق دوم؛ سه مسیر پیش روت هست. انتخاب کن و نتیجه‌اش رو ببین.");
+  document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
+}
+window.addEventListener("psychgame-room-complete", (event) => {
+  if (event.detail?.roomId === "ROOM_01") setTimeout(() => startRoom02("ROOM_01"), 900);
 });
 
 window.psychGame = {
