@@ -315,7 +315,7 @@ InteractionSystem.prototype.handleRoom4 = function(objectId) {
     this.room?.completeRoom?.();
     this.completed=true;
     this.companion?.say("راهرو تموم شد... ولی مطمئنی از همون راهی اومدی که فکر می‌کنی؟");
-    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_04",turnCount:this.room?.turnCount||0,explored:!!this.room?.explored}}));
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_04",turnCount:this.room?.turnCount||0,explored:!!this.room?.explored,behavior:{turnCount:this.room?.turnCount||0,explored:!!this.room?.explored,retreatCount:this.room?.retreatCount||0,maxDepth:this.room?.maxDepth||0}}}));
   }
 };
 
@@ -331,7 +331,7 @@ InteractionSystem.prototype.handleRoom5 = function(objectId) {
     this.room?.completeRoom?.();
     this.completed=true;
     this.tracker.log("ROOM_05_EXIT_CHECKED",{roomId:"ROOM_05"});
-    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_05"}}));
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_05",behavior:{firstMirror:this.room?.firstMirror||null,repeatedMirrorChecks:Object.values(this.room?.observations||{}).filter(v=>v>1).length,glitchCount:this.room?.glitchCount||0,firstChoiceTime:this.room?.firstChoiceTime||0}}}));
   }
 };
 
@@ -344,7 +344,7 @@ InteractionSystem.prototype.handleRoom6 = function(objectId) {
     if (this.completed) return;
     this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
     this.tracker.log("ROOM_06_EXIT_CHECKED",{roomId:"ROOM_06"});
-    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_06"}}));
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_06",behavior:{firstChoice:this.room?.firstChoice||null,lastChoice:this.room?.lastChoice||null,switchCount:this.room?.switchCount||0,totalChecks:this.room?.playCount||0}}}));
   }
 };
 
