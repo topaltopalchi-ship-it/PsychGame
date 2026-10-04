@@ -4,7 +4,7 @@ export class Room05 {
   constructor(scene, tracker){
     this.scene=scene; this.tracker=tracker; this.objects={}; this.completed=false;
     this.companion=null; this.context={}; this.observations={}; this.firstMirror=null;
-    this.firstLookAt=performance.now(); this.lastMirror=null; this.firstChoiceTime=0; this.glitchCount=0; this.choiceLocked=false; this.glitchTimer=null;
+    this.firstLookAt=performance.now(); this.lastMirror=null; this.firstChoiceTime=0; this.glitchCount=0; this.choiceLocked=false; this.glitchTimer=null; this.ambientPulse=0;
   }
   start(context={}){
     this.context=context||{}; this.companion=this.context.companion||null;
@@ -40,6 +40,7 @@ export class Room05 {
   createAtmosphere(){
     const l=new THREE.PointLight(0x6875a8,1.2,14);l.position.set(0,3.2,-2);this.scene.add(l);this.objects.MIRROR_LIGHT=l;
     const glow=this.mesh(new THREE.SphereGeometry(.16,12,12),new THREE.MeshBasicMaterial({color:0x8899ff}),[0,3.1,-3]);this.add("MIRROR_GLOW",glow);
+    const ceiling=this.mesh(new THREE.BoxGeometry(14,.08,1.8),new THREE.MeshStandardMaterial({color:0x222630,roughness:.55,metalness:.35}),[0,3.75,-.8]); this.add("MIRROR_CEILING",ceiling);
   }
   reactToMirror(id){
     if(this.choiceLocked)return;
@@ -71,6 +72,13 @@ export class Room05 {
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_05",firstMirror:this.firstMirror,glitchCount:this.glitchCount});}
-  update(delta){if(this.objects.MIRROR_GLOW){this.objects.MIRROR_GLOW.scale.setScalar(1+Math.sin(performance.now()*.004)*.08);}}
+  update(delta){
+    const now=performance.now();
+    if(this.objects.MIRROR_GLOW)this.objects.MIRROR_GLOW.scale.setScalar(1+Math.sin(now*.004)*.08);
+    if(this.objects.MIRROR_LIGHT){
+      const base=1.2+Math.sin(now*.0017)*.12;
+      this.objects.MIRROR_LIGHT.intensity=base+(this.glitchCount>0?Math.sin(now*.006)*.08:0);
+    }
+  }
   destroy(){if(this.glitchTimer)clearTimeout(this.glitchTimer);this.objects={};}
 }
