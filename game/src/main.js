@@ -157,7 +157,7 @@ function startRoom02(previousPath = "ROOM_01") {
   clearRoomGeometry();
   interaction.clearTargets?.();
   activeRoom = new Room02(scene, tracker);
-  activeRoom.start(context);
+  activeRoom.start({ previousPath });
   interaction.setRoom(activeRoom, 2);
   camera.position.set(0, 1.7, 3.5);
   camera.rotation.set(0, 0, 0);
@@ -175,7 +175,7 @@ function startRoom03(context = { previousPath: "ROOM_02" }) {
   clearRoomGeometry();
   interaction.clearTargets?.();
   activeRoom = new Room03(scene, tracker);
-  activeRoom.start({ previousPath });
+  activeRoom.start(context);
   interaction.setRoom(activeRoom, 3);
   camera.position.set(0, 1.7, 3.5);
   player.rotation.set(0, 0, 0);
