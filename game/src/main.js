@@ -124,7 +124,7 @@ const interaction =
     tracker,
     scene,
     mainLight
-  );
+);
 
 // =====================================
 // Room 01
@@ -138,7 +138,6 @@ const room01 =
 
 room01.start();
 
-
 room01
   .getInteractableObjects()
   .forEach(
@@ -150,11 +149,8 @@ room01
     }
   );
 
-
-
-
 // =====================================
-// Session Start
+// Game Start
 // =====================================
 
 tracker.log(
@@ -164,6 +160,36 @@ tracker.log(
       session.getPlayerCode()
   }
 );
+
+// =====================================
+// Debug / Author Console
+// =====================================
+
+window.psychGame =
+  {
+    session,
+    tracker,
+
+    getPlayerCode() {
+      return session.getPlayerCode();
+    },
+
+    getEvents() {
+      return tracker.getEvents();
+    },
+
+    getAnalysis() {
+      return session.getAnalysis();
+    },
+
+    getReport() {
+      return session.getSessionData();
+    },
+
+    exportSession() {
+      return session.exportSession();
+    }
+  };
 
 console.log(
   "================================="
@@ -181,6 +207,22 @@ console.log(
 console.log(
   "Session ID:",
   session.getSessionId()
+);
+
+console.log(
+  "Author tools available:"
+);
+
+console.log(
+  "psychGame.getAnalysis()"
+);
+
+console.log(
+  "psychGame.getReport()"
+);
+
+console.log(
+  "psychGame.getEvents()"
 );
 
 console.log(
