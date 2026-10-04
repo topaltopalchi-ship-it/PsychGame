@@ -360,3 +360,16 @@ InteractionSystem.prototype.handleRoom7 = function(objectId) {
     window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07"}}));
   }
 };
+
+
+InteractionSystem.prototype.handleRoom7 = function(objectId) {
+  if (objectId === "FOLLOW_COMPANION" || objectId === "GO_ALONE") {
+    this.room?.choose?.(objectId); return;
+  }
+  if (objectId === "COMP_EXIT") {
+    if (this.completed) return;
+    this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
+    this.tracker.log("ROOM_07_EXIT_CHECKED",{roomId:"ROOM_07"});
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07"}}));
+  }
+};
