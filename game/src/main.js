@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { PlayerController } from "./player/PlayerController.js";
 import { BehaviorTracker } from "./psychology/BehaviorTracker.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
+import { SessionManager } from "./session/SessionManager.js";
 
 // =====================================
 // PsychGame — Main Game Engine
@@ -9,36 +10,30 @@ import { InteractionSystem } from "./interaction/InteractionSystem.js";
 
 const game = document.getElementById("game");
 
-// =====================================
-// SCENE
-// =====================================
-
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0x080a0d);
+scene.background =
+  new THREE.Color(0x080a0d);
 
+const camera =
+  new THREE.PerspectiveCamera(
+    70,
+    window.innerWidth /
+      window.innerHeight,
+    0.1,
+    100
+  );
 
-// =====================================
-// CAMERA
-// =====================================
-
-const camera = new THREE.PerspectiveCamera(
-  70,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
+camera.position.set(
+  0,
+  1.7,
+  5
 );
 
-camera.position.set(0, 1.7, 5);
-
-
-// =====================================
-// RENDERER
-// =====================================
-
-const renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
+const renderer =
+  new THREE.WebGLRenderer({
+    antialias: true
+  });
 
 renderer.setSize(
   window.innerWidth,
@@ -46,44 +41,56 @@ renderer.setSize(
 );
 
 renderer.setPixelRatio(
-  Math.min(window.devicePixelRatio, 2)
+  Math.min(
+    window.devicePixelRatio,
+    2
+  )
 );
 
-game.appendChild(renderer.domElement);
-
-
-// =====================================
-// LIGHTING
-// =====================================
-
-const ambientLight = new THREE.HemisphereLight(
-  0x8899aa,
-  0x111111,
-  1.5
+game.appendChild(
+  renderer.domElement
 );
+
+// =====================================
+// Lighting
+// =====================================
+
+const ambientLight =
+  new THREE.HemisphereLight(
+    0x8899aa,
+    0x111111,
+    1.5
+  );
 
 scene.add(ambientLight);
 
+const mainLight =
+  new THREE.PointLight(
+    0xffd6a0,
+    20,
+    12
+  );
 
-const mainLight = new THREE.PointLight(
-  0xffd6a0,
-  20,
-  12
+mainLight.position.set(
+  0,
+  3,
+  0
 );
-
-mainLight.position.set(0, 3, 0);
 
 mainLight.castShadow = true;
 
 scene.add(mainLight);
 
-
 // =====================================
-// FLOOR
+// Temporary Floor
 // =====================================
 
 const floorGeometry =
-  new THREE.BoxGeometry(10, 0.2, 10);
+  new THREE.BoxGeometry(
+    10,
+    0.2,
+    10
+  );
 
 const floorMaterial =
   new THREE.MeshStandardMaterial({
@@ -103,78 +110,97 @@ floor.receiveShadow = true;
 
 scene.add(floor);
 
-
 // =====================================
-// PSYCHOLOGY SYSTEM
+// Systems
 // =====================================
 
 const tracker =
   new BehaviorTracker();
 
-
-// =====================================
-// PLAYER
-// =====================================
+const session =
+  new SessionManager();
 
 const player =
-  new PlayerController(camera);
-
-
-// =====================================
-// INTERACTION
-// =====================================
+  new PlayerController(
+    camera
+  );
 
 const interaction =
   new InteractionSystem(
     camera,
-    tracker
+    session.getTracker()
   );
 
+// =====================================
+// Player Session
+// =====================================
+
+console.log(
+  "================================="
+);
+
+console.log(
+  "PsychGame Session Started"
+);
+
+console.log(
+  "Player Code:",
+  session.getPlayerCode()
+);
+
+console.log(
+  "Session ID:",
+  session.getSessionId()
+);
+
+console.log(
+  "================================="
+);
+
+session
+  .getTracker()
+  .log(
+    "GAME_START",
+    {
+      playerCode:
+        session.getPlayerCode()
+    }
+  );
 
 // =====================================
-// GAME LOOP
+// Game Loop
 // =====================================
 
 const clock =
   new THREE.Clock();
 
-
 function animate() {
-
-  requestAnimationFrame(animate);
+  requestAnimationFrame(
+    animate
+  );
 
   const delta =
     clock.getDelta();
 
-
-  // Player movement
   player.update(delta);
 
-
-  // Object detection
   interaction.update();
 
-
-  // Render
   renderer.render(
     scene,
     camera
   );
-
 }
-
 
 animate();
 
-
 // =====================================
-// WINDOW RESIZE
+// Resize
 // =====================================
 
 window.addEventListener(
   "resize",
   () => {
-
     camera.aspect =
       window.innerWidth /
       window.innerHeight;
@@ -185,6 +211,5 @@ window.addEventListener(
       window.innerWidth,
       window.innerHeight
     );
-
   }
 );
