@@ -1,7 +1,7 @@
 import * as THREE from "three";
 export class Room02 {
   constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;}
-  start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.028);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
+  start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.024);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.createStoryDetails();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
   getInteractableObjects(){return Object.values(this.objects);}
   completeRoom(path){this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
   mesh(g,mat,pos,rot=[0,0,0]){const m=new THREE.Mesh(g,mat);m.position.set(...pos);m.rotation.set(...rot);m.castShadow=true;m.receiveShadow=true;this.scene.add(m);return m;}
@@ -20,6 +20,34 @@ export class Room02 {
     const light=new THREE.PointLight(0xd8e6ff,9,8);light.position.set(0,3.2,-.5);this.scene.add(light);
     for(const x of [-3.1,0,3.1]){const glow=this.mesh(new THREE.BoxGeometry(1.35,.05,.04),this.mat(0x6f829b,.35,.15,0x52657d),[x,3.0,-3.88]);glow.userData.objectId="PATH_CLUE";}
     this.mesh(new THREE.BoxGeometry(8.8,.035,2.2),this.mat(0x171a20,1),[0,.045,-.9]);
+  }
+
+  createStoryDetails(){
+    const dark=this.mat(0x111419,.9);
+    const brass=this.mat(0x92734a,.42,.55);
+    const red=this.mat(0x6f2f2f,.55,.1,0x3b1111);
+
+    // Three wall plaques make the choices feel deliberate rather than like empty doors.
+    for(const [x,label] of [[-3.1,"L"],[0,"?"],[3.1,"R"]]){
+      const plaque=this.mesh(new THREE.BoxGeometry(.62,.48,.05),dark,[x,2.05,-5.74]);
+      plaque.userData.objectId="PATH_CLUE";
+      const glyph=this.mesh(new THREE.BoxGeometry(.08,.28,.035),brass,[x,2.05,-5.70]);
+      glyph.userData.objectId="PATH_CLUE";
+      if(label==="L") glyph.rotation.z=.55;
+      if(label==="R") glyph.rotation.z=-.55;
+    }
+
+    // A thin red trail leads toward the decision point.
+    for(let z=1.0;z>-2.9;z-=.65){
+      const mark=this.mesh(new THREE.BoxGeometry(.34,.018,.16),red,[0,.08,z]);
+      mark.userData.objectId="DECISION_MARKER";
+    }
+
+    // Old warning boards add environmental storytelling.
+    const board=this.mesh(new THREE.BoxGeometry(2.6,1.05,.08),dark,[3.55,2.25,-1.8]);
+    board.userData.objectId="PATH_CLUE";
+    this.mesh(new THREE.BoxGeometry(1.9,.05,.03),brass,[3.55,2.38,-1.74]);
+    this.mesh(new THREE.BoxGeometry(1.3,.04,.03),brass,[3.55,2.15,-1.74]);
   }
 
   createBench(){const wood=this.mat(0x493728,.75);const seat=this.mesh(new THREE.BoxGeometry(3,.16,.65),wood,[0,.85,1.1]);seat.userData.objectId="BENCH";this.objects.bench=seat;this.mesh(new THREE.BoxGeometry(2.7,.85,.12),wood,[0,1.25,1.35]);for(const x of [-1.25,1.25])this.mesh(new THREE.BoxGeometry(.12,.75,.12),wood,[x,.42,1.1]);}
