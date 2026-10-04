@@ -103,6 +103,7 @@ window.addEventListener("psychgame-target", (event) => {
 });
 
 window.psychGame = {\n  interact: () => interaction.interact(),
+  interactAt: (x, y) => interaction.interactAt(x, y),
   session,
   tracker,
   getPlayerCode: () => session.getPlayerCode(),
