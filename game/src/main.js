@@ -1,362 +1,109 @@
-import { AuthorPanel } from "./ui/AuthorPanel.js";
 import * as THREE from "three";
 import { PlayerController } from "./player/PlayerController.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
 import { SessionManager } from "./session/SessionManager.js";
 import { Room01 } from "./rooms/Room01.js";
+import { AuthorPanel } from "./ui/AuthorPanel.js";
 
-// =====================================
-// PsychGame — Main Game Engine
-// =====================================
+const game = document.getElementById("game");
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x080a0d);
 
-const game =
-  document.getElementById("game");
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 1.7, 5);
 
-const scene =
-  new THREE.Scene();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.82;
+game.appendChild(renderer.domElement);
 
-scene.background =
-  new THREE.Color(0x080a0d);
+const ambientLight = new THREE.HemisphereLight(0x7d8996, 0x111111, 0.62);
+scene.add(ambientLight);
 
-// =====================================
-// Camera
-// =====================================
-
-const camera =
-  new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth /
-      window.innerHeight,
-    0.1,
-    100
-  );
-
-camera.position.set(
-  0,
-  1.7,
-  5
-);
-
-// =====================================
-// Renderer
-// =====================================
-
-const renderer =
-  new THREE.WebGLRenderer({
-    antialias: true
-  });
-
-renderer.setSize(
-  window.innerWidth,
-  window.innerHeight
-);
-
-renderer.setPixelRatio(
-  Math.min(
-    window.devicePixelRatio,
-    2
-  )
-);
-
-game.appendChild(
-  renderer.domElement
-);
-
-// =====================================
-// Lighting
-// =====================================
-
-const ambientLight =
-  new THREE.HemisphereLight(
-    0x8899aa,
-    0x111111,
-    1.5
-  );
-
-scene.add(
-  ambientLight
-);
-
-const mainLight =
-  new THREE.PointLight(
-    0xffd6a0,
-    20,
-    12
-  );
-
-mainLight.position.set(
-  0,
-  3,
-  0
-);
-
+const mainLight = new THREE.PointLight(0xffd6a0, 18, 12);
+mainLight.position.set(0, 3.45, -0.4);
 mainLight.castShadow = true;
+mainLight.shadow.mapSize.set(1024, 1024);
+scene.add(mainLight);
 
-scene.add(
-  mainLight
-);
+const rimLight = new THREE.PointLight(0x334d72, 7, 9);
+rimLight.position.set(-3.8, 2.6, -3.8);
+scene.add(rimLight);
 
-// =====================================
-// Session
-// =====================================
+const session = new SessionManager();
+const authorPanel = new AuthorPanel(session);
+const tracker = session.getTracker();
+const player = new PlayerController(camera);
+const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
+const room01 = new Room01(scene, tracker);
 
-const session =
-  new SessionManager();
-const authorPanel =
-new AuthorPanel(session);
+room01.start();
+room01.getInteractableObjects().forEach((object) => interaction.register(object, object.userData.objectId));
+tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
 
-// =====================================
-// Hidden Author Access
-// =====================================
+const hud = document.createElement("div");
+const crosshair = document.createElement("div");
+crosshair.id = "pg-crosshair";
+crosshair.textContent = "+";
+const hint = document.createElement("div");
+hint.id = "pg-hint";
+hint.textContent = "WASD برای حرکت · موس برای نگاه · E برای تعامل";
+const title = document.createElement("div");
+title.id = "pg-title";
+title.textContent = "اتاق ۰۱ — دکمه قرمز";
+hud.append(crosshair, hint, title);
+Object.assign(hud.style, { position:"fixed", inset:"0", pointerEvents:"none", zIndex:"5000", direction:"rtl", fontFamily:"Tahoma,Arial,sans-serif", color:"#eee" });
+document.body.appendChild(hud);
+
+const style = document.createElement("style");
+style.textContent = "#pg-crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;color:rgba(255,255,255,.65);text-shadow:0 1px 5px #000}#pg-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 16px;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:rgba(5,7,10,.58);backdrop-filter:blur(8px);font-size:13px;color:rgba(255,255,255,.78)}#pg-title{position:absolute;top:18px;right:20px;padding:8px 12px;border-right:2px solid #a74b3c;background:rgba(5,7,10,.42);font-size:14px;color:rgba(255,255,255,.8)}@media(max-width:700px){#pg-hint{font-size:11px;bottom:12px;max-width:88%;text-align:center}#pg-title{font-size:12px;top:10px;right:10px}}";
+document.head.appendChild(style);
 
 let authorTapCount = 0;
 let authorTapTimer = null;
+const hiddenAuthorZone = document.createElement("div");
+Object.assign(hiddenAuthorZone.style, { position:"fixed", top:"0", left:"0", width:"90px", height:"90px", zIndex:"10000", background:"transparent" });
+document.body.appendChild(hiddenAuthorZone);
 
-const hiddenAuthorZone =
-  document.createElement("div");
-
-hiddenAuthorZone.style.position =
-  "fixed";
-
-hiddenAuthorZone.style.top =
-  "0";
-
-hiddenAuthorZone.style.left =
-  "0";
-
-hiddenAuthorZone.style.width =
-  "90px";
-
-hiddenAuthorZone.style.height =
-  "90px";
-
-hiddenAuthorZone.style.zIndex =
-  "10000";
-
-hiddenAuthorZone.style.background =
-  "transparent";
-
-document.body.appendChild(
-  hiddenAuthorZone
-);
-
-hiddenAuthorZone.addEventListener(
-  "click",
-  () => {
-    authorTapCount++;
-
-    clearTimeout(
-      authorTapTimer
-    );
-
-    authorTapTimer =
-      setTimeout(() => {
-        authorTapCount = 0;
-      }, 1500);
-
-    if (
-      authorTapCount >= 5
-    ) {
-      authorTapCount = 0;
-
-      const code =
-        prompt(
-          "کد نویسنده را وارد کنید:"
-        );
-
-      if (!code) {
-        return;
-      }
-
-      authorPanel.open(code);
-    }
-  }
-);
-window.openAuthorPanel =
-  () => {
-    const code =
-      prompt(
-        "کد نویسنده را وارد کنید:"
-      );
-
-    if (!code) {
-      return;
-    }
-
-    authorPanel.open(code);
-  };
-const tracker =
-  session.getTracker();
-
-// =====================================
-// Player
-// =====================================
-
-const player =
-  new PlayerController(
-    camera
-  );
-
-// =====================================
-// Interaction
-// =====================================
-
-const interaction =
-  new InteractionSystem(
-    camera,
-    tracker,
-    scene,
-    mainLight
-);
-
-// =====================================
-// Room 01
-// =====================================
-
-const room01 =
-  new Room01(
-    scene,
-    tracker
-  );
-
-room01.start();
-
-room01
-  .getInteractableObjects()
-  .forEach(
-    (object) => {
-      interaction.register(
-        object,
-        object.userData.objectId
-      );
-    }
-  );
-
-// =====================================
-// Game Start
-// =====================================
-
-tracker.log(
-  "GAME_START",
-  {
-    playerCode:
-      session.getPlayerCode()
-  }
-);
-
-// =====================================
-// Debug / Author Console
-// =====================================
-
-window.psychGame =
-  {
-    session,
-    tracker,
-
-    getPlayerCode() {
-      return session.getPlayerCode();
-    },
-
-    getEvents() {
-      return tracker.getEvents();
-    },
-
-    getAnalysis() {
-      return session.getAnalysis();
-    },
-
-    getReport() {
-      return session.getSessionData();
-    },
-
-    exportSession() {
-      return session.exportSession();
-    }
-  };
-
-console.log(
-  "================================="
-);
-
-console.log(
-  "PsychGame Started"
-);
-
-console.log(
-  "Player Code:",
-  session.getPlayerCode()
-);
-
-console.log(
-  "Session ID:",
-  session.getSessionId()
-);
-
-console.log(
-  "Author tools available:"
-);
-
-console.log(
-  "psychGame.getAnalysis()"
-);
-
-console.log(
-  "psychGame.getReport()"
-);
-
-console.log(
-  "psychGame.getEvents()"
-);
-
-console.log(
-  "================================="
-);
-
-// =====================================
-// Game Loop
-// =====================================
-
-const clock =
-  new THREE.Clock();
-
-function animate() {
-  requestAnimationFrame(
-    animate
-  );
-
-  const delta =
-    clock.getDelta();
-
-  player.update(
-    delta
-  );
-
-  interaction.update();
-
-  renderer.render(
-    scene,
-    camera
-  );
+function openAuthor() {
+  const code = prompt("کد نویسنده را وارد کنید:");
+  if (code) authorPanel.open(code);
 }
+hiddenAuthorZone.addEventListener("click", () => {
+  authorTapCount++;
+  clearTimeout(authorTapTimer);
+  authorTapTimer = setTimeout(() => { authorTapCount = 0; }, 1500);
+  if (authorTapCount >= 5) { authorTapCount = 0; openAuthor(); }
+});
+window.openAuthorPanel = openAuthor;
 
+window.psychGame = {
+  session,
+  tracker,
+  getPlayerCode: () => session.getPlayerCode(),
+  getEvents: () => tracker.getEvents(),
+  getAnalysis: () => session.getAnalysis(),
+  getReport: () => session.getSessionData(),
+  exportSession: () => session.exportSession()
+};
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  player.update(delta);
+  interaction.update();
+  renderer.render(scene, camera);
+}
 animate();
 
-// =====================================
-// Resize
-// =====================================
-
-window.addEventListener(
-  "resize",
-  () => {
-    camera.aspect =
-      window.innerWidth /
-      window.innerHeight;
-
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(
-      window.innerWidth,
-      window.innerHeight
-    );
-  }
-);
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
