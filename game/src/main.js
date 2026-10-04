@@ -174,6 +174,7 @@ function startRoom02(previousPath = "ROOM_01") {
   activeRoom = new Room02(scene, tracker);
   activeRoom.start({ previousPath });
   interaction.setRoom(activeRoom, 2);
+  audioManager.setRoom(2);
   camera.position.set(0, 1.7, 3.5);
   camera.rotation.set(0, 0, 0);
   player.rotation.set(0, 0, 0);
@@ -192,6 +193,7 @@ function startRoom03(context = { previousPath: "ROOM_02" }) {
   activeRoom = new Room03(scene, tracker);
   activeRoom.start(context);
   interaction.setRoom(activeRoom, 3);
+  audioManager.setRoom(3);
   camera.position.set(0, 1.7, 3.5);
   player.rotation.set(0, 0, 0);
   camera.rotation.copy(player.rotation);
@@ -210,6 +212,7 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) {
   activeRoom = new Room04(scene, tracker);
   activeRoom.start(context);
   interaction.setRoom(activeRoom, 4);
+  audioManager.setRoom(4);
   camera.position.set(0,1.7,3.5);
   player.rotation.set(0,0,0);
   camera.rotation.copy(player.rotation);
@@ -242,6 +245,7 @@ function startRoom05(context={previousRoom:"ROOM_04"}) {
   activeRoom = new Room05(scene, tracker);
   activeRoom.start({...context, companion});
   interaction.setRoom(activeRoom,5);
+  audioManager.setRoom(5);
   companion?.say("اتاق پنجم... اینجا به چیزی که می‌بینی زود اعتماد نکن.");
 }
 
@@ -251,6 +255,7 @@ function startRoom06(context={previousRoom:"ROOM_05"}) {
   clearRoomGeometry(); interaction.clearTargets?.();
   activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion});
   interaction.setRoom(activeRoom,6);
+  audioManager.setRoom(6);
   companion?.say("اتاق ششم... بعضی صداها آشنا به نظر می‌رسن، ولی به این حس زود اعتماد نکن.");
 }
 
@@ -259,6 +264,7 @@ function startRoom07(context={previousRoom:"ROOM_06"}) {
   clearRoomGeometry(); interaction.clearTargets?.();
   activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion});
   interaction.setRoom(activeRoom,7);
+  audioManager.setRoom(7);
   companion?.say("اتاق هفتم... اینجا باید تصمیم بگیری به چه کسی اعتماد کنی.");
 }
 
@@ -267,6 +273,7 @@ function startRoom08(context={previousRoom:"ROOM_07"}) {
   clearRoomGeometry(); interaction.clearTargets?.();
   activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion});
   interaction.setRoom(activeRoom,8);
+  audioManager.setRoom(8);
   companion?.say("اتاق آخر... اینجا فقط انتخاب‌هایی که کردی بهت برمی‌گردن.");
 }
 
@@ -286,6 +293,7 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener("psychgame-room-complete",(event)=>{
+  audioManager.playPulse("dark");
   const d=event.detail||{};
   if(d.roomId==="ROOM_04"){
     behavioralHistory.hallBehavior=d.behavior||{};
