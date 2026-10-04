@@ -27,19 +27,19 @@ export class Companion {
     this.panel.id = "pg-companion";
     this.panel.innerHTML = '<div id="pg-companion-name">همراه</div><div id="pg-companion-text"></div>';
     Object.assign(this.panel.style, {
-      position:"fixed", left:"20px", bottom:"62px",
-      width:"min(380px,calc(100vw - 40px))", padding:"14px 16px",
+      position:"fixed", left:"50%", bottom:"88px", transform:"translate(-50%,10px)",
+      width:"min(430px,calc(100vw - 28px))", padding:"16px 18px",
       borderRadius:"14px", background:"rgba(10,12,17,.82)",
       border:"1px solid rgba(255,255,255,.13)", backdropFilter:"blur(12px)",
       boxShadow:"0 12px 35px rgba(0,0,0,.35)", direction:"rtl",
       fontFamily:"Tahoma,Arial,sans-serif", color:"#eee", zIndex:"6000",
-      opacity:"0", transform:"translateY(10px)",
+      opacity:"0",
       transition:"opacity .25s,transform .25s", pointerEvents:"none"
     });
     document.body.appendChild(this.panel);
     this.text = this.panel.querySelector("#pg-companion-text");
     const style = document.createElement("style");
-    style.textContent = "#pg-companion-name{font-size:11px;color:#c58d7c;margin-bottom:5px}#pg-companion-text{font-size:14px;line-height:1.8}";
+    style.textContent = "#pg-companion-name{font-size:11px;color:#c58d7c;margin-bottom:5px}#pg-companion-text{font-size:16px;line-height:1.9;font-weight:500}";
     document.head.appendChild(style);
   }
 
@@ -49,11 +49,11 @@ export class Companion {
       this.pendingVoice = message;
       this.speak(message);
       this.panel.style.opacity = "1";
-      this.panel.style.transform = "translateY(0)";
+      this.panel.style.transform = "translate(-50%,0)";
       clearTimeout(this.hideTimer);
       this.hideTimer = setTimeout(() => {
         this.panel.style.opacity = "0";
-        this.panel.style.transform = "translateY(10px)";
+        this.panel.style.transform = "translate(-50%,10px)";
       }, 4800);
     }, delay);
   }
