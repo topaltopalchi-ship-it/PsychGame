@@ -43,7 +43,7 @@ export class PlayerController {
     const pad = document.createElement("div");
     pad.id="pg-joystick";
     pad.innerHTML='<div id="pg-stick"></div>';
-    Object.assign(pad.style,{position:"fixed",left:"18px",bottom:"18px",width:"118px",height:"118px",borderRadius:"50%",background:"rgba(255,255,255,.09)",border:"1px solid rgba(255,255,255,.18)",zIndex:"7000",touchAction:"none",display:"none"});
+    Object.assign(pad.style,{position:"fixed",left:"18px",bottom:"22px",width:"118px",height:"118px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none"});
     const stick=pad.firstElementChild;
     Object.assign(stick.style,{position:"absolute",left:"38px",top:"38px",width:"42px",height:"42px",borderRadius:"50%",background:"rgba(255,255,255,.28)"});
     document.body.appendChild(pad);
@@ -62,7 +62,7 @@ export class PlayerController {
 
     const look=document.createElement("div");
     look.id="pg-touch-look";
-    Object.assign(look.style,{position:"fixed",right:"0",top:"0",width:"58%",height:"100%",zIndex:"6500",touchAction:"none",display:"none"});
+    Object.assign(look.style,{position:"fixed",right:"0",top:"0",width:"58%",height:"78%",zIndex:"6500",touchAction:"none",display:"none"});
     document.body.appendChild(look);
     let lastX=0,lastY=0,lookActive=false;
     look.addEventListener("pointerdown",e=>{lookActive=true;lastX=e.clientX;lastY=e.clientY;look.setPointerCapture(e.pointerId);});
@@ -72,13 +72,20 @@ export class PlayerController {
 
     const interact=document.createElement("button");
     interact.id="pg-touch-interact"; interact.textContent="تعامل";
-    Object.assign(interact.style,{position:"fixed",right:"20px",bottom:"24px",width:"86px",height:"58px",borderRadius:"18px",border:"1px solid rgba(255,255,255,.25)",background:"rgba(120,30,25,.9)",color:"#fff",fontSize:"16px",fontWeight:"700",zIndex:"8000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.35)"});
+    Object.assign(interact.style,{position:"fixed",right:"20px",bottom:"30px",width:"92px",height:"62px",borderRadius:"18px",border:"2px solid rgba(255,255,255,.35)",background:"rgba(120,30,25,.96)",color:"#fff",fontSize:"16px",fontWeight:"700",zIndex:"10000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.45)",touchAction:"manipulation"});
     interact.addEventListener("click",()=>window.psychGame?.interact?.());
     document.body.appendChild(interact);
 
-    if(window.matchMedia("(pointer:coarse)").matches){
+    const isTouch = window.matchMedia("(pointer:coarse)").matches || navigator.maxTouchPoints > 0;
+    if(isTouch){
       pad.style.display="block"; look.style.display="block"; interact.style.display="block";
     }
+    window.addEventListener("resize",()=>{
+      const touch = window.matchMedia("(pointer:coarse)").matches || navigator.maxTouchPoints > 0;
+      pad.style.display=touch?"block":"none";
+      look.style.display=touch?"block":"none";
+      interact.style.display=touch?"block":"none";
+    });
   }
 
   look(dx,dy){
