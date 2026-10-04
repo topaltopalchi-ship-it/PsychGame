@@ -4,7 +4,7 @@ export class Room04 {
   constructor(scene, tracker){
     this.scene=scene; this.tracker=tracker; this.objects={}; this.completed=false;
     this.loopCount=0; this.turnCount=0; this.lastZ=0; this.explored=false; this.lastMarkIndex=-1; this.markObservations=0; this.retreatCount=0; this.maxDepth=0; this.memoryShiftDone=false;
-    this.startTime=0; this.eventTimer=null; this.glitchDone=false;
+    this.startTime=0; this.eventTimer=null; this.memoryShiftTimer=null; this.glitchTimer=null; this.glitchDone=false;
   }
 
   start(context={}){
@@ -70,7 +70,7 @@ export class Room04 {
     const marks=Object.values(this.objects).filter(o=>o?.userData?.objectId==="HALL_MARK");
     if(marks.length){
       marks.forEach((m,i)=>{m.position.z += i%2===0 ? .22 : -.22;});
-      setTimeout(()=>marks.forEach((m,i)=>{m.position.z += i%2===0 ? -.22 : .22;}),700);
+      this.memoryShiftTimer=setTimeout(()=>marks.forEach((m,i)=>{m.position.z += i%2===0 ? -.22 : .22;}),700);
     }
     this.companion?.say?.("نه... این علامت‌ها جای قبلی‌شون نیستن. یا شاید حافظه‌ی تو عوض شده.");
   }
@@ -81,7 +81,7 @@ export class Room04 {
     this.tracker.log("ROOM_04_LOOP_GLITCH",{turnCount:this.turnCount,explored:this.explored});
     if(this.objects.lamp){
       this.objects.lamp.intensity=9;
-      setTimeout(()=>{if(this.objects.lamp)this.objects.lamp.intensity=1.5;},180);
+      this.glitchTimer=setTimeout(()=>{if(this.objects.lamp)this.objects.lamp.intensity=1.5;},180);
     }
   }
 
@@ -99,5 +99,5 @@ export class Room04 {
     this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_04",turnCount:this.turnCount,explored:this.explored});
   }
 
-  destroy(){ if(this.eventTimer)clearTimeout(this.eventTimer); }
+  destroy(){ if(this.eventTimer)clearTimeout(this.eventTimer); if(this.memoryShiftTimer)clearTimeout(this.memoryShiftTimer); if(this.glitchTimer)clearTimeout(this.glitchTimer); }
 }
