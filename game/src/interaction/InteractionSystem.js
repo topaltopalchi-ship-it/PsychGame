@@ -275,7 +275,7 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
     this.completed = true;
     this.tracker.log("ROOM_COMPLETED", { roomId: "ROOM_02", path: "PATH_CENTER" });
     this.companion?.say("مسیر درست رو پیدا کردی. حالا می‌ریم مرحله بعد.");
-    window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_02" } }));
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_02", path: this.room?.selectedPath || "PATH_CENTER", wrongPaths: Object.entries(this.room?.observedPaths || {}).filter(([path,count]) => path !== "PATH_CENTER" && count > 0).map(([path]) => path) } }));
   }
 };
 
