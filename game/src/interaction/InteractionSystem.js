@@ -252,7 +252,13 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
   if (objectId === "PATH_LEFT" || objectId === "PATH_RIGHT") {
     this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId });
     this.tracker.log("FAILURE", { roomId: "ROOM_02", cause: objectId });
-    this.companion?.say(objectId === "PATH_LEFT" ? "این مسیر به بن‌بست رسید. می‌خوای برگردی و دوباره انتخاب کنی؟" : "این در باز نمی‌شه. شاید مسیر دیگه‌ای ارزش بررسی داشته باشه.");
+    this.tracker.log("PATH_RETURN", { roomId: "ROOM_02", path: objectId });
+    this.companion?.say(objectId === "PATH_LEFT" ? "این مسیر به بن‌بست رسید. برگرد و دوباره انتخاب کن." : "این مسیر بسته است. برگرد و مسیر دیگری را امتحان کن.");
+    return;
+  }
+  if (objectId === "DECISION_MARKER") {
+    this.tracker.log("DECISION_POINT_INSPECTED", { roomId: "ROOM_02" });
+    this.companion?.say("اینجا نقطه تصمیمه. عجله نکن؛ سه مسیر رو بررسی کن.");
     return;
   }
   if (objectId === "PATH_CENTER") {
