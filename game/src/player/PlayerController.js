@@ -43,7 +43,7 @@ export class PlayerController {
     const pad = document.createElement("div");
     pad.id="pg-joystick";
     pad.innerHTML='<div id="pg-stick"></div>';
-    Object.assign(pad.style,{position:"fixed",left:"18px",bottom:"22px",width:"118px",height:"118px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none"});
+    Object.assign(pad.style,{position:"fixed",left:"50%",bottom:"22px",transform:"translateX(-50%)",width:"118px",height:"118px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none"});
     const stick=pad.firstElementChild;
     Object.assign(stick.style,{position:"absolute",left:"38px",top:"38px",width:"42px",height:"42px",borderRadius:"50%",background:"rgba(255,255,255,.28)"});
     document.body.appendChild(pad);
