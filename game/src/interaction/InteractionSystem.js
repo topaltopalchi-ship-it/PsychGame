@@ -359,7 +359,7 @@ export class InteractionSystem {
             "EXIT_DOOR"
         }
       );
-
+      if (this.companion) this.companion.say("در قفل شده... اول ببین بعد از فشردن دکمه چه چیزی عوض شده.");
       return;
     }
 
@@ -381,12 +381,13 @@ export class InteractionSystem {
       "DRAWER_INSPECTED",
       {
         result:
-          "USEFUL_CLUE"
+          "DECOY_CLUE"
       }
     );
 
+    if (this.companion) this.companion.say("یه سرنخه... ولی این کلید به نظر میاد برای این در نباشه.");
     console.log(
-      "The drawer contains a small key."
+      "The drawer contains a misleading clue."
     );
   }
 
