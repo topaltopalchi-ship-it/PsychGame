@@ -1,7 +1,7 @@
 import * as THREE from "three";
 export class Room02 {
-  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;}
-  start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.024);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.createStoryDetails();this.createPathLighting();this.createDreadProps();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
+  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;}
+  start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.024);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.createStoryDetails();this.createPathLighting();this.createDreadProps();this.createScareFigure();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
   getInteractableObjects(){return Object.values(this.objects);}
   completeRoom(path){this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
   mesh(g,mat,pos,rot=[0,0,0]){const m=new THREE.Mesh(g,mat);m.position.set(...pos);m.rotation.set(...rot);m.castShadow=true;m.receiveShadow=true;this.scene.add(m);return m;}
@@ -56,6 +56,7 @@ export class Room02 {
       {x:0,color:0x9fbfff,intensity:2.4},
       {x:3.1,color:0xb8c47b,intensity:2.8}
     ];
+    this.pathLights=[];
     for(const p of lights){
       const lamp=this.mesh(new THREE.CylinderGeometry(.16,.22,.12,16),this.mat(0x16181d,.5,.35),[p.x,3.72,-3.72]);
       lamp.userData.objectId="PATH_CLUE";
@@ -64,7 +65,42 @@ export class Room02 {
       const light=new THREE.PointLight(p.color,p.intensity,5.5);
       light.position.set(p.x,3.48,-3.72);
       this.scene.add(light);
+      this.pathLights.push(light);
     }
+  }
+
+  triggerPathScare(path){
+    if(this.scareTimer) clearTimeout(this.scareTimer);
+    const index=path==="PATH_LEFT"?0:2;
+    const target=this.pathLights[index];
+    const figure=this.scareFigure;
+    if(target) target.intensity*=2.8;
+    if(figure){
+      figure.position.set(path==="PATH_LEFT"?-3.1:3.1,1.55,-2.7);
+      figure.visible=true;
+      figure.scale.set(1,1,1);
+    }
+    if(this.scene.fog) this.scene.fog.density=.07;
+    this.tracker.log("PATH_SCARE",{roomId:"ROOM_02",path});
+    this.scareTimer=setTimeout(()=>{
+      if(target) target.intensity/=2.8;
+      if(figure) figure.visible=false;
+      if(this.scene.fog) this.scene.fog.density=this.originalFogDensity;
+    },700);
+  }
+
+  createScareFigure(){
+    const material=this.mat(0x020203,1,0);
+    const group=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(.22,.32,1.25,10),material);
+    body.position.y=.72;
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.2,12,8),material);
+    head.position.y=1.55;
+    group.add(body,head);
+    group.position.set(-3.1,0,-2.7);
+    group.visible=false;
+    this.scene.add(group);
+    this.scareFigure=group;
   }
 
   createDreadProps(){
