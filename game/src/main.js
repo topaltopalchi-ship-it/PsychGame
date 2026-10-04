@@ -132,13 +132,24 @@ window.addEventListener("psychgame-target", (event) => {
   }
 });
 
+function clearRoomGeometry() {
+  scene.children.slice().forEach((child) => {
+    if (child.isMesh || (child.isLight && child !== ambientLight && child !== mainLight && child !== rimLight)) {
+      scene.remove(child);
+    }
+  });
+}
+
 function startRoom02(previousPath = "ROOM_01") {
   if (activeRoom !== room01 || !room01.completed) return;
+  clearRoomGeometry();
+  interaction.clearTargets?.();
   activeRoom = new Room02(scene, tracker);
   activeRoom.start({ previousPath });
   interaction.setRoom(activeRoom, 2);
   camera.position.set(0, 1.7, 3.5);
   camera.rotation.set(0, 0, 0);
+  player.rotation.set(0, 0, 0);
   mainLight.intensity = 24;
   companion?.say("اتاق دوم؛ سه مسیر پیش روت هست. انتخاب کن و نتیجه‌اش رو ببین.");
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
