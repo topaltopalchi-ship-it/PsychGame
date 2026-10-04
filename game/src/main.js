@@ -293,6 +293,10 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+window.addEventListener("psychgame-audio-pulse",(event)=>{
+  audioManager.playPulse(event.detail?.type || "dark");
+});
+
 window.addEventListener("psychgame-room-complete",(event)=>{
   audioManager.playPulse("dark");
   const d=event.detail||{};
