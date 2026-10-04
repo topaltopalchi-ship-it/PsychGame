@@ -185,7 +185,7 @@ function startRoom03(context = { previousPath: "ROOM_02" }) {
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_02") setTimeout(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [] }), 900);
+  if (event.detail?.roomId === "ROOM_02") setTimeout(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion }), 900);
 });
 
 window.psychGame = {
