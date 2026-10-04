@@ -266,6 +266,7 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
     this.tracker.log("FAILURE", { roomId: "ROOM_02", cause: objectId });
     this.tracker.log("PATH_RETURN", { roomId: "ROOM_02", path: objectId });
     this.room?.triggerPathScare?.(objectId);
+    window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:"impact"}}));
     this.companion?.say(objectId === "PATH_LEFT" ? "این مسیر به بن‌بست رسید. برگرد و دوباره انتخاب کن." : "این مسیر بسته است. برگرد و مسیر دیگری را امتحان کن.");
     return;
   }
@@ -327,6 +328,7 @@ InteractionSystem.prototype.handleRoom4 = function(objectId) {
 InteractionSystem.prototype.handleRoom5 = function(objectId) {
   if (objectId === "MIRROR_LEFT" || objectId === "MIRROR_CENTER" || objectId === "MIRROR_RIGHT") {
     this.room?.reactToMirror?.(objectId);
+    if((this.room?.observations?.[objectId]||0)>=2) window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:"whisper"}}));
     return;
   }
   if (objectId === "MIRROR_EXIT") {
@@ -342,7 +344,7 @@ InteractionSystem.prototype.handleRoom5 = function(objectId) {
 
 InteractionSystem.prototype.handleRoom6 = function(objectId) {
   if (objectId === "REC_FAMILIAR" || objectId === "REC_UNKNOWN" || objectId === "REC_STATIC") {
-    this.room?.reactToRecording?.(objectId); return;
+    this.room?.reactToRecording?.(objectId); window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:objectId==="REC_STATIC"?"warning":"whisper"}})); return;
   }
   if (objectId === "REC_EXIT") {
     if (this.completed) return;
@@ -355,7 +357,7 @@ InteractionSystem.prototype.handleRoom6 = function(objectId) {
 
 InteractionSystem.prototype.handleRoom7 = function(objectId) {
   if (objectId === "FOLLOW_COMPANION" || objectId === "GO_ALONE") {
-    this.room?.choose?.(objectId); return;
+    this.room?.choose?.(objectId); window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:"warning"}})); return;
   }
   if (objectId === "COMP_EXIT") {
     if (this.completed) return;
@@ -368,7 +370,7 @@ InteractionSystem.prototype.handleRoom7 = function(objectId) {
 
 InteractionSystem.prototype.handleRoom8 = function(objectId) {
   if (objectId === "TRUTH_CORE") {
-    this.room?.reveal?.(); return;
+    this.room?.reveal?.(); window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:"whisper"}})); return;
   }
   if (objectId === "TRUTH_EXIT") {
     if (this.completed) return;
