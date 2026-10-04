@@ -43,7 +43,7 @@ export class Room03 {
       this.tracker.log("ROOM_03_MEMORY_CONFIRM",{wrongPaths:this.memoryContext.wrongPaths});
       this.companion?.say?.("حتی این ساعت هم انگار می‌دونه کجا اشتباه کردی...");
       if(this.memoryLight)this.memoryLight.intensity=7;
-      this.clockPulseTimer=this.finalBeatTimer=setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},700);
+      this.clockPulseTimer=setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},700);
     }else{
       this.tracker.log("ROOM_03_CLOCK_INSPECTED",{memoryClean:true});
     }
@@ -119,7 +119,7 @@ export class Room03 {
     if(this.exitSequenceStarted)return;
     this.exitSequenceStarted=true;
     this.reactToExit();
-    setTimeout(()=>this.triggerFinalBeat(),900);
+    this.finalBeatTimer=setTimeout(()=>this.triggerFinalBeat(),900);
     this.endingTimer=setTimeout(()=>this.triggerEnding(),1800);
     this.confirmTimer=setTimeout(()=>this.confirmExit(),2200);
   }
@@ -143,7 +143,7 @@ export class Room03 {
     this.tracker.log("ROOM_03_ENDING_TRIGGERED",{remembered:!!this.memoryContext?.wrongPaths?.length});
     if(this.objects.exit){
       this.objects.exit.scale.z=.7;
-      setTimeout(()=>{if(this.objects.exit)this.objects.exit.scale.z=1;},650);
+      this.endingTimer=setTimeout(()=>{if(this.objects.exit)this.objects.exit.scale.z=1;},650);
     }
     this.scene.fog.density=.06;
     this.endingTimer=setTimeout(()=>{this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.08:.025;},1100);
