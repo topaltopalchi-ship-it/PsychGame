@@ -3,12 +3,12 @@ import * as THREE from "three";
 export class Room04 {
   constructor(scene, tracker){
     this.scene=scene; this.tracker=tracker; this.objects={}; this.completed=false;
-    this.loopCount=0; this.turnCount=0; this.lastZ=0; this.explored=false;
+    this.loopCount=0; this.turnCount=0; this.lastZ=0; this.explored=false; this.lastMarkIndex=-1; this.markObservations=0; this.retreatCount=0; this.maxDepth=0;
     this.startTime=0; this.eventTimer=null; this.glitchDone=false;
   }
 
   start(context={}){
-    this.startTime=performance.now();
+    this.startTime=performance.now(); this.lastZ=0; this.maxDepth=0; this.retreatCount=0; this.markObservations=0;
     this.scene.fog=new THREE.FogExp2(0x07090d,.032);
     this.createRoom();
     this.tracker.log("ROOM_ENTER",{roomId:"ROOM_04",roomName:"ENDLESS_HALL",previousRoom:context.previousRoom||"ROOM_03"});
@@ -47,11 +47,19 @@ export class Room04 {
     }
     this.lastZ=position.z;
     if(Math.abs(position.z)>6) this.explored=true;
+    this.maxDepth=Math.max(this.maxDepth,Math.abs(position.z));
+    if(this.lastZ<position.z-.08) this.retreatCount++;
   }
 
   reactToMark(){
-    this.tracker.log("ROOM_04_MARK_INSPECTED",{turnCount:this.turnCount,explored:this.explored});
+    this.markObservations++;
+    this.tracker.log("ROOM_04_MARK_INSPECTED",{turnCount:this.turnCount,explored:this.explored,observations:this.markObservations,maxDepth:Math.round(this.maxDepth*10)/10});
+    if(this.markObservations===2){
+      this.companion?.say?.("دوباره همین علامت... یا فقط داری چیزی رو به یاد میاری که وجود نداره؟");
+    }
   }
+
+  setCompanion(companion){this.companion=companion;}
 
   triggerGlitch(){
     if(this.glitchDone)return;
