@@ -160,9 +160,9 @@ export class InteractionSystem {
   }
 
   applyButtonConsequence() {
-    this.tracker.log("CONSEQUENCE", { type: "LIGHTS_OUT_AND_DOOR_LOCKED" });
-    if (this.mainLight) this.mainLight.intensity = 0;
-    if (this.room?.revealClue) this.room.revealClue();
+    this.tracker.log("CONSEQUENCE", { type: "LIGHTS_DIMMED_AND_DOOR_LOCKED" });
+    if (this.mainLight) this.mainLight.intensity = 11;
+    this.room?.setRoomLightLevel?.(0.58);
 
     if (this.exitDoor) {
       this.exitDoor.userData.locked = true;
@@ -182,6 +182,7 @@ export class InteractionSystem {
         this.completed = true;
         this.room?.completeRoom?.();
         this.companion?.say("در بازه. بدون دردسر می‌تونی از اتاق خارج بشی.");
+        window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01" } }));
       }
       return;
     }
@@ -205,12 +206,14 @@ export class InteractionSystem {
       this.tracker.log("ROOM_COMPLETED", { roomId: "ROOM_01" });
       this.room?.completeRoom?.();
       this.companion?.say("بازش کردی... فکر کنم آماده‌ای بریم اتاق بعدی.");
+      window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01" } }));
     }
   }
 
   handleDrawer() {
-    this.tracker.log("DRAWER_INSPECTED", { result: "KEY_VISIBLE_INSIDE" });
-    this.companion?.say("کشو بازه. کلید طلایی رو داخلش می‌بینی؛ خودِ کلید رو لمس کن.");
+    this.tracker.log("DRAWER_INSPECTED", { result: "KEY_REVEALED" });
+    if (this.room?.objects?.drawerKey) { this.room.objects.drawerKey.visible = true; this.room.objects.drawerKey.scale.setScalar(0.18); }
+    this.companion?.say("داخل کشو چیزی برق زد... کلید کوچیکه. نزدیک‌تر نگاه کن.");
   }
 
   handleDrawerKey() {
