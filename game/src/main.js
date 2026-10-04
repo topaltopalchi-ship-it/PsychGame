@@ -6,6 +6,7 @@ import { Room01 } from "./rooms/Room01.js";
 import { Room02 } from "./rooms/Room02.js";
 import { Room03 } from "./rooms/Room03.js";
 import { Room04 } from "./rooms/Room04.js";
+import { Room05 } from "./rooms/Room05.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
@@ -221,6 +222,17 @@ window.psychGame = {
 };
 
 const clock = new THREE.Clock();
+function startRoom05(context={previousRoom:"ROOM_04"}) {
+  if (activeRoom?.constructor?.name !== "Room04" || !activeRoom.completed) return;
+  clearRoomGeometry();
+  interaction.clearTargets?.();
+  activeRoom = new Room05(scene, tracker);
+  activeRoom.start({...context, companion});
+  interaction.setRoom(activeRoom,5);
+  companion?.say("اتاق پنجم... اینجا به چیزی که می‌بینی زود اعتماد نکن.");
+}
+
+
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
@@ -234,4 +246,8 @@ window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+window.addEventListener("psychgame-room-complete",(event)=>{
+  if(event.detail?.roomId === "ROOM_05") startRoom06?.({previousRoom:"ROOM_05",companion});
 });
