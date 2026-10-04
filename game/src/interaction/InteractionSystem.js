@@ -292,6 +292,7 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
     return;
   }
   if (objectId === "WAIT_EXIT") {
+      this.room?.confirmExit?.();
       this.room?.triggerEnding?.();
       this.room?.triggerFinalBeat?.();
       this.room?.reactToExit?.();
