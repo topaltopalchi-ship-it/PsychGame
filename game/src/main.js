@@ -27,14 +27,14 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.82;
 game.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.HemisphereLight(0x7d8996, 0x111111, 0.62);
+const ambientLight = new THREE.HemisphereLight(0x9aa6b5, 0x1a1a1a, 1.05);
 scene.add(ambientLight);
-const mainLight = new THREE.PointLight(0xffd6a0, 18, 12);
+const mainLight = new THREE.PointLight(0xffd6a0, 28, 13);
 mainLight.position.set(0, 3.45, -0.4);
 mainLight.castShadow = true;
 mainLight.shadow.mapSize.set(1024, 1024);
 scene.add(mainLight);
-const rimLight = new THREE.PointLight(0x334d72, 7, 9);
+const rimLight = new THREE.PointLight(0x4b6282, 10, 10);
 rimLight.position.set(-3.8, 2.6, -3.8);
 scene.add(rimLight);
 
