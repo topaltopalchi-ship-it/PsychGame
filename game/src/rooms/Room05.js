@@ -4,7 +4,7 @@ export class Room05 {
   constructor(scene, tracker){
     this.scene=scene; this.tracker=tracker; this.objects={}; this.completed=false;
     this.companion=null; this.context={}; this.observations={}; this.firstMirror=null;
-    this.firstLookAt=performance.now(); this.lastMirror=null; this.glitchCount=0; this.choiceLocked=false;
+    this.firstLookAt=performance.now(); this.lastMirror=null; this.firstChoiceTime=0; this.glitchCount=0; this.choiceLocked=false;
   }
   start(context={}){
     this.context=context||{}; this.companion=this.context.companion||null;
@@ -45,7 +45,7 @@ export class Room05 {
     if(this.choiceLocked)return;
     const now=performance.now(); const elapsed=(now-this.firstLookAt)/1000;
     this.observations[id]=(this.observations[id]||0)+1; this.lastMirror=id;
-    if(!this.firstMirror)this.firstMirror=id;
+    if(!this.firstMirror){this.firstMirror=id;this.firstChoiceTime=Math.round(elapsed*10)/10;}
     this.tracker.log("ROOM_05_MIRROR_INSPECTED",{mirror:id,count:this.observations[id],firstMirror:this.firstMirror,secondsBeforeChoice:Math.round(elapsed*10)/10});
     if(this.observations[id]>=2){this.glitchMirror(id);}
     if(this.observations[id]>=3 && id!=="MIRROR_CENTER"){
