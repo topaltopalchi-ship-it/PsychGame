@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export class Room06 {
-  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;this.observations={};this.firstChoice=null;this.playCount=0;this.startedAt=0;this.sequenceDone=false;this.whisperTimer=null;this.whisperTriggered=false;}
+  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;this.observations={};this.firstChoice=null;this.playCount=0;this.lastChoice=null;this.switchCount=0;this.startedAt=0;this.sequenceDone=false;this.whisperTimer=null;this.whisperTriggered=false;}
   start(context={}){this.companion=context.companion||null;this.startedAt=performance.now();this.scene.fog=new THREE.FogExp2(0x07090d,.03);this.createRoom();this.whisperTimer=setTimeout(()=>this.triggerWhisper(),7500);this.tracker.log("ROOM_ENTER",{roomId:"ROOM_06",roomName:"RECORDING_ROOM",previousRoom:context.previousRoom||"ROOM_05"});}
   mat(color,r=.5,m=.1){return new THREE.MeshStandardMaterial({color,roughness:r,metalness:m});}
   mesh(g,m,p=[0,0,0]){const o=new THREE.Mesh(g,m);o.position.set(...p);this.scene.add(o);return o;}
@@ -16,8 +16,10 @@ export class Room06 {
   }
   reactToRecording(id){
     const now=performance.now();this.observations[id]=(this.observations[id]||0)+1;this.playCount++;
+    if(this.lastChoice&&this.lastChoice!==id)this.switchCount++;
     if(!this.firstChoice)this.firstChoice=id;
-    this.tracker.log("ROOM_06_RECORDING_CHECKED",{recording:id,count:this.observations[id],firstChoice:this.firstChoice,secondsSinceEntry:Math.round((now-this.startedAt)/100)/10});
+    this.lastChoice=id;
+    this.tracker.log("ROOM_06_RECORDING_CHECKED",{recording:id,count:this.observations[id],firstChoice:this.firstChoice,switchCount:this.switchCount,secondsSinceEntry:Math.round((now-this.startedAt)/100)/10});
     if(id==="REC_STATIC"){this.companion?.say?.("این صدا رو بهتره زیاد گوش ندی... انگار فقط نویز نیست.");this.sequenceDone=true;}
     else if(id==="REC_FAMILIAR"){this.companion?.say?.(this.observations[id]>1?"دوباره صدای آشنا رو انتخاب کردی. چرا؟":"صدای آشناست... ولی مطمئنی خودش بود؟");}
     else {this.companion?.say?.(this.observations[id]>1?"باز هم به صدای ناشناس برگشتی.":"این صدا رو نمی‌شناسی... هنوز می‌خوای گوش بدی؟");}
@@ -31,7 +33,7 @@ export class Room06 {
     this.companion?.say?.("صبر کن... صدایی شنیدی؟ این یکی از دستگاه‌ها نبود.");
   }
   pulse(){const l=this.objects.REC_LIGHT;if(!l)return;l.intensity=2.6;setTimeout(()=>{l.intensity=1.3;},500);}
-  chooseExit(){const familiar=this.observations.REC_FAMILIAR||0,unknown=this.observations.REC_UNKNOWN||0,stat=this.observations.REC_STATIC||0;this.tracker.log("ROOM_06_TRUST_PROFILE",{firstChoice:this.firstChoice,familiar,unknown,static:stat,totalChecks:this.playCount});this.companion?.say?.(unknown+stat>familiar?"پس بیشتر به صداهای ناآشنا گوش دادی...":"اول سراغ چیزی رفتی که برات آشناتر بود.");}
+  chooseExit(){const familiar=this.observations.REC_FAMILIAR||0,unknown=this.observations.REC_UNKNOWN||0,stat=this.observations.REC_STATIC||0;this.tracker.log("ROOM_06_TRUST_PROFILE",{firstChoice:this.firstChoice,lastChoice:this.lastChoice,familiar,unknown,static:stat,totalChecks:this.playCount,switchCount:this.switchCount});this.companion?.say?.(unknown+stat>familiar?"پس بیشتر به صداهای ناآشنا گوش دادی...":"اول سراغ چیزی رفتی که برات آشناتر بود.");}
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_06",firstChoice:this.firstChoice,totalChecks:this.playCount});}
   update(delta){if(this.objects.REC_SPEAKER)this.objects.REC_SPEAKER.rotation.y=Math.sin(performance.now()*.001)*.015;}
