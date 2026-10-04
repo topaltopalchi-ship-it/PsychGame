@@ -376,14 +376,18 @@ export class InteractionSystem {
       "DRAWER_INSPECTED",
       {
         result:
-          "DECOY_CLUE"
+          "KEY_FOUND"
       }
     );
 
-    if (this.companion) this.companion.say("یه سرنخه... ولی این کلید به نظر میاد برای این در نباشه.");
-    console.log(
-      "The drawer contains a misleading clue."
-    );
+    if (!this.keyFound) {
+      this.keyFound = true;
+      this.tracker.log("KEY_FOUND", { source:"HALF_OPEN_DRAWER" });
+      if (this.room?.showKeyFound) this.room.showKeyFound();
+      if (this.companion) this.companion.say("آفرین، کلید رو پیدا کردی. حالا امتحانش کن روی در.");
+    } else if (this.companion) {
+      this.companion.say("کلید رو قبلاً پیدا کردی. حالا برو سراغ در.");
+    }
   }
 
   handleBox() {
