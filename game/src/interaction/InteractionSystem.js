@@ -232,8 +232,11 @@ export class InteractionSystem {
         break;
 
       case "HALF_OPEN_DRAWER":
-      case "KEY_FROM_DRAWER":
         this.handleDrawer();
+        break;
+
+      case "KEY_FROM_DRAWER":
+        this.handleDrawerKey();
         break;
 
       case "CLOSED_BOX":
@@ -360,7 +363,7 @@ export class InteractionSystem {
       if (this.exitDoor.material) {
         this.exitDoor.material.color = new THREE.Color(0x493326);
       }
-      this.tracker.log("DOOR_UNLOCKED", { objectId:"EXIT_DOOR", source:"HIDDEN_CLUE" });
+      this.tracker.log("DOOR_UNLOCKED", { objectId:"EXIT_DOOR", source:"KEY" });
       if (this.companion) this.companion.say("کلید درست همینه. قفل باز شد.");
     }
 
@@ -373,22 +376,20 @@ export class InteractionSystem {
   }
 
   handleDrawer() {
-    this.tracker.log(
-      "DRAWER_INSPECTED",
-      {
-        result:
-          "KEY_FOUND"
-      }
-    );
+    this.tracker.log("DRAWER_INSPECTED", { result:"CLUE_ONLY" });
+    if (this.companion) this.companion.say("آره، این یک سرنخه... ولی خودِ کلید رو باید از داخلش برداری.");
+  }
 
-    if (!this.keyFound) {
-      this.keyFound = true;
-      this.tracker.log("KEY_FOUND", { source:"HALF_OPEN_DRAWER" });
-      if (this.room?.showKeyFound) this.room.showKeyFound();
-      if (this.companion) this.companion.say("آفرین، کلید رو برداشتی. حالا برو سمت در.");
-    } else if (this.companion) {
-      this.companion.say("کلید رو قبلاً پیدا کردی. حالا برو سراغ در.");
+  handleDrawerKey() {
+    if (this.keyFound) {
+      if (this.companion) this.companion.say("کلید رو قبلاً برداشتی. حالا برو سمت در.");
+      return;
     }
+    this.keyFound = true;
+    this.tracker.log("KEY_FOUND", { source:"KEY_FROM_DRAWER" });
+    if (this.room?.showKeyFound) this.room.showKeyFound();
+    if (this.room?.hideDrawerKey) this.room.hideDrawerKey();
+    if (this.companion) this.companion.say("کلید رو برداشتی. حالا برو سمت در و دکمه تعامل رو بزن.");
   }
 
   handleBox() {
