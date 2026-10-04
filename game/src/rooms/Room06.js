@@ -1,8 +1,8 @@
 import * as THREE from "three";
 
 export class Room06 {
-  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;this.observations={};this.firstChoice=null;this.playCount=0;this.lastChoice=null;this.switchCount=0;this.startedAt=0;this.sequenceDone=false;this.whisperTimer=null;this.pulseTimer=null;this.whisperTriggered=false;}
-  start(context={}){this.companion=context.companion||null;this.startedAt=performance.now();this.scene.fog=new THREE.FogExp2(0x07090d,.03);this.createRoom();this.whisperTimer=setTimeout(()=>this.triggerWhisper(),7500);this.tracker.log("ROOM_ENTER",{roomId:"ROOM_06",roomName:"RECORDING_ROOM",previousRoom:context.previousRoom||"ROOM_05"});}
+  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;this.observations={};this.firstChoice=null;this.playCount=0;this.lastChoice=null;this.switchCount=0;this.startedAt=0;this.sequenceDone=false;this.whisperTimer=null;this.pulseTimer=null;this.signalTimer=null;this.whisperTriggered=false;this.signalTriggered=false;}
+  start(context={}){this.companion=context.companion||null;this.startedAt=performance.now();this.scene.fog=new THREE.FogExp2(0x07090d,.03);this.createRoom();this.whisperTimer=setTimeout(()=>this.triggerWhisper(),7500);this.signalTimer=setTimeout(()=>this.triggerSignalDistortion(),10500);this.tracker.log("ROOM_ENTER",{roomId:"ROOM_06",roomName:"RECORDING_ROOM",previousRoom:context.previousRoom||"ROOM_05"});}
   mat(color,r=.5,m=.1){return new THREE.MeshStandardMaterial({color,roughness:r,metalness:m});}
   mesh(g,m,p=[0,0,0]){const o=new THREE.Mesh(g,m);o.position.set(...p);this.scene.add(o);return o;}
   add(id,o){o.userData.objectId=id;this.objects[id]=o;return o;}
@@ -12,6 +12,7 @@ export class Room06 {
     [-3,0,3].forEach((x,i)=>{const box=this.mesh(new THREE.BoxGeometry(2.2,1.5,.8),this.mat(0x24272d,.55,.4),[x,1,-3.8]);this.add(["REC_FAMILIAR","REC_UNKNOWN","REC_STATIC"][i],box);const led=this.mesh(new THREE.SphereGeometry(.1,10,10),new THREE.MeshBasicMaterial({color:0x9b2020}),[x-.8,1.45,-3.35]);led.userData.ledFor=box.userData.objectId;});
     const exit=this.mesh(new THREE.BoxGeometry(2.5,2.8,.3),this.mat(0x2b171c,.7),[0,1.6,5.7]);this.add("REC_EXIT",exit);
     const speaker=this.mesh(new THREE.BoxGeometry(3.4,2.2,.25),this.mat(0x181b20,.8),[0,2.5,-5.7]);this.add("REC_SPEAKER",speaker);
+    const signal=this.mesh(new THREE.BoxGeometry(5.5,.06,.06),new THREE.MeshBasicMaterial({color:0x6d7890}),[0,2.0,-5.52]);this.add("REC_SIGNAL",signal);
     const light=new THREE.PointLight(0x60709a,1.3,14);light.position.set(0,3.3,0);this.scene.add(light);this.objects.REC_LIGHT=light;
   }
   reactToRecording(id){
@@ -25,6 +26,20 @@ export class Room06 {
     else {this.companion?.say?.(this.observations[id]>1?"باز هم به صدای ناشناس برگشتی.":"این صدا رو نمی‌شناسی... هنوز می‌خوای گوش بدی؟");}
     this.pulse();
   }
+  triggerSignalDistortion(){
+    if(this.signalTriggered||this.completed)return;
+    this.signalTriggered=true;
+    this.tracker.log("ROOM_06_SIGNAL_DISTORTION",{firstChoice:this.firstChoice,playCount:this.playCount,switchCount:this.switchCount});
+    const signal=this.objects.REC_SIGNAL;
+    const light=this.objects.REC_LIGHT;
+    if(signal){
+      signal.scale.x=0.35;
+      signal.rotation.z=.08;
+      setTimeout(()=>{if(!this.completed){signal.scale.x=1;signal.rotation.z=0;}},650);
+    }
+    if(light){light.intensity=.45;this.pulseTimer=setTimeout(()=>{if(!this.completed)light.intensity=1.3;},650);}
+    this.companion?.say?.("اون خط صدا... چرا قطع و وصل شد؟ چیزی داشت از داخلش رد می‌شد.");
+  }
   triggerWhisper(){
     if(this.whisperTriggered||this.completed)return;
     this.whisperTriggered=true;
@@ -37,5 +52,5 @@ export class Room06 {
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_06",firstChoice:this.firstChoice,totalChecks:this.playCount});}
   update(delta){if(this.objects.REC_SPEAKER)this.objects.REC_SPEAKER.rotation.y=Math.sin(performance.now()*.001)*.015;}
-  destroy(){if(this.whisperTimer)clearTimeout(this.whisperTimer);if(this.pulseTimer)clearTimeout(this.pulseTimer);this.objects={};}
+  destroy(){if(this.whisperTimer)clearTimeout(this.whisperTimer);if(this.pulseTimer)clearTimeout(this.pulseTimer);if(this.signalTimer)clearTimeout(this.signalTimer);this.objects={};}
 }
