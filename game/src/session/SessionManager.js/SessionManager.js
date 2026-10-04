@@ -1,9 +1,13 @@
 import { BehaviorTracker } from "../psychology/BehaviorTracker.js";
+import { BehaviorAnalyzer } from "../psychology/BehaviorAnalyzer.js";
 
 export class SessionManager {
   constructor() {
     this.tracker =
       new BehaviorTracker();
+
+    this.analyzer =
+      new BehaviorAnalyzer();
 
     this.playerCode =
       this.generatePlayerCode();
@@ -54,6 +58,15 @@ export class SessionManager {
     return this.tracker;
   }
 
+  getAnalysis() {
+    this.analyzer =
+      new BehaviorAnalyzer(
+        this.tracker.getEvents()
+      );
+
+    return this.analyzer.getReport();
+  }
+
   getSessionData() {
     return {
       playerCode:
@@ -69,7 +82,10 @@ export class SessionManager {
         this.playerConsent,
 
       events:
-        this.tracker.getEvents()
+        this.tracker.getEvents(),
+
+      analysis:
+        this.getAnalysis()
     };
   }
 
