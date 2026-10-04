@@ -43,18 +43,18 @@ export class PlayerController {
     const pad = document.createElement("div");
     pad.id="pg-joystick";
     pad.innerHTML='<div id="pg-stick"></div>';
-    Object.assign(pad.style,{position:"fixed",left:"50%",bottom:"22px",transform:"translateX(-50%)",width:"118px",height:"118px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none"});
+    Object.assign(pad.style,{position:"fixed",left:"50%",bottom:"22px",transform:"translateX(-50%)",width:"104px",height:"104px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none"});
     const stick=pad.firstElementChild;
-    Object.assign(stick.style,{position:"absolute",left:"38px",top:"38px",width:"42px",height:"42px",borderRadius:"50%",background:"rgba(255,255,255,.28)"});
+    Object.assign(stick.style,{position:"absolute",left:"34px",top:"34px",width:"36px",height:"36px",borderRadius:"50%",background:"rgba(255,255,255,.28)"});
     document.body.appendChild(pad);
     let active=false;
     const move=e=>{
       if(!active)return;
       const r=pad.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
-      let dx=e.clientX-cx, dy=e.clientY-cy, len=Math.hypot(dx,dy), max=52;
+      let dx=e.clientX-cx, dy=e.clientY-cy, len=Math.hypot(dx,dy), max=34;
       if(len>max){dx=dx/len*max;dy=dy/len*max;}
       stick.style.transform=`translate(${dx}px,${dy}px)`;
-      this.touchMove.x=(dx/max)*0.52; this.touchMove.y=(dy/max)*0.52;
+      this.touchMove.x=(dx/max)*0.34; this.touchMove.y=(dy/max)*0.34;
     };
     const end=()=>{active=false;this.touchMove.x=0;this.touchMove.y=0;stick.style.transform="translate(0,0)";};
     pad.addEventListener("pointerdown",e=>{active=true;pad.setPointerCapture(e.pointerId);move(e);});
