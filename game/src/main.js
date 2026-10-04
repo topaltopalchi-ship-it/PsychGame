@@ -157,7 +157,7 @@ function startRoom02(previousPath = "ROOM_01") {
   clearRoomGeometry();
   interaction.clearTargets?.();
   activeRoom = new Room02(scene, tracker);
-  activeRoom.start({ previousPath });
+  activeRoom.start(context);
   interaction.setRoom(activeRoom, 2);
   camera.position.set(0, 1.7, 3.5);
   camera.rotation.set(0, 0, 0);
@@ -170,7 +170,7 @@ window.addEventListener("psychgame-room-complete", (event) => {
   if (event.detail?.roomId === "ROOM_01") setTimeout(() => startRoom02("ROOM_01"), 900);
 });
 
-function startRoom03(previousPath = "ROOM_02") {
+function startRoom03(context = { previousPath: "ROOM_02" }) {
   if (activeRoom?.constructor?.name !== "Room02" || !activeRoom.completed) return;
   clearRoomGeometry();
   interaction.clearTargets?.();
@@ -185,7 +185,7 @@ function startRoom03(previousPath = "ROOM_02") {
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_02") setTimeout(() => startRoom03("ROOM_02"), 900);
+  if (event.detail?.roomId === "ROOM_02") setTimeout(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [] }), 900);
 });
 
 window.psychGame = {
