@@ -28,6 +28,9 @@ export class InteractionSystem {
 
     this.exitDoor = null;
 
+    this.lastLookedObject = null;
+    this.lookStartTime = null;
+
     window.addEventListener(
       "keydown",
       (event) => {
@@ -44,9 +47,7 @@ export class InteractionSystem {
 
     this.interactables.push(object);
 
-    if (
-      objectId === "EXIT_DOOR"
-    ) {
+    if (objectId === "EXIT_DOOR") {
       this.exitDoor = object;
     }
   }
@@ -64,18 +65,41 @@ export class InteractionSystem {
       );
 
     if (hits.length === 0) {
+      this.finishLook();
       this.currentTarget = null;
       return;
     }
 
-    const target = hits[0].object;
-
-    this.currentTarget = target;
+    const target =
+      hits[0].object;
 
     const objectId =
       target.userData.objectId;
 
     if (!objectId) return;
+
+    if (
+      this.lastLookedObject !==
+      objectId
+    ) {
+      this.finishLook();
+
+      this.lastLookedObject =
+        objectId;
+
+      this.lookStartTime =
+        performance.now();
+
+      this.tracker.log(
+        "OBJECT_LOOK_START",
+        {
+          objectId
+        }
+      );
+    }
+
+    this.currentTarget =
+      target;
 
     if (
       objectId === "RED_BUTTON" &&
@@ -91,6 +115,38 @@ export class InteractionSystem {
         }
       );
     }
+  }
+
+  finishLook() {
+    if (
+      this.lastLookedObject === null ||
+      this.lookStartTime === null
+    ) {
+      return;
+    }
+
+    const duration =
+      Math.round(
+        performance.now() -
+        this.lookStartTime
+      );
+
+    this.tracker.log(
+      "OBJECT_LOOK_END",
+      {
+        objectId:
+          this.lastLookedObject,
+
+        durationMs:
+          duration
+      }
+    );
+
+    this.lastLookedObject =
+      null;
+
+    this.lookStartTime =
+      null;
   }
 
   interact() {
@@ -195,14 +251,13 @@ export class InteractionSystem {
       }
     );
 
-    // خاموش شدن چراغ اصلی
     if (this.mainLight) {
       this.mainLight.intensity = 0;
     }
 
-    // تغییر وضعیت در
     if (this.exitDoor) {
-      this.exitDoor.userData.locked = true;
+      this.exitDoor.userData.locked =
+        true;
 
       this.exitDoor.material =
         this.exitDoor.material.clone();
