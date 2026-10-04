@@ -4,13 +4,13 @@ export class Room07 {
   constructor(scene, tracker){
     this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;
     this.companion=null;this.context={};this.startedAt=0;this.followCount=0;this.ignoreCount=0;
-    this.firstChoice=null;this.lastChoice=null;this.choiceSwitches=0;this.promptActive=false;
+    this.firstChoice=null;this.lastChoice=null;this.choiceSwitches=0;this.promptActive=false;this.promptTimer=null;
   }
   start(context={}){
     this.context=context||{};this.companion=context.companion||null;this.startedAt=performance.now();
     this.scene.fog=new THREE.FogExp2(0x08090d,.026);
     this.createRoom();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_07",roomName:"COMPANION_ROOM",previousRoom:context.previousRoom||"ROOM_06"});
-    setTimeout(()=>this.promptCompanion(),5000);
+    this.promptTimer=setTimeout(()=>this.promptCompanion(),5000);
   }
   mat(color,r=.5,m=.1){return new THREE.MeshStandardMaterial({color,roughness:r,metalness:m});}
   mesh(g,m,p=[0,0,0]){const o=new THREE.Mesh(g,m);o.position.set(...p);this.scene.add(o);return o;}
@@ -47,5 +47,5 @@ export class Room07 {
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_07",firstChoice:this.firstChoice,followCount:this.followCount,ignoreCount:this.ignoreCount});}
-  destroy(){this.objects={};}
+  destroy(){if(this.promptTimer)clearTimeout(this.promptTimer);this.objects={};}
 }
