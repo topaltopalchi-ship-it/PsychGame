@@ -9,6 +9,7 @@ import { Room04 } from "./rooms/Room04.js";
 import { Room05 } from "./rooms/Room05.js";
 import { Room06 } from "./rooms/Room06.js";
 import { Room07 } from "./rooms/Room07.js";
+import { Room08 } from "./rooms/Room08.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
@@ -249,6 +250,14 @@ function startRoom07(context={previousRoom:"ROOM_06"}) {
   activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion});
   interaction.setRoom(activeRoom,7);
   companion?.say("اتاق هفتم... اینجا باید تصمیم بگیری به چه کسی اعتماد کنی.");
+}
+
+function startRoom08(context={previousRoom:"ROOM_07"}) {
+  if (activeRoom?.constructor?.name !== "Room07" || !activeRoom.completed) return;
+  clearRoomGeometry(); interaction.clearTargets?.();
+  activeRoom=new Room08(scene,tracker); activeRoom.start({...context,companion});
+  interaction.setRoom(activeRoom,8);
+  companion?.say("اتاق آخر... اینجا فقط انتخاب‌هایی که کردی بهت برمی‌گردن.");
 }
 
 function animate() {
