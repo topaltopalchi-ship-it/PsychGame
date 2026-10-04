@@ -3,7 +3,7 @@ import { PlayerController } from "./player/PlayerController.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
 import { SessionManager } from "./session/SessionManager.js";
 import { Room01 } from "./rooms/Room01.js";
-import { AuthorPanel } from "./ui/AuthorPanel.js";
+import { AuthorPanel } from "./ui/AuthorPanel.js";\nimport { Companion } from "./ui/Companion.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -37,7 +37,7 @@ scene.add(rimLight);
 
 const session = new SessionManager();
 const authorPanel = new AuthorPanel(session);
-const tracker = session.getTracker();
+const tracker = session.getTracker();\nconst companion = new Companion(tracker);
 const player = new PlayerController(camera);
 const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
 const room01 = new Room01(scene, tracker);
