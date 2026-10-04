@@ -24,12 +24,13 @@ export class InteractionSystem {
     this.buttonAttempts = 0;
     this.buttonFirstSeenTime = null;
     this.buttonPressed = false;
-    this.buttonFailed = false;
 
     this.exitDoor = null;
 
     this.lastLookedObject = null;
     this.lookStartTime = null;
+
+    this.interactionCounts = {};
 
     window.addEventListener(
       "keydown",
@@ -47,7 +48,9 @@ export class InteractionSystem {
 
     this.interactables.push(object);
 
-    if (objectId === "EXIT_DOOR") {
+    if (
+      objectId === "EXIT_DOOR"
+    ) {
       this.exitDoor = object;
     }
   }
@@ -161,41 +164,66 @@ export class InteractionSystem {
       return;
     }
 
+    this.interactionCounts[
+      objectId
+    ] =
+      (this.interactionCounts[
+        objectId
+      ] || 0) + 1;
+
     this.tracker.log(
       "OBJECT_INTERACTION",
       {
         objectId,
-        action: "INTERACT"
+
+        attempt:
+          this.interactionCounts[
+            objectId
+          ]
       }
     );
 
-    if (
-      objectId === "RED_BUTTON"
-    ) {
-      this.handleRedButton();
-    }
+    switch (objectId) {
+      case "RED_BUTTON":
+        this.handleRedButton();
+        break;
 
-    if (
-      objectId === "EXIT_DOOR"
-    ) {
-      this.handleDoor();
+      case "EXIT_DOOR":
+        this.handleDoor();
+        break;
+
+      case "HALF_OPEN_DRAWER":
+        this.handleDrawer();
+        break;
+
+      case "CLOSED_BOX":
+        this.handleBox();
+        break;
+
+      case "OLD_DESK":
+        this.handleDesk();
+        break;
+
+      case "BROKEN_CLOCK":
+        this.handleClock();
+        break;
+
+      case "OLD_PAINTING":
+        this.handlePainting();
+        break;
     }
   }
 
   handleRedButton() {
     this.buttonAttempts++;
 
-    let reactionTime = null;
-
-    if (
-      this.buttonFirstSeenTime !== null
-    ) {
-      reactionTime =
-        Math.round(
-          performance.now() -
-          this.buttonFirstSeenTime
-        );
-    }
+    const reactionTime =
+      this.buttonFirstSeenTime === null
+        ? null
+        : Math.round(
+            performance.now() -
+            this.buttonFirstSeenTime
+          );
 
     this.tracker.log(
       "RED_BUTTON_PRESS",
@@ -208,20 +236,14 @@ export class InteractionSystem {
       }
     );
 
-    if (
-      !this.buttonPressed
-    ) {
+    if (!this.buttonPressed) {
       this.buttonPressed = true;
-      this.buttonFailed = true;
 
       this.tracker.log(
         "FAILURE",
         {
           cause:
-            "RED_BUTTON",
-
-          attempt:
-            this.buttonAttempts
+            "RED_BUTTON"
         }
       );
 
@@ -267,18 +289,6 @@ export class InteractionSystem {
           0x241714
         );
     }
-
-    console.log(
-      "RED BUTTON PRESSED"
-    );
-
-    console.log(
-      "LIGHTS OUT"
-    );
-
-    console.log(
-      "EXIT DOOR LOCKED"
-    );
   }
 
   handleDoor() {
@@ -294,18 +304,72 @@ export class InteractionSystem {
         }
       );
 
-      console.log(
-        "The door is locked."
-      );
-
       return;
     }
 
     this.tracker.log(
-      "DOOR_INTERACTION",
+      "DOOR_CHECKED",
       {
-        objectId:
-          "EXIT_DOOR"
+        status:
+          "AVAILABLE"
+      }
+    );
+  }
+
+  handleDrawer() {
+    this.tracker.log(
+      "DRAWER_INSPECTED",
+      {
+        result:
+          "USEFUL_CLUE"
+      }
+    );
+
+    console.log(
+      "The drawer contains a small key."
+    );
+  }
+
+  handleBox() {
+    this.tracker.log(
+      "BOX_INSPECTED",
+      {
+        result:
+          "NOTHING_FOUND"
+      }
+    );
+
+    console.log(
+      "The box is empty."
+    );
+  }
+
+  handleDesk() {
+    this.tracker.log(
+      "DESK_INSPECTED",
+      {
+        result:
+          "ORDINARY_OBJECT"
+      }
+    );
+  }
+
+  handleClock() {
+    this.tracker.log(
+      "CLOCK_INSPECTED",
+      {
+        result:
+          "BROKEN"
+      }
+    );
+  }
+
+  handlePainting() {
+    this.tracker.log(
+      "PAINTING_INSPECTED",
+      {
+        result:
+          "NO_DIRECT_CLUE"
       }
     );
   }
