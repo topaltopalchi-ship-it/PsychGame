@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room03 {
-  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;this.exitWatched=false;this.finalBeatDone=false;this.endingTriggered=false;this.exitConfirmed=false;this.exitSequenceStarted=false;this.companion=null;}
+  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;this.exitWatched=false;this.finalBeatDone=false;this.endingTriggered=false;this.exitConfirmed=false;this.exitSequenceStarted=false;this.finalBeatTimer=null;this.endingTimer=null;this.confirmTimer=null;this.companion=null;}
   start(context={}){
     this.memoryContext=context||{};this.companion=this.memoryContext.companion||null;this.memoryResponseDone=false;this.seatBaseZ=1;
     this.scene.fog=new THREE.FogExp2(0x090b10,this.memoryContext.wrongPaths?.length?.08:.025);
@@ -117,7 +117,8 @@ export class Room03 {
     this.exitSequenceStarted=true;
     this.reactToExit();
     setTimeout(()=>this.triggerFinalBeat(),900);
-    setTimeout(()=>this.triggerEnding(),1800);
+    this.endingTimer=setTimeout(()=>this.triggerEnding(),1800);
+    this.confirmTimer=setTimeout(()=>this.confirmExit(),2200);
   }
 
   confirmExit(){
