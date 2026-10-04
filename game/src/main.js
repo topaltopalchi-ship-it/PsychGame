@@ -3,7 +3,8 @@ import { PlayerController } from "./player/PlayerController.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
 import { SessionManager } from "./session/SessionManager.js";
 import { Room01 } from "./rooms/Room01.js";
-import { AuthorPanel } from "./ui/AuthorPanel.js";\nimport { Companion } from "./ui/Companion.js";
+import { AuthorPanel } from "./ui/AuthorPanel.js";
+import { Companion } from "./ui/Companion.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -37,12 +38,15 @@ scene.add(rimLight);
 
 const session = new SessionManager();
 const authorPanel = new AuthorPanel(session);
-const tracker = session.getTracker();\nconst companion = new Companion(tracker);
+const tracker = session.getTracker();
+const companion = new Companion(tracker);
 const player = new PlayerController(camera);
 const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
 const room01 = new Room01(scene, tracker);
 
-room01.start();\ninteraction.setRoom(room01);\ninteraction.setCompanion(companion);
+room01.start();
+interaction.setRoom(room01);
+interaction.setCompanion(companion);
 room01.getInteractableObjects().forEach((object) => interaction.register(object, object.userData.objectId));
 tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
 
@@ -102,7 +106,8 @@ window.addEventListener("psychgame-target", (event) => {
   targetPrompt.style.display = label ? "block" : "none";
 });
 
-window.psychGame = {\n  interact: () => interaction.interact(),
+window.psychGame = {
+  interact: () => interaction.interact(),
   interactAt: (x, y) => interaction.interactAt(x, y),
   session,
   tracker,
