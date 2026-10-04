@@ -29,13 +29,11 @@ game.appendChild(renderer.domElement);
 
 const ambientLight = new THREE.HemisphereLight(0x7d8996, 0x111111, 0.62);
 scene.add(ambientLight);
-
 const mainLight = new THREE.PointLight(0xffd6a0, 18, 12);
 mainLight.position.set(0, 3.45, -0.4);
 mainLight.castShadow = true;
 mainLight.shadow.mapSize.set(1024, 1024);
 scene.add(mainLight);
-
 const rimLight = new THREE.PointLight(0x334d72, 7, 9);
 rimLight.position.set(-3.8, 2.6, -3.8);
 scene.add(rimLight);
@@ -60,7 +58,7 @@ crosshair.id = "pg-crosshair";
 crosshair.textContent = "+";
 const hint = document.createElement("div");
 hint.id = "pg-hint";
-hint.textContent = "سمت چپ: حرکت · نگاه به شیء · دکمه پایین راست: تعامل";
+hint.textContent = "سمت چپ: حرکت · به شیء نگاه کن · دکمه پایین راست: تعامل";
 const title = document.createElement("div");
 title.id = "pg-title";
 title.textContent = "YOL · اتاق ۰۱ — دکمه قرمز";
@@ -96,26 +94,25 @@ window.openAuthorPanel = openAuthor;
 
 const targetLabels = {
   RED_BUTTON: "دکمه قرمز — فشار بده",
-  EXIT_DOOR: "در — امتحان کن",
-  HALF_OPEN_DRAWER: "کشوی نیمه‌باز — سرنخ",
+  EXIT_DOOR: "در — باز کن",
+  HALF_OPEN_DRAWER: "کشوی نیمه‌باز — بررسی کن",
   KEY_FROM_DRAWER: "کلید طلایی — بردار",
   CLOSED_BOX: "جعبه — بررسی",
   OLD_DESK: "میز قدیمی — بررسی",
   BROKEN_CLOCK: "ساعت خراب — بررسی",
-  OLD_PAINTING: "تابلو — بررسی",
-  HIDDEN_CLUE: "کلید — بردار"
+  OLD_PAINTING: "تابلو — بررسی"
 };
 const targetNames = {
   RED_BUTTON: "دکمه قرمز",
   EXIT_DOOR: "در",
-  HALF_OPEN_DRAWER: "کشوی نیمه‌باز",
+  HALF_OPEN_DRAWER: "کشو",
   KEY_FROM_DRAWER: "کلید طلایی",
   CLOSED_BOX: "جعبه",
   OLD_DESK: "میز قدیمی",
   BROKEN_CLOCK: "ساعت خراب",
-  OLD_PAINTING: "تابلو",
-  HIDDEN_CLUE: "کلید"
+  OLD_PAINTING: "تابلو"
 };
+
 window.addEventListener("psychgame-target", (event) => {
   const objectId = event.detail?.objectId;
   const label = targetLabels[objectId];
@@ -123,7 +120,7 @@ window.addEventListener("psychgame-target", (event) => {
   targetPrompt.style.display = label ? "block" : "none";
   const interactButton = document.getElementById("pg-touch-interact");
   if (interactButton) {
-    interactButton.textContent = objectId ? ("تعامل: " + targetNames[objectId]) : "تعامل";
+    interactButton.textContent = objectId ? ("تعامل: " + (targetNames[objectId] || "شیء")) : "تعامل";
     interactButton.style.opacity = objectId ? "1" : ".55";
   }
 });
