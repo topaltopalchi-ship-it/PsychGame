@@ -318,3 +318,19 @@ InteractionSystem.prototype.handleRoom4 = function(objectId) {
     window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_04",turnCount:this.room?.turnCount||0,explored:!!this.room?.explored}}));
   }
 };
+
+
+InteractionSystem.prototype.handleRoom5 = function(objectId) {
+  if (objectId === "MIRROR_LEFT" || objectId === "MIRROR_CENTER" || objectId === "MIRROR_RIGHT") {
+    this.room?.reactToMirror?.(objectId);
+    return;
+  }
+  if (objectId === "MIRROR_EXIT") {
+    if (this.completed) return;
+    this.room?.chooseExit?.();
+    this.room?.completeRoom?.();
+    this.completed=true;
+    this.tracker.log("ROOM_05_EXIT_CHECKED",{roomId:"ROOM_05"});
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_05"}}));
+  }
+};
