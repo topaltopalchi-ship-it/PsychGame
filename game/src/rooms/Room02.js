@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room02 {
-  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;this.observedPaths={PATH_LEFT:0,PATH_CENTER:0,PATH_RIGHT:0};this.lastObservedPath=null;this.psychTimer=null;this.idleTime=0;this.whisperTriggered=false;}
+  constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;this.observedPaths={PATH_LEFT:0,PATH_CENTER:0,PATH_RIGHT:0};this.lastObservedPath=null;this.psychTimer=null;this.idleTime=0;this.whisperTriggered=false;this.observationTimers=[];this.idleTimer=null;}
   start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.024);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.createStoryDetails();this.createPathLighting();this.createDreadProps();this.createScareFigure();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
   getInteractableObjects(){return Object.values(this.objects);}
   completeRoom(path){this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
@@ -79,7 +79,7 @@ export class Room02 {
       if(target){
         const old=target.intensity;
         target.intensity=old*.35;
-        setTimeout(()=>{target.intensity=old;},420);
+        const timer=setTimeout(()=>{target.intensity=old;this.observationTimers=this.observationTimers.filter(t=>t!==timer);},420);this.observationTimers.push(timer);
       }
       this.companion?.say?.(path==="PATH_CENTER" ? "چرا دوباره به همین مسیر نگاه می‌کنی؟" : "فکر کنم این مسیر متوجه شد که دیدیش...");
     }
@@ -156,5 +156,5 @@ export class Room02 {
     }
   }
 
-  createBench(){const wood=this.mat(0x493728,.75);const seat=this.mesh(new THREE.BoxGeometry(3,.16,.65),wood,[0,.85,1.1]);seat.userData.objectId="BENCH";this.objects.bench=seat;this.mesh(new THREE.BoxGeometry(2.7,.85,.12),wood,[0,1.25,1.35]);for(const x of [-1.25,1.25])this.mesh(new THREE.BoxGeometry(.12,.75,.12),wood,[x,.42,1.1]);}
+  destroy(){for(const t of this.observationTimers){clearTimeout(t);}this.observationTimers=[];if(this.scareTimer)clearTimeout(this.scareTimer);if(this.idleTimer)clearTimeout(this.idleTimer);if(this.psychTimer)clearTimeout(this.psychTimer);this.objects={};this.scareFigure=null;this.pathLights=[];}\n\n  createBench(){const wood=this.mat(0x493728,.75);const seat=this.mesh(new THREE.BoxGeometry(3,.16,.65),wood,[0,.85,1.1]);seat.userData.objectId="BENCH";this.objects.bench=seat;this.mesh(new THREE.BoxGeometry(2.7,.85,.12),wood,[0,1.25,1.35]);for(const x of [-1.25,1.25])this.mesh(new THREE.BoxGeometry(.12,.75,.12),wood,[x,.42,1.1]);}
 }
