@@ -169,9 +169,21 @@ export class InteractionSystem {
     const point = new THREE.Vector2(x, y);
     this.raycaster.setFromCamera(point, this.camera);
     const hits = this.raycaster.intersectObjects(this.interactables, true);
-    if (!hits.length) return false;
+    if (!hits.length) {
+      if (this.currentTarget) {
+        this.interact();
+        return true;
+      }
+      return false;
+    }
     const hit = hits.find(h => h.object.userData?.objectId);
-    if (!hit) return false;
+    if (!hit) {
+      if (this.currentTarget) {
+        this.interact();
+        return true;
+      }
+      return false;
+    }
     this.currentTarget = hit.object;
     const objectId = hit.object.userData.objectId;
     window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId } }));
