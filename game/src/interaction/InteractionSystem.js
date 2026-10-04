@@ -372,8 +372,12 @@ InteractionSystem.prototype.handleRoom8 = function(objectId) {
   }
   if (objectId === "TRUTH_EXIT") {
     if (this.completed) return;
-    this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
+    this.completed=true;
+    this.room?.startEnding?.();
     this.tracker.log("ROOM_08_EXIT_CHECKED",{roomId:"ROOM_08"});
-    window.dispatchEvent(new CustomEvent("psychgame-game-complete",{detail:{roomId:"ROOM_08"}}));
+    setTimeout(()=>{
+      this.room?.completeRoom?.();
+      window.dispatchEvent(new CustomEvent("psychgame-game-complete",{detail:{roomId:"ROOM_08"}}));
+    },1800);
   }
 };
