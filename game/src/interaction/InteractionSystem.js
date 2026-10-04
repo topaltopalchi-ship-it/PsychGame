@@ -232,6 +232,7 @@ export class InteractionSystem {
         break;
 
       case "HALF_OPEN_DRAWER":
+      case "KEY_FROM_DRAWER":
         this.handleDrawer();
         break;
 
@@ -384,7 +385,7 @@ export class InteractionSystem {
       this.keyFound = true;
       this.tracker.log("KEY_FOUND", { source:"HALF_OPEN_DRAWER" });
       if (this.room?.showKeyFound) this.room.showKeyFound();
-      if (this.companion) this.companion.say("آفرین، کلید رو پیدا کردی. حالا امتحانش کن روی در.");
+      if (this.companion) this.companion.say("آفرین، کلید رو برداشتی. حالا برو سمت در.");
     } else if (this.companion) {
       this.companion.say("کلید رو قبلاً پیدا کردی. حالا برو سراغ در.");
     }
