@@ -4,6 +4,7 @@ import { InteractionSystem } from "./interaction/InteractionSystem.js";
 import { SessionManager } from "./session/SessionManager.js";
 import { Room01 } from "./rooms/Room01.js";
 import { Room02 } from "./rooms/Room02.js";
+import { Room03 } from "./rooms/Room03.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 
@@ -156,6 +157,24 @@ function startRoom02(previousPath = "ROOM_01") {
 }
 window.addEventListener("psychgame-room-complete", (event) => {
   if (event.detail?.roomId === "ROOM_01") setTimeout(() => startRoom02("ROOM_01"), 900);
+});
+
+function startRoom03(previousPath = "ROOM_02") {
+  if (activeRoom?.constructor?.name !== "Room02" || !activeRoom.completed) return;
+  clearRoomGeometry();
+  interaction.clearTargets?.();
+  activeRoom = new Room03(scene, tracker);
+  activeRoom.start({ previousPath });
+  interaction.setRoom(activeRoom, 3);
+  camera.position.set(0, 1.7, 3.5);
+  player.rotation.set(0, 0, 0);
+  camera.rotation.copy(player.rotation);
+  mainLight.intensity = 22;
+  companion?.say("اتاق سوم؛ اینجا عجله نکردن خودش یک انتخابه.");
+  document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار";
+}
+window.addEventListener("psychgame-room-complete", (event) => {
+  if (event.detail?.roomId === "ROOM_02") setTimeout(() => startRoom03("ROOM_02"), 900);
 });
 
 window.psychGame = {
