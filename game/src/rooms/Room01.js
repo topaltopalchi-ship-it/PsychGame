@@ -1,19 +1,13 @@
 import * as THREE from "three";
 
 export class Room01 {
-
   constructor(scene, tracker) {
-
     this.scene = scene;
     this.tracker = tracker;
-
     this.objects = {};
-
   }
 
-
   start() {
-
     this.createFloor();
     this.createWalls();
     this.createDoor();
@@ -28,12 +22,15 @@ export class Room01 {
         roomName: "THE_RED_BUTTON"
       }
     );
-
   }
 
+  getInteractableObjects() {
+    return Object.values(
+      this.objects
+    );
+  }
 
   createFloor() {
-
     const geometry =
       new THREE.BoxGeometry(
         10,
@@ -58,17 +55,13 @@ export class Room01 {
     floor.receiveShadow = true;
 
     this.scene.add(floor);
-
   }
 
-
   createWalls() {
-
     const material =
       new THREE.MeshStandardMaterial({
         color: 0x252a30
       });
-
 
     const back =
       new THREE.Mesh(
@@ -88,7 +81,6 @@ export class Room01 {
 
     this.scene.add(back);
 
-
     const left =
       new THREE.Mesh(
         new THREE.BoxGeometry(
@@ -107,7 +99,6 @@ export class Room01 {
 
     this.scene.add(left);
 
-
     const right =
       new THREE.Mesh(
         new THREE.BoxGeometry(
@@ -125,12 +116,9 @@ export class Room01 {
     );
 
     this.scene.add(right);
-
   }
 
-
   createDoor() {
-
     const geometry =
       new THREE.BoxGeometry(
         1.8,
@@ -162,12 +150,9 @@ export class Room01 {
       door;
 
     this.scene.add(door);
-
   }
 
-
   createRedButton() {
-
     const geometry =
       new THREE.CylinderGeometry(
         0.28,
@@ -205,12 +190,9 @@ export class Room01 {
       button;
 
     this.scene.add(button);
-
   }
 
-
   createDesk() {
-
     const geometry =
       new THREE.BoxGeometry(
         2.5,
@@ -243,12 +225,9 @@ export class Room01 {
       desk;
 
     this.scene.add(desk);
-
   }
 
-
   createClock() {
-
     const geometry =
       new THREE.CylinderGeometry(
         0.45,
@@ -284,7 +263,5 @@ export class Room01 {
       clock;
 
     this.scene.add(clock);
-
   }
-
-      }
+}
