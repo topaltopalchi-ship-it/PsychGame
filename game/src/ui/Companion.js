@@ -15,6 +15,7 @@ export class Companion {
     this.voiceUnlocked = false;
     this.pendingVoice = null;
     this.voiceReady = false;
+    this.voiceTested = false;
     this.createUI();
     this.installVoiceUnlock();
     this.say("خب... فکر کنم باید راه خروج رو پیدا کنیم.", 1000);
@@ -91,29 +92,41 @@ export class Companion {
 
     this.pendingVoice = message;
     try {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      synth.resume();
 
-      const voices = window.speechSynthesis.getVoices();
-      const persianVoice = voices.find(v => /^fa(-|_)/i.test(v.lang));
+      const voices = synth.getVoices();
+      // Prefer Persian, then any voice supplied by the device.
+      const voice =
+        voices.find(v => /^fa(-|_)/i.test(v.lang)) ||
+        voices.find(v => /^ar(-|_)/i.test(v.lang)) ||
+        voices.find(v => v.default) ||
+        voices[0];
+
       const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = persianVoice ? persianVoice.lang : "fa-IR";
-      utterance.rate = 0.9;
+      utterance.lang = voice?.lang || "fa-IR";
+      utterance.rate = 0.88;
       utterance.pitch = 0.95;
       utterance.volume = 1;
-      if (persianVoice) utterance.voice = persianVoice;
+      if (voice) utterance.voice = voice;
 
+      utterance.onstart = () => { this.voiceTested = true; };
       utterance.onend = () => {
         if (this.pendingVoice === message) this.pendingVoice = null;
       };
-      utterance.onerror = () => {
-        // Android browsers can need one more resume/speak cycle.
-        if (this.voiceUnlocked && this.pendingVoice === message) {
-          setTimeout(() => this.speak(message), 180);
-        }
+      utterance.onerror = (event) => {
+        console.warn("Companion TTS error:", event.error);
+        this.pendingVoice = null;
       };
 
-      window.speechSynthesis.speak(utterance);
+      // Mobile Chrome may ignore a queued utterance immediately after resume;
+      // give the speech engine a short moment to become active.
+      setTimeout(() => {
+        if (!this.voiceUnlocked) return;
+        synth.resume();
+        synth.speak(utterance);
+      }, 120);
     } catch (error) {
       console.warn("Companion voice unavailable", error);
     }
