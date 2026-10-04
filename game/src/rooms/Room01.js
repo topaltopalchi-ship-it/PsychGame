@@ -33,6 +33,19 @@ export class Room01 {
     this.dynamic.clue = clue;
   }
 
+  showButtonPressed() {
+    const button = this.objects.redButton;
+    if (!button) return;
+    button.position.y = 1.68;
+    button.material.emissive = new THREE.Color(0xff1b1b);
+    button.material.emissiveIntensity = 4;
+    setTimeout(() => {
+      if (!button) return;
+      button.position.y = 1.8;
+      button.material.emissiveIntensity = 2.2;
+    }, 180);
+  }
+
   showKeyFound() {
     if (!this.dynamic.clue) return;
     this.dynamic.clue.material.emissive = new THREE.Color(0x806a24);
