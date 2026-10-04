@@ -97,7 +97,8 @@ window.openAuthorPanel = openAuthor;
 const targetLabels = {
   RED_BUTTON: "دکمه قرمز — فشار بده",
   EXIT_DOOR: "در — امتحان کن",
-  HALF_OPEN_DRAWER: "کشوی نیمه‌باز — بررسی",
+  HALF_OPEN_DRAWER: "کشوی نیمه‌باز — سرنخ",
+  KEY_FROM_DRAWER: "کلید طلایی — بردار",
   CLOSED_BOX: "جعبه — بررسی",
   OLD_DESK: "میز قدیمی — بررسی",
   BROKEN_CLOCK: "ساعت خراب — بررسی",
@@ -108,6 +109,7 @@ const targetNames = {
   RED_BUTTON: "دکمه قرمز",
   EXIT_DOOR: "در",
   HALF_OPEN_DRAWER: "کشوی نیمه‌باز",
+  KEY_FROM_DRAWER: "کلید طلایی",
   CLOSED_BOX: "جعبه",
   OLD_DESK: "میز قدیمی",
   BROKEN_CLOCK: "ساعت خراب",
