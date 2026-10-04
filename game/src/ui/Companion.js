@@ -13,6 +13,8 @@ export class Companion {
     };
     this.voiceEnabled = true;
     this.voiceUnlocked = false;
+    this.pendingVoice = null;
+    this.voiceReady = false;
     this.createUI();
     this.installVoiceUnlock();
     this.say("خب... فکر کنم باید راه خروج رو پیدا کنیم.", 1000);
@@ -43,6 +45,7 @@ export class Companion {
   say(message, delay = 0) {
     setTimeout(() => {
       this.text.textContent = message;
+      this.pendingVoice = message;
       this.speak(message);
       this.panel.style.opacity = "1";
       this.panel.style.transform = "translateY(0)";
@@ -60,32 +63,56 @@ export class Companion {
       this.voiceUnlocked = true;
       try {
         window.speechSynthesis.resume();
-        const warmup = new SpeechSynthesisUtterance("");
-        warmup.volume = 0;
-        warmup.lang = "fa-IR";
-        window.speechSynthesis.speak(warmup);
+        window.speechSynthesis.cancel();
+        const voices = window.speechSynthesis.getVoices();
+        this.voiceReady = voices.length > 0;
+        // Speak the latest companion message immediately after the user's gesture.
+        if (this.pendingVoice) this.speak(this.pendingVoice);
       } catch (error) {}
       window.removeEventListener("pointerdown", unlock);
       window.removeEventListener("touchstart", unlock);
       window.removeEventListener("click", unlock);
     };
-    window.addEventListener("pointerdown", unlock, {passive:true});
-    window.addEventListener("touchstart", unlock, {passive:true});
-    window.addEventListener("click", unlock, {passive:true});
+
+    window.addEventListener("pointerdown", unlock, { passive: true });
+    window.addEventListener("touchstart", unlock, { passive: true });
+    window.addEventListener("click", unlock, { passive: true });
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.addEventListener("voiceschanged", () => {
+        this.voiceReady = window.speechSynthesis.getVoices().length > 0;
+        if (this.voiceUnlocked && this.pendingVoice) this.speak(this.pendingVoice);
+      });
+    }
   }
 
   speak(message) {
     if (!this.voiceEnabled || !this.voiceUnlocked || !("speechSynthesis" in window)) return;
+
+    this.pendingVoice = message;
     try {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = "fa-IR";
-      utterance.rate = 0.92;
-      utterance.pitch = 0.95;
-      utterance.volume = 1;
+      window.speechSynthesis.resume();
+
       const voices = window.speechSynthesis.getVoices();
       const persianVoice = voices.find(v => /^fa(-|_)/i.test(v.lang));
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = persianVoice ? persianVoice.lang : "fa-IR";
+      utterance.rate = 0.9;
+      utterance.pitch = 0.95;
+      utterance.volume = 1;
       if (persianVoice) utterance.voice = persianVoice;
+
+      utterance.onend = () => {
+        if (this.pendingVoice === message) this.pendingVoice = null;
+      };
+      utterance.onerror = () => {
+        // Android browsers can need one more resume/speak cycle.
+        if (this.voiceUnlocked && this.pendingVoice === message) {
+          setTimeout(() => this.speak(message), 180);
+        }
+      };
+
       window.speechSynthesis.speak(utterance);
     } catch (error) {
       console.warn("Companion voice unavailable", error);
