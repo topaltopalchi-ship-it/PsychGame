@@ -116,6 +116,34 @@ export class Room01 {
   createDrawer() {
     const drawer=this.mesh(new THREE.BoxGeometry(1.25,.46,.78),this.mat(0x4b2f20,.88),[.8,.92,-1.05]);
     drawer.userData.objectId="HALF_OPEN_DRAWER"; this.objects.drawer=drawer;
+
+    const cavity=this.mesh(
+      new THREE.BoxGeometry(1.02,.05,.48),
+      this.mat(0x17110e,.96),
+      [.8,1.17,-.98]
+    );
+    cavity.userData.objectId="HALF_OPEN_DRAWER";
+    this.objects.drawerCavity=cavity;
+
+    const keyGroup=new THREE.Group();
+    keyGroup.position.set(.8,1.22,-.93);
+    const shaft=new THREE.Mesh(
+      new THREE.BoxGeometry(.42,.045,.07),
+      new THREE.MeshStandardMaterial({color:0xf2c14e,emissive:0x7a4f00,emissiveIntensity:1.4,metalness:.75,roughness:.22})
+    );
+    shaft.rotation.y=Math.PI/2;
+    const ring=new THREE.Mesh(
+      new THREE.TorusGeometry(.10,.035,12,24),
+      new THREE.MeshStandardMaterial({color:0xf2c14e,emissive:0x7a4f00,emissiveIntensity:1.4,metalness:.75,roughness:.22})
+    );
+    ring.rotation.x=Math.PI/2;
+    ring.position.x=-.24;
+    keyGroup.add(shaft,ring);
+    keyGroup.userData.objectId="KEY_FROM_DRAWER";
+    keyGroup.userData.interactable=true;
+    this.scene.add(keyGroup);
+    this.objects.drawerKey=keyGroup;
+
     const handle=this.mesh(new THREE.CylinderGeometry(.045,.045,.25,16),this.mat(0xa27b46,.3,.7),[.8,.92,-.64],[Math.PI/2,0,0]);
     handle.userData.objectId="HALF_OPEN_DRAWER"; this.objects.drawerHandle=handle;
   }
