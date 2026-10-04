@@ -41,10 +41,9 @@ export class Room08 {
   reveal(){
     if(this.revealDone)return;this.revealDone=true;
     const r=this.result||{title:"متعادل"};
-    this.companion?.say?.("چیزی که اینجا می‌بینی تشخیص روان‌شناختی نیست؛ فقط ردّ انتخاب‌هایی است که در این بازی کردی.");
-    setTimeout(()=>this.companion?.say?.("الگوی بازی تو: "+r.title+"."),900);
     this.tracker.log("ROOM_08_PROFILE_REVEALED",{profile:r.title,secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
     const l=this.objects.TRUTH_LIGHT;if(l){l.intensity=3;setTimeout(()=>{if(!this.completed)l.intensity=1.5;},900);}
+    this.companion?.say?.("...");
   }
   chooseExit(){
     this.reveal();this.tracker.log("ROOM_08_EXIT_CHECKED",{profile:this.result?.title||"متعادل"});
