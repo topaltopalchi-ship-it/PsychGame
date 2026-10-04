@@ -3,7 +3,7 @@ import * as THREE from "three";
 export class Room08 {
   constructor(scene,tracker){
     this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;
-    this.context={};this.startedAt=0;this.result=null;this.revealDone=false;this.lightTimer=null;
+    this.context={};this.startedAt=0;this.result=null;this.revealDone=false;this.lightTimer=null;this.pulseTimer=null;this.endingTimer=null;this.endLight=null;
   }
   start(context={}){
     this.context=context||{};this.companion=context.companion||null;this.startedAt=performance.now();
@@ -20,6 +20,8 @@ export class Room08 {
     const core=this.mesh(new THREE.IcosahedronGeometry(.75,1),this.mat(0x343b50,.3,.65),[0,2.2,0]);this.add("TRUTH_CORE",core);
     const exit=this.mesh(new THREE.BoxGeometry(2.6,2.8,.35),this.mat(0x30171d,.7),[0,1.6,6.7]);this.add("TRUTH_EXIT",exit);
     const light=new THREE.PointLight(0x7788bb,1.5,16);light.position.set(0,3.5,0);this.scene.add(light);this.objects.TRUTH_LIGHT=light;
+    this.endLight=new THREE.PointLight(0x5b1720,.35,9);this.endLight.position.set(0,2.4,6.1);this.scene.add(this.endLight);
+    const ring=this.mesh(new THREE.TorusGeometry(1.35,.035,8,48),new THREE.MeshBasicMaterial({color:0x7180aa,transparent:true,opacity:.32}),[0,.08,0]);ring.rotation.x=Math.PI/2;this.add("TRUTH_RING",ring);
   }
   calculateProfile(){
     const hall=this.context.hallBehavior||{};
@@ -43,13 +45,17 @@ export class Room08 {
     const r=this.result||{title:"متعادل"};
     this.tracker.log("ROOM_08_PROFILE_REVEALED",{profile:r.title,secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
     const l=this.objects.TRUTH_LIGHT;if(l){l.intensity=3;this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.5;},900);}
+    if(this.endLight){this.endLight.intensity=.9;this.pulseTimer=setTimeout(()=>{if(!this.completed&&this.endLight)this.endLight.intensity=.22;},700);}
+    const core=this.objects.TRUTH_CORE;if(core){core.scale.setScalar(1.45);this.endingTimer=setTimeout(()=>{if(!this.completed)core.scale.setScalar(1);},750);}
     
   }
   chooseExit(){
     this.reveal();this.tracker.log("ROOM_08_EXIT_CHECKED",{profile:this.result?.title||"متعادل"});
+    if(this.endLight)this.endLight.intensity=.08;
+    this.companion?.say?.("در بازه... ولی فکر نکن اینجا چیزی بهت جواب می‌ده.");
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_08",profile:this.result?.title||"متعادل"});}
-  update(delta){if(this.objects.TRUTH_CORE){this.objects.TRUTH_CORE.rotation.y+=delta*.35;this.objects.TRUTH_CORE.rotation.x+=delta*.12;}}
-  destroy(){if(this.lightTimer)clearTimeout(this.lightTimer);this.objects={};}
+  update(delta){if(this.objects.TRUTH_CORE){this.objects.TRUTH_CORE.rotation.y+=delta*.35;this.objects.TRUTH_CORE.rotation.x+=delta*.12;}if(this.objects.TRUTH_RING){this.objects.TRUTH_RING.rotation.z+=delta*.12;this.objects.TRUTH_RING.material.opacity=.24+Math.sin(performance.now()*.002)*.08;}}
+  destroy(){if(this.lightTimer)clearTimeout(this.lightTimer);if(this.pulseTimer)clearTimeout(this.pulseTimer);if(this.endingTimer)clearTimeout(this.endingTimer);if(this.endLight)this.scene.remove(this.endLight);this.objects={};}
 }
