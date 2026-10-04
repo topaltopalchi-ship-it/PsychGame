@@ -7,6 +7,7 @@ import { Room02 } from "./rooms/Room02.js";
 import { Room03 } from "./rooms/Room03.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
+import { AudioManager } from "./audio/AudioManager.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -44,6 +45,7 @@ const session = new SessionManager();
 const authorPanel = new AuthorPanel(session);
 const tracker = session.getTracker();
 const companion = new Companion(tracker);
+const audioManager = new AudioManager();
 const player = new PlayerController(camera);
 const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
 const room01 = new Room01(scene, tracker);
@@ -54,6 +56,15 @@ interaction.setRoom(room01, 1);
 interaction.setCompanion(companion);
 room01.getInteractableObjects().forEach((object) => interaction.register(object, object.userData.objectId));
 tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
+
+let audioUnlocked = false;
+function unlockGameAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  audioManager.unlock();
+}
+window.addEventListener("pointerdown", unlockGameAudio, { once: true, passive: true });
+window.addEventListener("touchstart", unlockGameAudio, { once: true, passive: true });
 
 const hud = document.createElement("div");
 const crosshair = document.createElement("div");
@@ -186,7 +197,8 @@ window.psychGame = {
   getEvents: () => tracker.getEvents(),
   getAnalysis: () => session.getAnalysis(),
   getReport: () => session.getSessionData(),
-  exportSession: () => session.exportSession()
+  exportSession: () => session.exportSession(),
+  audioManager
 };
 
 const clock = new THREE.Clock();
