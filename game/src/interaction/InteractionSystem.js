@@ -16,6 +16,7 @@ export class InteractionSystem {
     this.exitDoor = null;
     this.companion = null;
     this.room = null;
+    this.roomNumber = 1;
     this.keyFound = false;
     this.completed = false;
     this.lastLookedObject = null;
@@ -27,7 +28,9 @@ export class InteractionSystem {
   }
 
   setCompanion(companion) { this.companion = companion; }
-  setRoom(room) { this.room = room; }
+  setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
+
+  clearTargets() { this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
 
   register(object, objectId) {
     object.userData.interactable = true;
@@ -114,6 +117,8 @@ export class InteractionSystem {
       objectId,
       attempt: this.interactionCounts[objectId]
     });
+
+    if (this.roomNumber === 2) { this.handleRoom2(objectId); return; }
 
     switch (objectId) {
       case "RED_BUTTON": this.handleRedButton(); break;
@@ -235,3 +240,27 @@ export class InteractionSystem {
     this.tracker.log("PAINTING_INSPECTED", { result: "NO_DIRECT_CLUE" });
   }
 }
+
+
+// Room 2: choices are intentionally recoverable after a wrong path.
+InteractionSystem.prototype.handleRoom2 = function(objectId) {
+  if (objectId === "PATH_CLUE") {
+    this.tracker.log("CLUE_INSPECTED", { roomId: "ROOM_02" });
+    this.companion?.say("سه مسیر داری. انتخابت مهمه؛ اگر اشتباه کنی، می‌تونی دوباره تصمیم بگیری.");
+    return;
+  }
+  if (objectId === "PATH_LEFT" || objectId === "PATH_RIGHT") {
+    this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId });
+    this.tracker.log("FAILURE", { roomId: "ROOM_02", cause: objectId });
+    this.companion?.say(objectId === "PATH_LEFT" ? "این مسیر به بن‌بست رسید. می‌خوای برگردی و دوباره انتخاب کنی؟" : "این در باز نمی‌شه. شاید مسیر دیگه‌ای ارزش بررسی داشته باشه.");
+    return;
+  }
+  if (objectId === "PATH_CENTER") {
+    this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId });
+    this.room?.completeRoom?.("PATH_CENTER");
+    this.completed = true;
+    this.tracker.log("ROOM_COMPLETED", { roomId: "ROOM_02", path: "PATH_CENTER" });
+    this.companion?.say("مسیر درست رو پیدا کردی. حالا می‌ریم مرحله بعد.");
+    window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_02" } }));
+  }
+};
