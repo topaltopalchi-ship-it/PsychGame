@@ -124,6 +124,10 @@ export class InteractionSystem {
     if (this.roomNumber === 2) { this.handleRoom2(objectId); return; }
     if (this.roomNumber === 3) { this.handleRoom3(objectId); return; }
     if (this.roomNumber === 4) { this.handleRoom4(objectId); return; }
+    if (this.roomNumber === 5) { this.handleRoom5(objectId); return; }
+    if (this.roomNumber === 6) { this.handleRoom6(objectId); return; }
+    if (this.roomNumber === 7) { this.handleRoom7(objectId); return; }
+    if (this.roomNumber === 8) { this.handleRoom8(objectId); return; }
 
     switch (objectId) {
       case "RED_BUTTON": this.handleRedButton(); break;
@@ -358,19 +362,6 @@ InteractionSystem.prototype.handleRoom7 = function(objectId) {
     this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
     this.tracker.log("ROOM_07_EXIT_CHECKED",{roomId:"ROOM_07"});
     window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07",trustBehavior:{firstChoice:this.room?.firstChoice||null,lastChoice:this.room?.lastChoice||null,followCount:this.room?.followCount||0,ignoreCount:this.room?.ignoreCount||0,choiceSwitches:this.room?.choiceSwitches||0}}}));
-  }
-};
-
-
-InteractionSystem.prototype.handleRoom7 = function(objectId) {
-  if (objectId === "FOLLOW_COMPANION" || objectId === "GO_ALONE") {
-    this.room?.choose?.(objectId); return;
-  }
-  if (objectId === "COMP_EXIT") {
-    if (this.completed) return;
-    this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
-    this.tracker.log("ROOM_07_EXIT_CHECKED",{roomId:"ROOM_07"});
-    window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07"}}));
   }
 };
 
