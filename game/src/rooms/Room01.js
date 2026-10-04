@@ -74,16 +74,42 @@ export class Room01 {
   }
 
   createDoor() {
-    const door = this.mesh(new THREE.BoxGeometry(1.8, 3.4, .16), this.mat(0x493326, .68), [3.5, 1.7, -4.65]);
+    // خروج عمداً در دیوار سمت راست و در نیمهٔ پشتی اتاق است؛
+    // بازیکن باید بعد از جست‌وجوی اتاق برگردد و آن را پیدا کند.
+    const door = this.mesh(
+      new THREE.BoxGeometry(1.8, 3.4, .16),
+      this.mat(0x493326, .68),
+      [4.65, 1.7, -0.9],
+      [0, Math.PI / 2, 0]
+    );
     door.userData.objectId = "EXIT_DOOR";
     this.objects.exitDoor = door;
 
     const frame = this.mat(0x171311, .55, .15);
-    this.mesh(new THREE.BoxGeometry(2.15, .18, .24), frame, [3.5, 3.48, -4.53]);
-    this.mesh(new THREE.BoxGeometry(.18, 3.5, .24), frame, [2.48, 1.75, -4.53]);
-    this.mesh(new THREE.BoxGeometry(.18, 3.5, .24), frame, [4.52, 1.75, -4.53]);
+    this.mesh(
+      new THREE.BoxGeometry(2.15, .18, .24),
+      frame,
+      [4.53, 3.48, -0.9],
+      [0, Math.PI / 2, 0]
+    );
+    this.mesh(
+      new THREE.BoxGeometry(.18, 3.5, .24),
+      frame,
+      [4.53, 1.75, -1.92],
+      [0, Math.PI / 2, 0]
+    );
+    this.mesh(
+      new THREE.BoxGeometry(.18, 3.5, .24),
+      frame,
+      [4.53, 1.75, .12],
+      [0, Math.PI / 2, 0]
+    );
 
-    const handle = this.mesh(new THREE.SphereGeometry(.12, 24, 24), this.mat(0xb08a4a, .22, .75), [4.05, 1.65, -4.47]);
+    const handle = this.mesh(
+      new THREE.SphereGeometry(.12, 24, 24),
+      this.mat(0xb08a4a, .22, .75),
+      [4.47, 1.65, -.45]
+    );
     handle.userData.objectId = "EXIT_DOOR";
     this.objects.doorHandle = handle;
   }
