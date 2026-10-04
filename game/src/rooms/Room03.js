@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room03 {
-  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;this.exitWatched=false;this.finalBeatDone=false;this.endingTriggered=false;}
+  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;this.exitWatched=false;this.finalBeatDone=false;this.endingTriggered=false;this.exitConfirmed=false;}
   start(context={}){
     this.memoryContext=context||{};this.memoryResponseDone=false;this.seatBaseZ=1;
     this.scene.fog=new THREE.FogExp2(0x090b10,this.memoryContext.wrongPaths?.length?.08:.025);
@@ -110,6 +110,19 @@ export class Room03 {
       this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.08:.025;
     },900);
     this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "این بار... مطمئن شو چیزی پشت سرت نیست." : "خب... فکر کنم وقتشه بریم.");
+  }
+
+  confirmExit(){
+    if(this.exitConfirmed)return;
+    this.exitConfirmed=true;
+    this.tracker.log("ROOM_03_EXIT_CONFIRMED",{remembered:!!this.memoryContext?.wrongPaths?.length});
+    this.scene.fog.density=.09;
+    if(this.memoryLight)this.memoryLight.intensity=.4;
+    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "باشه... این بار خودت انتخاب کردی. برو." : "خوبه. اینجا تمومش می‌کنیم.");
+    setTimeout(()=>{
+      this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.08:.025;
+      if(this.memoryLight)this.memoryLight.intensity=3;
+    },1200);
   }
 
   triggerEnding(){
