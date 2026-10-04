@@ -12,7 +12,9 @@ export class Companion {
       exploredBeforeFailure: false
     };
     this.voiceEnabled = true;
+    this.voiceUnlocked = false;
     this.createUI();
+    this.installVoiceUnlock();
     this.say("خب... فکر کنم باید راه خروج رو پیدا کنیم.", 1000);
     this.timer = setInterval(() => this.observe(), 350);
   }
@@ -52,8 +54,28 @@ export class Companion {
     }, delay);
   }
 
+  installVoiceUnlock() {
+    const unlock = () => {
+      if (!("speechSynthesis" in window)) return;
+      this.voiceUnlocked = true;
+      try {
+        window.speechSynthesis.resume();
+        const warmup = new SpeechSynthesisUtterance("");
+        warmup.volume = 0;
+        warmup.lang = "fa-IR";
+        window.speechSynthesis.speak(warmup);
+      } catch (error) {}
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("click", unlock);
+    };
+    window.addEventListener("pointerdown", unlock, {passive:true});
+    window.addEventListener("touchstart", unlock, {passive:true});
+    window.addEventListener("click", unlock, {passive:true});
+  }
+
   speak(message) {
-    if (!this.voiceEnabled || !("speechSynthesis" in window)) return;
+    if (!this.voiceEnabled || !this.voiceUnlocked || !("speechSynthesis" in window)) return;
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(message);
