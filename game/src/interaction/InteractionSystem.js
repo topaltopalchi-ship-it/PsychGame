@@ -26,6 +26,8 @@ export class InteractionSystem {
     this.buttonPressed = false;
 
     this.exitDoor = null;\n    this.companion = null;\n    this.room = null;
+    this.keyFound = false;
+    this.completed = false;
 
     this.lastLookedObject = null;
     this.lookStartTime = null;
@@ -214,6 +216,10 @@ export class InteractionSystem {
       case "OLD_PAINTING":
         this.handlePainting();
         break;
+
+      case "HIDDEN_CLUE":
+        this.handleHiddenClue();
+        break;
     }
   }
 
@@ -298,6 +304,13 @@ export class InteractionSystem {
     }
   }
 
+  handleHiddenClue() {
+    this.keyFound = true;
+    this.tracker.log("KEY_FOUND", { source:"HIDDEN_CLUE" });
+    if (this.room?.showKeyFound) this.room.showKeyFound();
+    if (this.companion) this.companion.say("این کلید احتمالاً برای همون دره.");
+  }
+
   handleDoor() {
     if (
       this.exitDoor &&
@@ -314,13 +327,17 @@ export class InteractionSystem {
       return;
     }
 
-    this.tracker.log(
-      "DOOR_CHECKED",
-      {
-        status:
-          "AVAILABLE"
-      }
-    );
+    if (!this.keyFound) {
+      this.tracker.log("DOOR_CHECKED", { status:"AVAILABLE", result:"NEEDS_KEY" });
+      if (this.companion) this.companion.say("در بازه، ولی انگار کلید می‌خواد.");
+      return;
+    }
+    if (!this.completed) {
+      this.completed = true;
+      this.tracker.log("ROOM_COMPLETED", { roomId:"ROOM_01" });
+      if (this.room?.completeRoom) this.room.completeRoom();
+      if (this.companion) this.companion.say("بازش کردی... فکر کنم آماده‌ای بریم اتاق بعدی.");
+    }
   }
 
   handleDrawer() {
