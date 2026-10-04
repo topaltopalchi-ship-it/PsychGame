@@ -348,26 +348,21 @@ export class InteractionSystem {
   }
 
   handleDoor() {
-    if (
-      this.exitDoor &&
-      this.exitDoor.userData.locked
-    ) {
-      this.tracker.log(
-        "DOOR_BLOCKED",
-        {
-          objectId:
-            "EXIT_DOOR"
-        }
-      );
-      if (this.companion) this.companion.say("در قفل شده... اول ببین بعد از فشردن دکمه چه چیزی عوض شده.");
+    if (!this.keyFound) {
+      this.tracker.log("DOOR_CHECKED", { status:"LOCKED", result:"NEEDS_KEY" });
+      if (this.companion) this.companion.say("در قفله. اول کلید رو پیدا کن.");
       return;
     }
 
-    if (!this.keyFound) {
-      this.tracker.log("DOOR_CHECKED", { status:"AVAILABLE", result:"NEEDS_KEY" });
-      if (this.companion) this.companion.say("در بازه، ولی انگار کلید می‌خواد.");
-      return;
+    if (this.exitDoor && this.exitDoor.userData.locked) {
+      this.exitDoor.userData.locked = false;
+      if (this.exitDoor.material) {
+        this.exitDoor.material.color = new THREE.Color(0x493326);
+      }
+      this.tracker.log("DOOR_UNLOCKED", { objectId:"EXIT_DOOR", source:"HIDDEN_CLUE" });
+      if (this.companion) this.companion.say("کلید درست همینه. قفل باز شد.");
     }
+
     if (!this.completed) {
       this.completed = true;
       this.tracker.log("ROOM_COMPLETED", { roomId:"ROOM_01" });
