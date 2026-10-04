@@ -6,6 +6,7 @@ export class Room01 {
     this.tracker = tracker;
     this.objects = {};
     this.dynamic = { clueVisible:false, redGlow:null, deskLight:null };
+    this.completed = false;
   }
 
   start() {
@@ -30,6 +31,17 @@ export class Room01 {
     clue.visible = false;
     this.objects.hiddenClue = clue;
     this.dynamic.clue = clue;
+  }
+
+  showKeyFound() {
+    if (!this.dynamic.clue) return;
+    this.dynamic.clue.material.emissive = new THREE.Color(0x806a24);
+    this.dynamic.clue.material.emissiveIntensity = 1.2;
+  }
+
+  completeRoom() {
+    this.completed = true;
+    if (this.dynamic.clue) this.dynamic.clue.material.emissiveIntensity = 0;
   }
 
   revealClue() {
