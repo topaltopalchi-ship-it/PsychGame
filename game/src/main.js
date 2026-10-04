@@ -11,9 +11,13 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080a0d);
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 1.7, 5);
+camera.position.set(0, 1.7, 3.6);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+renderer.domElement.style.width = "100%";
+renderer.domElement.style.height = "100%";
+renderer.domElement.style.display = "block";
+renderer.domElement.style.touchAction = "none";
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
@@ -56,7 +60,7 @@ crosshair.id = "pg-crosshair";
 crosshair.textContent = "+";
 const hint = document.createElement("div");
 hint.id = "pg-hint";
-hint.textContent = "گوشی: جوی‌استیک برای حرکت · لمس سمت راست برای نگاه · دکمه «تعامل» برای انتخاب";
+hint.textContent = "سمت چپ: حرکت · لمس هر شیء: تعامل · کشیدن انگشت: نگاه";
 const title = document.createElement("div");
 title.id = "pg-title";
 title.textContent = "اتاق ۰۱ — دکمه قرمز";
