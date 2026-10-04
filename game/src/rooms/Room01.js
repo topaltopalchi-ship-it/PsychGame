@@ -160,7 +160,7 @@ export class Room01 {
 
     const keyGroup = new THREE.Group();
     keyGroup.position.set(.8, 1.24, -1.0);
-    keyGroup.scale.setScalar(1.45);
+    keyGroup.scale.setScalar(0.72);
 
     const keyMaterial = new THREE.MeshStandardMaterial({
       color: 0xffd34f,
