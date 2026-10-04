@@ -42,7 +42,7 @@ const player = new PlayerController(camera);
 const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
 const room01 = new Room01(scene, tracker);
 
-room01.start();
+room01.start();\ninteraction.setRoom(room01);\ninteraction.setCompanion(companion);
 room01.getInteractableObjects().forEach((object) => interaction.register(object, object.userData.objectId));
 tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
 
