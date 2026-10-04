@@ -7,6 +7,7 @@ import { Room02 } from "./rooms/Room02.js";
 import { Room03 } from "./rooms/Room03.js";
 import { Room04 } from "./rooms/Room04.js";
 import { Room05 } from "./rooms/Room05.js";
+import { Room06 } from "./rooms/Room06.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
@@ -232,6 +233,14 @@ function startRoom05(context={previousRoom:"ROOM_04"}) {
   companion?.say("اتاق پنجم... اینجا به چیزی که می‌بینی زود اعتماد نکن.");
 }
 
+
+function startRoom06(context={previousRoom:"ROOM_05"}) {
+  if (activeRoom?.constructor?.name !== "Room05" || !activeRoom.completed) return;
+  clearRoomGeometry(); interaction.clearTargets?.();
+  activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion});
+  interaction.setRoom(activeRoom,6);
+  companion?.say("اتاق ششم... بعضی صداها آشنا به نظر می‌رسن، ولی به این حس زود اعتماد نکن.");
+}
 
 function animate() {
   requestAnimationFrame(animate);
