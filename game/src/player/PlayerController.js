@@ -3,7 +3,7 @@ import * as THREE from "three";
 export class PlayerController {
   constructor(camera) {
     this.camera = camera;
-    this.speed = 3;
+    this.speed = 3.2;
     this.lookSpeed = 0.002;
     this.keys = { forward:false, backward:false, left:false, right:false };
     this.touchMove = { x:0, y:0 };
@@ -62,7 +62,7 @@ export class PlayerController {
 
     const look=document.createElement("div");
     look.id="pg-touch-look";
-    Object.assign(look.style,{position:"fixed",right:"0",top:"0",width:"58%",height:"78%",zIndex:"6500",touchAction:"none",display:"none"});
+    Object.assign(look.style,{position:"fixed",right:"0",top:"0",width:"100%",height:"100%",zIndex:"6500",touchAction:"none",display:"none"});
     document.body.appendChild(look);
     let lastX=0,lastY=0,startX=0,startY=0,lookActive=false,moved=false;
     look.addEventListener("pointerdown",e=>{lookActive=true;moved=false;startX=lastX=e.clientX;startY=lastY=e.clientY;look.setPointerCapture(e.pointerId);e.preventDefault();},{passive:false});
@@ -109,5 +109,8 @@ export class PlayerController {
     this.direction.normalize();
     const movement=this.direction.clone().applyEuler(new THREE.Euler(0,this.camera.rotation.y,0));
     this.camera.position.add(movement.multiplyScalar(this.speed*delta));
+    this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, -4.2, 4.2);
+    this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, -4.2, 4.2);
+    this.camera.position.y = 1.7;
   }
 }
