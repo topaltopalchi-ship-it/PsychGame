@@ -55,6 +55,7 @@ const player = new PlayerController(camera);
 const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
 const room01 = new Room01(scene, tracker);
 let activeRoom = room01;
+const behavioralHistory = { hallBehavior:{}, mirrorBehavior:{}, recordingBehavior:{}, trustBehavior:{} };
 
 room01.start();
 interaction.setRoom(room01, 1);
@@ -255,7 +256,7 @@ function startRoom07(context={previousRoom:"ROOM_06"}) {
 function startRoom08(context={previousRoom:"ROOM_07"}) {
   if (activeRoom?.constructor?.name !== "Room07" || !activeRoom.completed) return;
   clearRoomGeometry(); interaction.clearTargets?.();
-  activeRoom=new Room08(scene,tracker); activeRoom.start({...context,companion});
+  activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion});
   interaction.setRoom(activeRoom,8);
   companion?.say("اتاق آخر... اینجا فقط انتخاب‌هایی که کردی بهت برمی‌گردن.");
 }
@@ -286,4 +287,13 @@ window.addEventListener("psychgame-room-complete",(event)=>{
     companion,
     trustBehavior:event.detail?.trustBehavior||{}
   });
+});
+
+window.addEventListener("psychgame-room-complete",(event)=>{
+  const d=event.detail||{};
+  if(d.roomId==="ROOM_04") behavioralHistory.hallBehavior=d.behavior||{};
+  if(d.roomId==="ROOM_05") behavioralHistory.mirrorBehavior=d.behavior||{};
+  if(d.roomId==="ROOM_06") behavioralHistory.recordingBehavior=d.behavior||{};
+  if(d.roomId==="ROOM_07") behavioralHistory.trustBehavior=d.trustBehavior||{};
+  if(d.roomId==="ROOM_04") startRoom05?.({previousRoom:"ROOM_04",companion});
 });
