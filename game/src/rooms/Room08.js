@@ -43,9 +43,9 @@ export class Room08 {
   triggerCoreResponse(){
     if(this.coreResponseDone)return;this.coreResponseDone=true;
     this.tracker.log("ROOM_08_CORE_RESPONSE",{secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
-    const l=this.objects.TRUTH_LIGHT;if(l){l.intensity=3;this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.5;},900);}
-    if(this.endLight){this.endLight.intensity=.9;this.pulseTimer=setTimeout(()=>{if(!this.completed&&this.endLight)this.endLight.intensity=.22;},700);}
-    const core=this.objects.TRUTH_CORE;if(core){core.scale.setScalar(1.45);this.endingTimer=setTimeout(()=>{if(!this.completed)core.scale.setScalar(1);},750);}
+    const l=this.objects.TRUTH_LIGHT;if(l){l.intensity=3;this.lightTimer=setTimeout(()=>{if(!this.completed||this.endingStarted)l.intensity=1.5;},900);}
+    if(this.endLight){this.endLight.intensity=.9;this.pulseTimer=setTimeout(()=>{if((!this.completed||this.endingStarted)&&this.endLight)this.endLight.intensity=.22;},700);}
+    const core=this.objects.TRUTH_CORE;if(core){core.scale.setScalar(1.45);this.endingTimer=setTimeout(()=>{if(!this.completed||this.endingStarted)core.scale.setScalar(1);},750);}
     
   }
   startEnding(){
