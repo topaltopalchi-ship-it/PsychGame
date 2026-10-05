@@ -93,7 +93,7 @@ export class TrainingEngine {
     }
 
     if (!persisted) return null;
-    if (persisted.planId && this.planId && persisted.planId !== this.planId) return null;
+    if (this.planId && persisted.planId !== this.planId) return null;
     return persisted;
   }
 
