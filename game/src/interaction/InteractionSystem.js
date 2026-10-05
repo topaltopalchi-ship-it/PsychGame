@@ -145,7 +145,8 @@ export class InteractionSystem {
     if (this.roomNumber === 11) { this.handleRoom11(objectId); return; }
     if (this.roomNumber === 12) { this.handleTrainingGeneric(objectId); return; }
     if (this.roomNumber === 13) { this.handleTrainingGeneric(objectId); return; }
-    if (this.roomNumber === 14) { this.handleTrainingGeneric(objectId); return; }\n    if (this.roomNumber >= 15 && this.roomNumber <= 20) { this.handleTrainingGeneric(objectId); return; }
+    if (this.roomNumber === 14) { this.handleTrainingGeneric(objectId); return; }
+    if (this.roomNumber >= 15 && this.roomNumber <= 20) { this.handleTrainingGeneric(objectId); return; }
 
     switch (objectId) {
       case "RED_BUTTON": this.handleRedButton(); break;
