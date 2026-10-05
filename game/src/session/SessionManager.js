@@ -59,10 +59,21 @@ export class SessionManager {
   }
 
   getTrainingRecommendations() {
-    return buildTrainingRecommendations({
+    const analysis = this.getAnalysis();
+    const phase1Profile = this.getPhase1Profile();
+    const report = SpecialistReport.build({
       playerCode: this.playerCode,
       sessionId: this.getSessionId(),
-      phase1Profile: this.getPhase1Profile()
+      sessionStart: this.sessionStart,
+      events: this.tracker.getEvents(),
+      analysis,
+      phase1Profile
+    });
+    return buildTrainingRecommendations({
+      ...report,
+      playerCode: this.playerCode,
+      sessionId: this.getSessionId(),
+      phase1Profile
     });
   }
 
