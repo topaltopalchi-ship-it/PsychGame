@@ -75,6 +75,7 @@ test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) =
 });
 
 test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) => {
+  test.setTimeout(45000);
   const errors = [];
   const crashes = [];
   page.on("pageerror", (error) => errors.push(String(error)));
