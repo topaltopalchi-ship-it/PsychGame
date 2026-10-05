@@ -93,36 +93,8 @@ interaction.setRoom(room01, 1);
 audioManager.setRoom(1);
 interaction.setCompanion(companion);
 
-const consentOverlay = document.createElement("div");
-consentOverlay.id = "pg-consent";
-Object.assign(consentOverlay.style, {
-  position:"fixed", inset:"0", zIndex:"20000", display:"flex",
-  alignItems:"center", justifyContent:"center", padding:"20px",
-  background:"rgba(3,5,8,.88)", direction:"rtl",
-  fontFamily:"Tahoma,Arial,sans-serif"
-});
-consentOverlay.innerHTML = `
-  <div style="width:min(520px,92vw);padding:24px;border:1px solid rgba(255,255,255,.16);border-radius:18px;background:#10141a;color:#eee;box-shadow:0 18px 60px rgba(0,0,0,.45)">
-    <div style="font-size:19px;font-weight:700;margin-bottom:12px">ثبت رفتار بازی</div>
-    <div style="font-size:13px;line-height:2;color:rgba(255,255,255,.78)">
-      برای بررسی تخصصی، رفتارهای داخل بازی مثل انتخاب‌ها، تعامل‌ها و زمان واکنش ثبت می‌شوند.
-      نتیجه یا تحلیل روان‌شناختی به خود بازیکن نمایش داده نمی‌شود.
-      می‌توانید بدون فعال‌کردن ثبت رفتار هم بازی را ادامه دهید.
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:20px">
-      <button id="pg-consent-yes" style="padding:10px 18px;border:0;border-radius:10px;background:#2d7d58;color:#fff;font:inherit;cursor:pointer">موافقم و ادامه می‌دهم</button>
-      <button id="pg-consent-no" style="padding:10px 18px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:transparent;color:#ddd;font:inherit;cursor:pointer">بدون ثبت رفتار</button>
-    </div>
-  </div>`;
-document.body.appendChild(consentOverlay);
-
-const closeConsent = (enabled) => {
-  session.setConsent(enabled);
-  if (enabled) tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
-  consentOverlay.remove();
-};
-document.getElementById("pg-consent-yes").addEventListener("click", () => closeConsent(true));
-document.getElementById("pg-consent-no").addEventListener("click", () => closeConsent(false));
+session.setConsent(true);
+tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
 
 let audioUnlocked = false;
 function unlockGameAudio() {
