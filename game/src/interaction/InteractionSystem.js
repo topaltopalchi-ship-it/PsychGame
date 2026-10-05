@@ -128,9 +128,14 @@ export class InteractionSystem {
     if (!objectId) return;
 
     this.interactionCounts[objectId] = (this.interactionCounts[objectId] || 0) + 1;
+    const reactionTimeMs = this.lastLookedObject === objectId && this.lookStartTime !== null
+      ? Math.round(performance.now() - this.lookStartTime)
+      : null;
     this.tracker.log("OBJECT_INTERACTION", {
       objectId,
-      attempt: this.interactionCounts[objectId]
+      attempt: this.interactionCounts[objectId],
+      reactionTimeMs,
+      roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`
     });
 
     if (this.roomNumber === 2) { this.handleRoom2(objectId); return; }
