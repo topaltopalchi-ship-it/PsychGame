@@ -318,7 +318,7 @@ window.addEventListener("resize", () => {
 
 window.addEventListener("psychgame-game-complete",(event)=>{
   if(event.detail?.roomId!=="ROOM_08" || gameFinished)return;
-  gameFinished = true;
+  gameFinished = true;\n  session.saveSession({ completed: true });\n  session.uploadCompletedSession();
   clearRoomTransitionTimers();
   interaction.currentTarget = null;
   interaction.finishLook();
