@@ -72,7 +72,7 @@ export class Room02 {
   reactToObservation(path){
     this.observedPaths[path]=(this.observedPaths[path]||0)+1;this.lastObservedPath=path;
     const count=this.observedPaths[path];
-    this.tracker.log("PSYCHOLOGICAL_RESPONSE",{roomId:"ROOM_02",path,observations:count});
+    this.tracker.log("BEHAVIOR_RESPONSE",{roomId:"ROOM_02",path,observations:count});
     if(count>=2){
       this.objects.PATH_CLUE?.userData && (this.objects.PATH_CLUE.userData.hint = path === "PATH_LEFT" ? "رد پای قبلی را دنبال نکن." : path === "PATH_RIGHT" ? "این مسیر قبلاً دیده شده." : "چرا برگشتی؟");
       const target=this.pathLights[path==="PATH_LEFT"?0:path==="PATH_RIGHT"?2:1];
@@ -89,7 +89,7 @@ export class Room02 {
     this.idleTime+=delta;
     if(this.completed)return;if(!this.whisperTriggered && this.idleTime>18){
       this.whisperTriggered=true;
-      this.tracker.log("PSYCHOLOGICAL_IDLE_EVENT",{roomId:"ROOM_02",idleSeconds:Math.round(this.idleTime)});
+      this.tracker.log("BEHAVIOR_IDLE_EVENT",{roomId:"ROOM_02",idleSeconds:Math.round(this.idleTime)});
       this.pathLights.forEach((light,i)=>{
         light.intensity*=i===1?0.45:0.7;
       });
