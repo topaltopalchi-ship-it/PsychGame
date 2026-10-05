@@ -30,8 +30,10 @@ export class InteractionSystem {
       if (event.code === "KeyE") this.interact();
     });
     window.addEventListener("psychgame-game-complete", () => {
-      // Main.js owns the final/training transition. Keep interaction blocked by
-      // the room completion state without preemptively consuming the event.
+      // Freeze interaction immediately after the final room emits completion.
+      // Main.js decides whether to end the game or enter training; setRoom()
+      // explicitly re-enables interaction when a new room is created.
+      this.gameFinished = true;
       this.currentTarget = null;
       this.finishLook();
       window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId: null } }));
@@ -39,7 +41,7 @@ export class InteractionSystem {
   }
 
   setCompanion(companion) { this.companion = companion; }
-  setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
+  setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.gameFinished = false; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
 
   clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer); this.room8CompletionTimer = null; this.room3CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
 
