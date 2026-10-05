@@ -61,6 +61,10 @@ export class SpecialistPanel {
         ${this.trainingPlanView()}
       </div>
 
+      <h3>نتیجه تمرین تخصصی</h3>
+      <div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
+        ${this.trainingResultView(report.trainingResult)}
+      </div>
       <h3>مسیر طی‌شده</h3>
       <div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
         ${this.escape((report.path || []).join(" → ") || "—")}
@@ -77,6 +81,18 @@ export class SpecialistPanel {
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.analysis,null,2))}</pre>`;
 
     this.bindTrainingButtons();
+  }
+
+  trainingResultView(result) {
+    if (!result) return `<div style="opacity:.6">هنوز نتیجه نهایی تمرین ثبت نشده است.</div>`;
+    const status = result.status === "completed" ? "تکمیل‌شده" : result.status === "exhausted" ? "سقف تلاش‌ها" : String(result.status || "نامشخص");
+    const assignments = Array.isArray(result.assignments) ? result.assignments : [];
+    return `<div style="margin-bottom:10px"><b>وضعیت:</b> ${this.escape(status)} · <b>اقدامات نهایی:</b> ${Number(result.finalActions || 0)}</div>` +
+      (assignments.length ? assignments.map(item => `<div style="padding:9px 0;border-bottom:1px solid #202633">
+        <b>${this.escape(item.targetId)}</b> · سطح ${this.escape(String(item.level ?? "—"))}
+        <span style="opacity:.7"> · تلاش: ${Number(item.attempts || 0)} · موفق: ${Number(item.successes || 0)} · ناموفق: ${Number(item.failures || 0)}</span>
+        <span style="opacity:.7"> · ${item.completed ? "تکمیل" : item.exhausted ? "تمام‌شدن سقف تلاش" : item.aborted ? "متوقف‌شده" : "در حال اجرا"}</span>
+      </div>`).join("") : `<div style="opacity:.6">جزئیات هدفی ثبت نشده است.</div>`);
   }
 
   trainingRecommendations(data) {
