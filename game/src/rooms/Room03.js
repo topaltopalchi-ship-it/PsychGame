@@ -75,7 +75,7 @@ export class Room03 {
       this.memoryPulseTimer=setTimeout(()=>{if(this.completed)return;if(this.objects.seat)this.objects.seat.position.z=this.seatBaseZ;},650);
     }
     if(this.memoryLight)this.memoryLight.intensity=6;
-    this.clockPulseTimer=setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},500);
+    this.clockPulseTimer=setTimeout(()=>{if(this.completed)return;if(this.memoryLight)this.memoryLight.intensity=3;},500);
     this.memoryContext.companion?.say?.("یادت هست کدوم مسیر رو اشتباه رفتی؟ اینجا هم انگار یادش مونده...");
   }
 
