@@ -33,7 +33,6 @@ export class SessionUploader {
       });
 
       if (!response.ok) throw new Error("Upload failed: " + response.status);
-      this.clearQueue();
       return { uploaded: true };
     } catch (error) {
       this.queue(payload);
@@ -47,7 +46,13 @@ export class SessionUploader {
       const current = JSON.parse(localStorage.getItem(this.queueKey) || "[]");
       const id = this.payloadId(payload);
       if (current.some(item => this.payloadId(item) === id)) return;
-      current.push(payload);
+      const filtered = current.filter(item => {
+        if (!payload.completed || !item?.report?.sessionId) return true;
+        return item.report.sessionId !== payload.report.sessionId;
+      });
+      filtered.push(payload);
+      localStorage.setItem(this.queueKey, JSON.stringify(filtered.slice(-20)));
+      return;
       localStorage.setItem(this.queueKey, JSON.stringify(current.slice(-20)));
     } catch {}
   }
