@@ -1,6 +1,6 @@
 import * as THREE from "three";
 export class Room03 {
-  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;this.exitWatched=false;this.finalBeatDone=false;this.endingTriggered=false;this.exitConfirmed=false;this.exitSequenceStarted=false;this.finalBeatTimer=null;this.endingTimer=null;this.confirmTimer=null;this.exitGlitchTimer=null;this.clockPulseTimer=null;this.memoryPulseTimer=null;this.companion=null;}
+  constructor(scene, tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.memoryContext={};this.memoryLight=null;this.memoryResponseTimer=null;this.memoryResponseDone=false;this.seatBaseZ=1;this.clockWasInspected=false;this.clockTickTimer=null;this.exitGlitchDone=false;this.waitTime=0;this.exitWatched=false;this.finalBeatDone=false;this.endingTriggered=false;this.exitConfirmed=false;this.exitSequenceStarted=false;this.finalBeatTimer=null;this.endingTimer=null;this.confirmTimer=null;this.exitGlitchTimer=null;this.clockPulseTimer=null;this.memoryPulseTimer=null;this.finalRestoreTimer=null;this.confirmRestoreTimer=null;this.endingRestoreTimer=null;this.companion=null;}
   start(context={}){
     this.memoryContext=context||{};this.companion=this.memoryContext.companion||null;this.memoryResponseDone=false;this.seatBaseZ=1;
     this.scene.fog=new THREE.FogExp2(0x090b10,this.memoryContext.wrongPaths?.length?.08:.025);
@@ -94,14 +94,14 @@ export class Room03 {
   }
 
   update(delta){
-    this.waitTime+=delta;
+    if(this.completed)return;this.waitTime+=delta;
     if(this.waitTime>10 && this.memoryContext?.wrongPaths?.length){this.triggerExitGlitch();}
     if(this.memoryContext?.wrongPaths?.length && this.memoryLight){
       this.memoryLight.intensity=3+Math.sin(performance.now()*.003)*.8;
     }
   }
   getInteractableObjects(){return Object.values(this.objects);}
-  destroy(){for(const t of ["memoryResponseTimer","clockPulseTimer","memoryPulseTimer","exitGlitchTimer","finalBeatTimer","endingTimer","confirmTimer"]){if(this[t])clearTimeout(this[t]);}this.objects={};}
+  destroy(){for(const t of ["memoryResponseTimer","clockPulseTimer","memoryPulseTimer","exitGlitchTimer","finalBeatTimer","endingTimer","confirmTimer","finalRestoreTimer","confirmRestoreTimer","endingRestoreTimer"]){if(this[t])clearTimeout(this[t]);}this.objects={};}
   triggerFinalBeat(){
     if(this.finalBeatDone)return;
     this.finalBeatDone=true;
@@ -146,7 +146,7 @@ export class Room03 {
       this.endingTimer=setTimeout(()=>{if(this.objects.exit)this.objects.exit.scale.z=1;},650);
     }
     this.scene.fog.density=.06;
-    this.endingTimer=setTimeout(()=>{this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.08:.025;},1100);
+    this.endingRestoreTimer=setTimeout(()=>{if(this.completed)return;this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.08:.025;},1100);
     this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "اگه بری داخل... شاید این بار خودت رو جا گذاشته باشی." : "در بازه. برو.");
   }
 
