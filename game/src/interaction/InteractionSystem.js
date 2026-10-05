@@ -377,6 +377,11 @@ InteractionSystem.prototype.handleRoom5 = function(objectId) {
   }
   if (objectId === "MIRROR_EXIT") {
     if (this.completed) return;
+    if (!this.room?.firstMirror) {
+      this.tracker.log("ROOM_05_EXIT_BLOCKED",{roomId:"ROOM_05",reason:"NO_MIRROR_INSPECTION"});
+      this.companion?.say?.("هنوز هیچ آینه‌ای رو بررسی نکردی. اول یکی رو نگاه کن.");
+      return;
+    }
     this.room?.chooseExit?.();
     this.room?.completeRoom?.();
     this.completed=true;
@@ -405,6 +410,11 @@ InteractionSystem.prototype.handleRoom7 = function(objectId) {
   }
   if (objectId === "COMP_EXIT") {
     if (this.completed) return;
+    if (!this.room?.firstChoice) {
+      this.tracker.log("ROOM_07_EXIT_BLOCKED",{roomId:"ROOM_07",reason:"NO_TRUST_CHOICE"});
+      this.companion?.say?.("هنوز انتخابت رو نکردی. اول تصمیم بگیر با من میای یا خودت می‌ری.");
+      return;
+    }
     this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
     this.tracker.log("ROOM_07_EXIT_CHECKED",{roomId:"ROOM_07"});
     window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_07",trustBehavior:{firstChoice:this.room?.firstChoice||null,lastChoice:this.room?.lastChoice||null,followCount:this.room?.followCount||0,ignoreCount:this.room?.ignoreCount||0,choiceSwitches:this.room?.choiceSwitches||0}}}));
@@ -419,6 +429,11 @@ InteractionSystem.prototype.handleRoom8 = function(objectId) {
   }
   if (objectId === "TRUTH_EXIT") {
     if (this.completed) return;
+    if (!this.room?.coreResponseDone) {
+      this.tracker.log("ROOM_08_EXIT_BLOCKED",{roomId:"ROOM_08",reason:"CORE_NOT_INSPECTED"});
+      this.companion?.say?.("قبل از رفتن، اول اون هسته رو بررسی کن.");
+      return;
+    }
     this.completed=true;
     const endingRoom = this.room;
     endingRoom?.startEnding?.();
