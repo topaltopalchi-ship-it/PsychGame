@@ -10,6 +10,10 @@ export class SessionManager {
     this.sessionStart = new Date().toISOString();
     this.playerConsent = true;
     this.storageKey = `psychgame_${this.playerCode}`;
+
+    // Persist every event as it happens so a refresh or accidental tab close
+    // does not discard the behavioral session.
+    this.tracker.onEvent = () => this.saveSession();
   }
 
   generatePlayerCode() {
@@ -61,8 +65,12 @@ export class SessionManager {
   }
 
   saveSession() {
-    const data = this.getSessionData();
-    localStorage.setItem(this.storageKey, JSON.stringify(data));
+    try {
+      const data = this.getSessionData();
+      localStorage.setItem(this.storageKey, JSON.stringify(data));
+    } catch (error) {
+      console.warn("PsychGame session save failed", error);
+    }
   }
 
   exportSession() {
