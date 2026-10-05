@@ -16,6 +16,9 @@ import { AudioManager } from "./audio/AudioManager.js";
 import { Room09 } from "./rooms/Room09.js";
 import { Room10 } from "./rooms/Room10.js";
 import { Room11 } from "./rooms/Room11.js";
+import { Room12 } from "./rooms/Room12.js";
+import { Room13 } from "./rooms/Room13.js";
+import { Room14 } from "./rooms/Room14.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -379,6 +382,25 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
     roomId,
     targetId: event.detail.targetId || null
   });
+
+  if (roomId === "ROOM_11") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.some(x=>x.targetId==="UNCERTAINTY_TOLERANCE")){
+      clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room12(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_11"}); interaction.setRoom(activeRoom,12); audioManager.setRoom(12); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); document.getElementById("pg-title").textContent="YOL · مرحله تمرینی ۰۴"; return;
+    }
+  }
+  if (roomId === "ROOM_12") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.some(x=>x.targetId==="REPETITION_REDUCTION")){
+      clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room13(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_12"}); interaction.setRoom(activeRoom,13); audioManager.setRoom(13); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); document.getElementById("pg-title").textContent="YOL · مرحله تمرینی ۰۵"; return;
+    }
+  }
+  if (roomId === "ROOM_13") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.some(x=>x.targetId==="EMOTIONAL_PAUSE")){
+      clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room14(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_13"}); interaction.setRoom(activeRoom,14); audioManager.setRoom(14); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); document.getElementById("pg-title").textContent="YOL · مرحله تمرینی ۰۶"; return;
+    }
+  }
 
   if (roomId === "ROOM_10") {
     const plan = loadTrainingPlan();
