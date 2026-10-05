@@ -2,9 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("desktop browser smoke test", async ({ page }) => {
   const errors = [];
-  const crashes = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  page.on("crash", () => crashes.push("PAGE_CRASH"));
   await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
   await expect(page.locator("canvas")).toBeVisible();
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
@@ -78,7 +76,9 @@ test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) =
 
 test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) => {
   const errors = [];
+  const crashes = [];
   page.on("pageerror", (error) => errors.push(String(error)));
+  page.on("crash", () => crashes.push("PAGE_CRASH"));
 
   await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
