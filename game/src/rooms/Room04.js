@@ -90,8 +90,8 @@ export class Room04 {
 
   update(delta, player){
     if(player?.camera?.position) this.registerMovement(player.camera.position);
-    if(this.startTime && !this.memoryShiftDone && performance.now()-this.startTime>6500 && this.maxDepth>4) this.triggerMemoryShift();
-    if(this.startTime && !this.glitchDone && performance.now()-this.startTime>9000) this.triggerGlitch();
+    if(this.startTime && !this.completed && !this.memoryShiftDone && performance.now()-this.startTime>6500 && this.maxDepth>4) this.triggerMemoryShift();
+    if(this.startTime && !this.completed && !this.glitchDone && performance.now()-this.startTime>9000) this.triggerGlitch();
     if(this.startTime && !this.completed && performance.now()-this.startTime>11500 && this.objects.endLight){
       const t=performance.now()*.003; this.objects.endLight.intensity=1.8+Math.sin(t)*1.1;
     }
