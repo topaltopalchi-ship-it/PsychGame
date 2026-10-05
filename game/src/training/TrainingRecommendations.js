@@ -3,13 +3,13 @@
 
 const RECOMMENDATION_RULES = [
   { id: "WAIT_TOLERANCE", label: "تحمل تأخیر", evidence: ({ analysis = {} }) => analysis.decisionLatency === "SHORT" },
-  { id: "RESPONSE_INHIBITION", label: "مهار پاسخ فوری", evidence: ({ analysis = {} }) => analysis.riskTaking?.level === "HIGH" || analysis.decisionLatency?.level === "SHORT" },
+  { id: "RESPONSE_INHIBITION", label: "مهار پاسخ فوری", evidence: ({ analysis = {} }) => analysis.riskTaking === "HIGH" || analysis.decisionLatency === "SHORT" },
   { id: "ATTENTION_SUSTAIN", label: "تداوم توجه", evidence: ({ analysis = {}, lookSummary = {} }) => analysis.exploration === "LOW" || Number(lookSummary?.totalLookMs || 0) < 3000 },
   { id: "DECISION_COMMITMENT", label: "ثبات تصمیم", evidence: ({ roomDetails = {} }) => Object.values(roomDetails).some(room => Number(room?.choiceSwitches || 0) > 0) },
   { id: "UNCERTAINTY_TOLERANCE", label: "تحمل ابهام", evidence: ({ analysis = {} }) => analysis.helpSeeking === "OBSERVED" },
   { id: "REPETITION_REDUCTION", label: "کاهش رفتار تکراری", evidence: ({ repeatedInteractions = {} }) => Object.values(repeatedInteractions).some(value => Number(value || 0) >= 3) },
   { id: "GRADUAL_APPROACH", label: "رویارویی تدریجی", evidence: ({ analysis = {} }) => analysis.persistence === "LOW" },
-  { id: "EMOTIONAL_PAUSE", label: "مکث پیش از واکنش", evidence: ({ analysis = {} }) => analysis.riskTaking?.level === "MODERATE" || analysis.riskTaking?.level === "HIGH" }
+  { id: "EMOTIONAL_PAUSE", label: "مکث پیش از واکنش", evidence: ({ analysis = {} }) => analysis.riskTaking === "MODERATE" || analysis.riskTaking === "HIGH" }
 ];
 
 export function buildTrainingRecommendations(report = {}) {
