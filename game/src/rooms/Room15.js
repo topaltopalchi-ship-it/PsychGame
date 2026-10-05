@@ -33,9 +33,13 @@ export class Room15 {
     const elapsed = this.lastActionAt ? performance.now() - this.lastActionAt : 0;
     const success = elapsed >= required;
     this.engine.recordAttempt(this.assignment.targetId, success, { requiredPauseMs: required, elapsedMs: Math.round(elapsed) });
-    if (!success) return this.companion?.say?.("این بار مکث کافی نبود؛ دوباره امتحان کن.");
-    this.completed = true;
-    window.dispatchEvent(new CustomEvent("psychgame-training-room-complete", { detail: { roomId: "ROOM_15", targetId: "RESPONSE_INHIBITION", trainingSession: this.engine.getSession() } }));
+    this.lastActionAt = 0;
+    if (this.engine.isCompleted(this.assignment.targetId) || this.engine.isExhausted(this.assignment.targetId)) {
+      this.completed = true;
+      window.dispatchEvent(new CustomEvent("psychgame-training-room-complete", { detail: { roomId: "ROOM_15", targetId: "RESPONSE_INHIBITION", trainingSession: this.engine.getSession() } }));
+      return;
+    }
+    this.companion?.say?.("این بار مکث کافی نبود؛ دوباره امتحان کن.");
   }
   skip() { this.completed = true; window.dispatchEvent(new CustomEvent("psychgame-training-room-complete", { detail: { roomId: "ROOM_15", targetId: null } })); }
   getInteractableObjects() { return Object.values(this.objects); }
