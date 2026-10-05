@@ -21,6 +21,7 @@ export class InteractionSystem {
     this.completed = false;
     this.gameFinished = false;
     this.room8CompletionTimer = null;
+    this.room8GameCompleteDispatched = false;
     this.room3CompletionTimer = null;
     this.lastLookedObject = null;
     this.lookStartTime = null;
@@ -451,10 +452,13 @@ InteractionSystem.prototype.handleRoom8 = function(objectId) {
     const endingRoom = this.room;
     endingRoom?.startEnding?.();
     this.tracker.log("ROOM_08_EXIT_CHECKED",{roomId:"ROOM_08"});
+    if (this.room8CompletionTimer || this.room8GameCompleteDispatched) return;
     this.room8CompletionTimer = setTimeout(()=>{
       this.room8CompletionTimer = null;
-      if (this.room !== endingRoom || !this.completed || this.gameFinished) return;
+      if (this.room !== endingRoom || !this.completed || this.gameFinished || this.room8GameCompleteDispatched) return;
       endingRoom?.completeRoom?.();
+      if (!endingRoom?.completed) return;
+      this.room8GameCompleteDispatched = true;
       window.dispatchEvent(new CustomEvent("psychgame-game-complete",{detail:{roomId:"ROOM_08"}}));
     },1800);
   }
