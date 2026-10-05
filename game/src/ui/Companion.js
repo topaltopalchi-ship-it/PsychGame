@@ -19,6 +19,7 @@ export class Companion {
     this.voiceReady = false;
     this.voiceTested = false;
     this.speechActive = false;
+    this.speechSequence = 0;
     this.queuedVoice = null;
     this.lastSpokenMessage = "";
     this.lastSpokenAt = 0;
@@ -154,6 +155,7 @@ export class Companion {
       if (voice) utterance.voice = voice;
 
       this.speechActive = true;
+      const speechSequence = ++this.speechSequence;
       this.lastSpokenMessage = message;
       this.lastSpokenAt = now;
 
@@ -164,7 +166,10 @@ export class Companion {
         const next = this.queuedVoice;
         this.queuedVoice = null;
         if (next && next.message !== message) {
-          setTimeout(() => this.speak(next.message, next.mood), 90);
+          setTimeout(() => {
+            if (speechSequence !== this.speechSequence || this.speechActive) return;
+            this.speak(next.message, next.mood);
+          }, 90);
         }
       };
       utterance.onerror = (event) => {
@@ -181,6 +186,7 @@ export class Companion {
       }, 120);
     } catch (error) {
       this.speechActive = false;
+      this.speechSequence++;
       console.warn("Companion voice unavailable", error);
     }
   }
@@ -275,6 +281,7 @@ export class Companion {
     this.queuedVoice = null;
     this.pendingVoice = null;
     this.speechActive = false;
+    this.speechSequence++;
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     this.panel.remove();
   }
