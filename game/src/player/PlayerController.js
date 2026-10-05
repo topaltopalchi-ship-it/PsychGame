@@ -9,6 +9,7 @@ export class PlayerController {
     this.touchMove = { x:0, y:0 };
     this.rotation = new THREE.Euler(0,0,0,"YXZ");
     this.direction = new THREE.Vector3();
+    this.bounds = { minX:-4.2, maxX:4.2, minZ:-4.2, maxZ:4.2 };
     this.setupKeyboard();
     this.setupMouse();
     this.setupTouch();
@@ -89,6 +90,17 @@ export class PlayerController {
     });
   }
 
+  setBounds(bounds = {}) {
+    this.bounds = {
+      minX: Number.isFinite(bounds.minX) ? bounds.minX : -4.2,
+      maxX: Number.isFinite(bounds.maxX) ? bounds.maxX : 4.2,
+      minZ: Number.isFinite(bounds.minZ) ? bounds.minZ : -4.2,
+      maxZ: Number.isFinite(bounds.maxZ) ? bounds.maxZ : 4.2
+    };
+    this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, this.bounds.minX, this.bounds.maxX);
+    this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, this.bounds.minZ, this.bounds.maxZ);
+  }
+
   look(dx,dy){
     this.rotation.y-=dx*this.lookSpeed;
     this.rotation.x-=dy*this.lookSpeed;
@@ -120,8 +132,8 @@ export class PlayerController {
 
     const movement=this.direction.clone().applyEuler(new THREE.Euler(0,this.camera.rotation.y,0));
     this.camera.position.add(movement.multiplyScalar(this.speed*delta));
-    this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, -4.2, 4.2);
-    this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, -4.2, 4.2);
+    this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, this.bounds.minX, this.bounds.maxX);
+    this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, this.bounds.minZ, this.bounds.maxZ);
     this.camera.position.y = 1.7;
   }
 }
