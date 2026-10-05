@@ -265,6 +265,7 @@ export class SpecialistReport {
       sessionId: sessionData?.sessionId ?? null,
       sessionStart: sessionData?.sessionStart ?? null,
       eventCount: events.length,
+      events,
       sessionDurationMs: Number.isFinite(lastEvent?.elapsedMs) ? lastEvent.elapsedMs : null,
       decisionCount: decisionEvents.length,
       timeToFirstDecisionMs: Number.isFinite(firstDecision?.elapsedMs) ? firstDecision.elapsedMs : null,
