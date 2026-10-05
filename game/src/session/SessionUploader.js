@@ -44,16 +44,22 @@ export class SessionUploader {
   queue(payload) {
     try {
       const current = JSON.parse(localStorage.getItem(this.queueKey) || "[]");
-      const id = this.payloadId(payload);
-      if (current.some(item => this.payloadId(item) === id)) return;
-      const filtered = current.filter(item => {
-        if (!payload.completed || !item?.report?.sessionId) return true;
-        return item.report.sessionId !== payload.report.sessionId;
-      });
+      const sessionId = payload?.report?.sessionId;
+      const isCompleted = Boolean(payload?.completed);
+      let filtered = current;
+
+      if (sessionId) {
+        if (isCompleted) {
+          filtered = current.filter(item => item?.report?.sessionId !== sessionId);
+        } else {
+          filtered = current.filter(item =>
+            item?.report?.sessionId !== sessionId || Boolean(item.completed)
+          );
+        }
+      }
+
       filtered.push(payload);
       localStorage.setItem(this.queueKey, JSON.stringify(filtered.slice(-20)));
-      return;
-      localStorage.setItem(this.queueKey, JSON.stringify(current.slice(-20)));
     } catch {}
   }
 
