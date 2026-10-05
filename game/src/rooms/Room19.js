@@ -106,7 +106,7 @@ export class Room19 {
       elapsedMs: Math.round(performance.now() - this.startTime)
     });
 
-    if (this.engine.isCompleted(targetId)) {
+    if (this.engine.isCompleted(targetId) || this.engine.isExhausted(targetId)) {
       this.completed = true;
       window.dispatchEvent(new CustomEvent("psychgame-training-room-complete", {
         detail: { roomId: "ROOM_19", targetId }
