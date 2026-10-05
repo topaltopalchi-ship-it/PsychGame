@@ -35,7 +35,7 @@ export class Room06 {
     if(this.lastChoice&&this.lastChoice!==id)this.switchCount++;
     if(!this.firstChoice)this.firstChoice=id;
     this.lastChoice=id;
-    this.tracker.log("ROOM_06_RECORDING_CHECKED",{recording:id,count:this.observations[id],firstChoice:this.firstChoice,switchCount:this.switchCount,secondsSinceEntry:Math.round((now-this.startedAt)/100)/10,reactionTimeMs:Math.round(now-this.startedAt)});
+    this.tracker.log("ROOM_06_RECORDING_CHECKED",{recording:id,count:this.observations[id],firstChoice:this.firstChoice,switchCount:this.switchCount,secondsSinceEntry:Math.round((now-this.startedAt)/100)/10,firstChoiceDelayMs:this.playCount===1?Math.round(now-this.startedAt):null});
     if(id==="REC_STATIC"){this.companion?.say?.("این صدا رو بهتره زیاد گوش ندی... انگار فقط نویز نیست.", 0, "fear");this.sequenceDone=true;}
     else if(id==="REC_FAMILIAR"){this.companion?.say?.(this.observations[id]>1?"دوباره صدای آشنا رو انتخاب کردی. چرا؟":"صدای آشناست... ولی مطمئنی خودش بود؟", 0, "stress");}
     else {this.companion?.say?.(this.observations[id]>1?"باز هم به صدای ناشناس برگشتی.":"این صدا رو نمی‌شناسی... هنوز می‌خوای گوش بدی؟", 0, "stress");}
