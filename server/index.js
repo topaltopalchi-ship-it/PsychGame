@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, "data");
+const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(__dirname, "data");
 const dataFile = path.join(dataDir, "sessions.json");
 const PORT = Number(process.env.PORT || 8787);
 const AUTHOR_TOKEN = process.env.AUTHOR_TOKEN || "";
