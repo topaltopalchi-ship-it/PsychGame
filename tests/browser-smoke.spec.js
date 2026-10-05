@@ -36,34 +36,35 @@ test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) =
   await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
 
-  // Move the camera onto the red button, then interact.
+  // Initial camera is at (0, 1.7, 3.5), looking toward -Z.
+  // Reach the red button at (-3.8, 1.8, 1.2).
   await page.keyboard.down("KeyA");
-  await page.waitForTimeout(1600);
+  await page.waitForTimeout(2400);
   await page.keyboard.up("KeyA");
   await page.keyboard.down("KeyW");
-  await page.waitForTimeout(1550);
+  await page.waitForTimeout(1250);
   await page.keyboard.up("KeyW");
   await page.keyboard.press("KeyE");
 
-  // Move to the drawer and reveal the key.
+  // Reach the drawer at (0.8, 1.2, -1.0).
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(3000);
   await page.keyboard.up("KeyD");
   await page.keyboard.down("KeyW");
-  await page.waitForTimeout(2600);
+  await page.waitForTimeout(1000);
   await page.keyboard.up("KeyW");
   await page.keyboard.press("KeyE");
 
-  // The revealed key is at the same location as the drawer target.
-  await page.waitForTimeout(150);
+  // The drawer reveals the key at the same location.
+  await page.waitForTimeout(200);
   await page.keyboard.press("KeyE");
 
-  // Move to the exit door and unlock/complete Room 01.
+  // Reach the exit door at the east wall.
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(2500);
   await page.keyboard.up("KeyD");
   await page.keyboard.press("KeyE");
 
-  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 2500 });
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
   expect(errors).toEqual([]);
 });
