@@ -83,7 +83,8 @@ export function recordTrainingAttempt(session, targetId, successful) {
         attempts,
         successes,
         failures,
-        completed: successes >= 2 || attempts >= maxAttempts
+        completed: successes >= 2,
+        exhausted: attempts >= maxAttempts
       };
     })
   };
