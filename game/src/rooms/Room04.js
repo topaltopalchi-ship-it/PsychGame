@@ -69,7 +69,7 @@ export class Room04 {
 
   reactToMark(){
     this.markObservations++;
-    this.tracker.log("ROOM_04_MARK_INSPECTED",{turnCount:this.turnCount,explored:this.explored,observations:this.markObservations,maxDepth:Math.round(this.maxDepth*10)/10});
+    this.tracker.log("ROOM_04_MARK_INSPECTED",{turnCount:this.turnCount,explored:this.explored,observations:this.markObservations,maxDepth:Math.round(this.maxDepth*10)/10,reactionTimeMs:Math.round(performance.now()-this.startTime)});
     if(this.markObservations===2){
       this.companion?.say?.("دوباره همین علامت... یا فقط داری چیزی رو به یاد میاری که وجود نداره؟", 0, "tense");
     }
