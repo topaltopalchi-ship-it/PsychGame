@@ -403,7 +403,6 @@ function continueTraining(previousRoom = null) {
 
   const next = getTrainingRouteTarget(plan);
   if (!next) {
-    trainingFinished = true;
     startTrainingRoom(20, plan, previousRoom);
     return;
   }
@@ -438,7 +437,11 @@ function finishGameWithoutTraining() {
   if (titleEl) titleEl.textContent = "YOL · پایان";
   if (hintEl) hintEl.textContent = "سفر تمام شد.";
   if (targetEl) targetEl.style.display = "none";
-  if (interactButton) interactButtwindow.addEventListener("psychgame-training-room-complete", (event) => {
+  if (interactButton) interactButton.style.display = "none";
+  audioManager.playPulse("dark");
+}
+
+window.addEventListener("psychgame-training-room-complete", (event) => {
   const roomId = event.detail?.roomId;
   if (!roomId || trainingFinished) return;
 
@@ -449,6 +452,26 @@ function finishGameWithoutTraining() {
 
   if (roomId >= "ROOM_15" && roomId <= "ROOM_19") {
     scheduleRoomTransition(() => continueTraining(roomId), 500);
+    return;
+  }
+
+  if (roomId === "ROOM_20" && event.detail.final) {
+    trainingFinished = true;
+    gameFinished = true;
+    session.saveSession({ completed: true });
+    session.uploadCompletedSession();
+    clearRoomTransitionTimers();
+    interaction.currentTarget = null;
+    interaction.finishLook();
+    const titleEl = document.getElementById("pg-title");
+    const hintEl = document.getElementById("pg-hint");
+    const targetEl = document.getElementById("pg-target");
+    const interactButton = document.getElementById("pg-touch-interact");
+    if (titleEl) titleEl.textContent = "YOL · پایان تمرین";
+    if (hintEl) hintEl.textContent = "مرحله تمرینی تمام شد.";
+    if (targetEl) targetEl.style.display = "none";
+    if (interactButton) interactButton.style.display = "none";
+    audioManager.playPulse("dark");
   }
 });
 
