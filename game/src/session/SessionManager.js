@@ -80,6 +80,32 @@ export class SessionManager {
     }
   }
 
+  getTrainingConsistency() {
+    const result = this.getTrainingResult();
+    const progress = this.getTrainingProgress();
+    if (!result) return { status: "running", consistent: true, mismatches: [] };
+    if (!progress) return { status: "missing_runtime", consistent: false, mismatches: ["runtime"] };
+    const mismatches = [];
+    if (result.trainingSessionId && progress.sessionId !== result.trainingSessionId) mismatches.push("sessionId");
+    const resultAssignments = Array.isArray(result.assignments) ? result.assignments : [];
+    const runtimeAssignments = Array.isArray(progress.assignments) ? progress.assignments : [];
+    const fields = ["targetId","level","attempts","successes","failures","completed","exhausted","aborted"];
+    if (resultAssignments.length !== runtimeAssignments.length) mismatches.push("assignmentCount");
+    const runtimeByTarget = new Map(runtimeAssignments.map(item => [item.targetId, item]));
+    for (const expected of resultAssignments) {
+      const actual = runtimeByTarget.get(expected.targetId);
+      if (!actual) { mismatches.push(`assignment:${expected.targetId}`); continue; }
+      for (const field of fields) {
+        if (actual[field] !== expected[field]) { mismatches.push(`assignment:${expected.targetId}:${field}`); break; }
+      }
+    }
+    return {
+      status: result.status || "completed",
+      consistent: mismatches.length === 0,
+      mismatches
+    };
+  }
+
   getSessionData() {
     return {
       playerCode: this.playerCode,
@@ -89,7 +115,8 @@ export class SessionManager {
       events: this.tracker.getEvents(),
       analysis: this.getAnalysis(),
       trainingResult: this.getTrainingResult(),
-      trainingProgress: this.getTrainingProgress()
+      trainingProgress: this.getTrainingProgress(),
+      trainingConsistency: this.getTrainingConsistency()
     };
   }
 
