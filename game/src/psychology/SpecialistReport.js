@@ -7,6 +7,8 @@ export class SpecialistReport {
     const timeline = [];
     const roomEntries = {};
     const roomExits = {};
+    const lookStats = {};
+    const interactionStats = {};
 
     const inferRoomId = (event) => {
       if (event?.roomId) return event.roomId;
@@ -23,6 +25,14 @@ export class SpecialistReport {
         };
       }
       return rooms[roomId];
+    };
+
+    const ensureLook = (roomId, objectId) => {
+      const key = `${roomId || "UNKNOWN"}::${objectId || "UNKNOWN"}`;
+      if (!lookStats[key]) {
+        lookStats[key] = { roomId, objectId, looks: 0, totalLookMs: 0, maxLookMs: 0, lastLookMs: null };
+      }
+      return lookStats[key];
     };
 
     for (const event of events) {
@@ -42,17 +52,31 @@ export class SpecialistReport {
           room.completed++;
           roomExits[roomId] = event.elapsedMs ?? null;
         }
-        if (type === "OBJECT_INTERACTION") room.interactions++;
+        if (type === "OBJECT_INTERACTION") {
+          room.interactions++;
+          const key = `${roomId}::${event.objectId || "UNKNOWN"}`;
+          if (!interactionStats[key]) interactionStats[key] = { roomId, objectId: event.objectId || null, attempts: 0 };
+          interactionStats[key].attempts += 1;
+        }
         if (type === "FAILURE") room.failures++;
 
         if (type.includes("CHOICE") || type.includes("EXIT_CHECKED")) {
           room.decisions++;
-          room.lastChoice = event.choice ?? event.firstChoice ?? event.lastChoice ?? room.lastChoice;
-          if (!room.firstChoice && event.firstChoice) room.firstChoice = event.firstChoice;
+          room.lastChoice = event.choice ?? event.path ?? event.firstChoice ?? event.lastChoice ?? room.lastChoice;
+          if (!room.firstChoice) room.firstChoice = event.firstChoice ?? event.path ?? event.choice ?? null;
         }
 
         if (type.includes("INSPECTED") || type.includes("CHECKED")) room.inspections++;
         room.switches += Number(event.choiceSwitches || 0) + Number(event.switchCount || 0);
+      }
+
+      if (type === "OBJECT_LOOK_END") {
+        const stat = ensureLook(roomId, event.objectId);
+        const duration = Number(event.durationMs) || 0;
+        stat.looks++;
+        stat.totalLookMs += duration;
+        stat.maxLookMs = Math.max(stat.maxLookMs, duration);
+        stat.lastLookMs = duration;
       }
 
       if (timeline.length < 500) {
@@ -62,7 +86,10 @@ export class SpecialistReport {
           roomId,
           elapsedMs: Number.isFinite(event.elapsedMs) ? event.elapsedMs : null,
           timestamp: event.timestamp ?? null,
-          choice: event.choice ?? null
+          objectId: event.objectId ?? null,
+          choice: event.choice ?? event.path ?? null,
+          durationMs: event.durationMs ?? null,
+          attempt: event.attempt ?? null
         });
       }
     }
@@ -74,6 +101,15 @@ export class SpecialistReport {
         rooms[roomId].durationMs = end - start;
       }
     }
+
+    const lookSummary = Object.values(lookStats).map(stat => ({
+      ...stat,
+      averageLookMs: stat.looks ? Math.round(stat.totalLookMs / stat.looks) : 0
+    }));
+
+    const repeatedInteractions = Object.values(interactionStats)
+      .filter(stat => stat.attempts > 1)
+      .sort((a, b) => b.attempts - a.attempts);
 
     const decisionEvents = events.filter((event) =>
       String(event?.type || "").includes("CHOICE") ||
@@ -104,6 +140,8 @@ export class SpecialistReport {
       completedRooms,
       path,
       roomDurations,
+      lookSummary,
+      repeatedInteractions,
       timeline,
       eventTypes: byType,
       rooms,
