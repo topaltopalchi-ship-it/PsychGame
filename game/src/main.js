@@ -478,18 +478,20 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
 
 window.addEventListener("psychgame-game-complete",(event)=>{
   if(event.detail?.roomId!=="ROOM_08" || gameFinished)return;
+  const trainingPlan = loadTrainingPlan();
+  if (trainingPlan?.assignments?.length) {
+    gameFinished = false;
+    interaction.currentTarget = null;
+    interaction.finishLook();
+    continueTraining("ROOM_08");
+    return;
+  }
   gameFinished = true;
   session.saveSession({ completed: true });
   session.uploadCompletedSession();
   clearRoomTransitionTimers();
   interaction.currentTarget = null;
   interaction.finishLook();
-  const trainingPlan = loadTrainingPlan();
-  if (trainingPlan?.assignments?.length) {
-    gameFinished = false;
-    continueTraining("ROOM_08");
-    return;
-  }
   const titleEl=document.getElementById("pg-title");
   const hintEl=document.getElementById("pg-hint");
   const targetEl=document.getElementById("pg-target");
