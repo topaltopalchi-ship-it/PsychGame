@@ -8,14 +8,14 @@ export class Room20{
  finish(){
   if(this.completed||!this.engine||!this.actions)return;
   const summary=this.engine.getSummary();
-  const assignments=summary.assignments||[];
+  const assignments=summary.assignments;
   if(!assignments.length)return;
-  const pending=assignments.filter(x=>!x.completed&&!x.exhausted&&!x.aborted);
-  if(pending.length)return;
   const completed=assignments.filter(x=>x.completed);
   const exhausted=assignments.filter(x=>x.exhausted&&!x.completed);
   const aborted=assignments.filter(x=>x.aborted&&!x.completed&&!x.exhausted);
-  const result={version:1,playerCode:this.plan?.playerCode||null,completedAt:new Date().toISOString(),status:pending.length?"in_progress":(completed.length===assignments.length?"completed":(completed.length||exhausted.length?"partial":"aborted")),finalActions:this.actions,assignments,rooms:[15,16,17,18,19,20]};
+  const terminal=assignments.filter(x=>x.completed||x.exhausted||x.aborted);
+  if(terminal.length!==assignments.length)return;
+  const result={version:1,playerCode:this.plan?.playerCode||null,completedAt:new Date().toISOString(),status:completed.length===assignments.length?"completed":"exhausted",finalActions:this.actions,assignments,rooms:[15,16,17,18,19,20],summary:{completed:completed.length,exhausted:exhausted.length,aborted:aborted.length,total:assignments.length}};
   try{if(this.plan?.playerCode)localStorage.setItem("psychgame_training_results_"+this.plan.playerCode,JSON.stringify(result));}catch(_){}
   this.completed=true;
   this.tracker.log("TRAINING_PHASE_COMPLETED",{roomId:"ROOM_20",finalActions:this.actions,status:result.status,assignments:summary.assignments});
