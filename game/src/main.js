@@ -260,7 +260,7 @@ function startTrainingRoom(roomNumber, plan, previousRoom = null) {
   const RoomClass = constructors[safeRoomNumber];
   if (!RoomClass || safeRoomNumber < 15 || safeRoomNumber > 20) return false;
   activeRoom = new RoomClass(scene, tracker, plan, companion);
-  activeRoom.start({ previousRoom }); interaction.setRoom(activeRoom, safeRoomNumber); audioManager.setRoom(safeRoomNumber); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); mainLight.intensity = 20;
+  const selectedAssignment = plan?.assignments?.find(item => getTrainingRoomForTarget(item.targetId) === safeRoomNumber && !item.completed && !item.aborted && !item.exhausted) || null; activeRoom.start({ previousRoom, targetId: selectedAssignment?.targetId || null }); interaction.setRoom(activeRoom, safeRoomNumber); audioManager.setRoom(safeRoomNumber); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); mainLight.intensity = 20;
   document.getElementById("pg-title").textContent = `YOL · مرحله تمرینی ${String(safeRoomNumber - 14).padStart(2, "0")}`;
   return true;
 }
