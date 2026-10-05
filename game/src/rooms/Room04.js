@@ -71,7 +71,7 @@ export class Room04 {
     const marks=Object.values(this.objects).filter(o=>o?.userData?.objectId==="HALL_MARK");
     if(marks.length){
       marks.forEach((m,i)=>{m.position.z += i%2===0 ? .22 : -.22;});
-      this.memoryShiftTimer=setTimeout(()=>marks.forEach((m,i)=>{m.position.z += i%2===0 ? -.22 : .22;}),700);
+      this.memoryShiftTimer=setTimeout(()=>{if(this.completed)return;marks.forEach((m,i)=>{m.position.z += i%2===0 ? -.22 : .22;});},700);
     }
     this.companion?.say?.("نه... این علامت‌ها جای قبلی‌شون نیستن. یا شاید حافظه‌ی تو عوض شده.");
   }
@@ -83,7 +83,7 @@ export class Room04 {
     if(this.objects.lamp){
       this.objects.lamp.intensity=9;
       if(this.objects.endLight)this.objects.endLight.intensity=0.4;
-      this.glitchTimer=setTimeout(()=>{if(this.objects.lamp)this.objects.lamp.intensity=1.5;if(this.objects.endLight)this.objects.endLight.intensity=2.2;},180);
+      this.glitchTimer=setTimeout(()=>{if(this.completed)return;if(this.objects.lamp)this.objects.lamp.intensity=1.5;if(this.objects.endLight)this.objects.endLight.intensity=2.2;},180);
     }
     this.companion?.say?.("صبر کن... این نور قبلاً این‌طوری نبود.");
   }
