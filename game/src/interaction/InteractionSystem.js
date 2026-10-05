@@ -110,8 +110,25 @@ export class InteractionSystem {
     const target = hits.map(h => this.resolveTarget(h.object)).find(Boolean);
 
     if (target) {
+      const objectId = target.userData.objectId;
+      const isNewTarget = this.lastLookedObject !== objectId;
+
+      // Touch/pointer interaction can happen before the next animation frame.
+      // Start the same look interval used by the center-ray path so reaction
+      // time stays comparable on desktop and mobile.
+      if (isNewTarget) {
+        this.finishLook();
+        this.lastLookedObject = objectId;
+        this.lookStartTime = performance.now();
+        this.tracker.log("OBJECT_LOOK_START", {
+          objectId,
+          roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
+          source: "POINTER"
+        });
+      }
+
       this.currentTarget = target;
-      window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId: target.userData.objectId } }));
+      window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId } }));
       this.interact();
       return true;
     }
