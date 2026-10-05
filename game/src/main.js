@@ -56,6 +56,7 @@ const interaction = new InteractionSystem(camera, tracker, scene, mainLight);
 const room01 = new Room01(scene, tracker);
 let activeRoom = room01;
 const behavioralHistory = { hallBehavior:{}, mirrorBehavior:{}, recordingBehavior:{}, trustBehavior:{} };
+let gameFinished = false;
 
 room01.start();
 interaction.setRoom(room01, 1);
@@ -280,7 +281,8 @@ function startRoom08(context={previousRoom:"ROOM_07"}) {
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
-  player.update(delta);activeRoom?.update?.(delta, player);
+  player.update(delta);
+  if (!gameFinished) activeRoom?.update?.(delta, player);
   interaction.update();
   renderer.render(scene, camera);
 }
@@ -294,6 +296,7 @@ window.addEventListener("resize", () => {
 
 window.addEventListener("psychgame-game-complete",(event)=>{
   if(event.detail?.roomId!=="ROOM_08")return;
+  gameFinished = true;
   const titleEl=document.getElementById("pg-title");
   const hintEl=document.getElementById("pg-hint");
   const targetEl=document.getElementById("pg-target");
