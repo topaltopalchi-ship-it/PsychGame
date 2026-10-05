@@ -243,10 +243,14 @@ function loadTrainingPlan() { try { const key = `psychgame_training_${session.ge
 
 function getTrainingRouteTarget(plan) {
   const assignments = Array.isArray(plan?.assignments) ? plan.assignments : [];
-  const runtime = (() => { try { const raw = sessionStorage.getItem(`psychgame_training_runtime_${session.getPlayerCode()}`); return raw ? JSON.parse(raw) : null; } catch (_) { return null; } })();
+  const runtime = loadTrainingRuntime();
   const compatibleRuntime = !runtime || !plan?.planId || runtime.planId === plan.planId;
-  const states = new Map((compatibleRuntime ? (runtime?.assignments || []) : []).map(item => [item.targetId, item]));
-  return assignments.find(item => { const state = states.get(item.targetId); return !state || (!state.completed && !state.aborted && !state.exhausted); }) || null;
+  const runtimeAssignments = compatibleRuntime && Array.isArray(runtime?.assignments) ? runtime.assignments : [];
+  const states = new Map(runtimeAssignments.filter(item => item?.targetId).map(item => [item.targetId, item]));
+  return assignments.find(item => {
+    const state = states.get(item.targetId);
+    return !state || (!state.completed && !state.aborted && !state.exhausted);
+  }) || null;
 }
 
 function startTrainingRoom(roomNumber, plan, previousRoom = null) {
