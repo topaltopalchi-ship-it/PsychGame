@@ -106,5 +106,5 @@ export class Room04 {
     this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_04",turnCount:this.turnCount,explored:this.explored});
   }
 
-  destroy(){ if(this.eventTimer)clearTimeout(this.eventTimer); if(this.memoryShiftTimer)clearTimeout(this.memoryShiftTimer); if(this.glitchTimer)clearTimeout(this.glitchTimer); if(this.loopPulseTimer)clearTimeout(this.loopPulseTimer); }
+  destroy(){ if(this.eventTimer)clearTimeout(this.eventTimer); if(this.memoryShiftTimer)clearTimeout(this.memoryShiftTimer); if(this.glitchTimer)clearTimeout(this.glitchTimer); if(this.loopPulseTimer)clearTimeout(this.loopPulseTimer); this.objects={}; }
 }
