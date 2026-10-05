@@ -15,11 +15,12 @@ export class Room20{
   const aborted=assignments.filter(x=>x.aborted&&!x.completed&&!x.exhausted);
   const terminal=assignments.filter(x=>x.completed||x.exhausted||x.aborted);
   if(terminal.length!==assignments.length)return;
-  const result={version:1,playerCode:this.plan?.playerCode||null,completedAt:new Date().toISOString(),status:completed.length===assignments.length?"completed":"exhausted",finalActions:this.actions,assignments,rooms:[15,16,17,18,19,20],summary:{completed:completed.length,exhausted:exhausted.length,aborted:aborted.length,total:assignments.length}};
+  const status=completed.length===assignments.length?"completed":(aborted.length===assignments.length?"aborted":"exhausted");
+  const result={version:1,playerCode:this.plan?.playerCode||null,completedAt:new Date().toISOString(),status,finalActions:this.actions,assignments,rooms:[15,16,17,18,19,20],summary:{completed:completed.length,exhausted:exhausted.length,aborted:aborted.length,total:assignments.length}};
   try{if(this.plan?.playerCode)localStorage.setItem("psychgame_training_results_"+this.plan.playerCode,JSON.stringify(result));}catch(_){}
   this.completed=true;
   this.tracker.log("TRAINING_PHASE_COMPLETED",{roomId:"ROOM_20",finalActions:this.actions,status:result.status,assignments:summary.assignments});
   window.dispatchEvent(new CustomEvent("psychgame-training-room-complete",{detail:{roomId:"ROOM_20",final:true,trainingResult:result}}));
-}
+ }
  getInteractableObjects(){return Object.values(this.objects)} destroy(){this.objects={}}
 }
