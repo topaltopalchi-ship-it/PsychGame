@@ -138,6 +138,44 @@ try {
   assert.equal("events" in listedSmoke, false);
   assert.equal("analysis" in listedSmoke, false);
 
+  const seededSessions = Array.from({ length: 5000 }, (_, index) => ({
+    id: "retention-" + index,
+    playerCode: "PLAYER-RETENTION",
+    receivedAt: new Date().toISOString(),
+    completed: false,
+    report: {
+      sessionId: "retention-" + index,
+      playerCode: "PLAYER-RETENTION",
+      events: [],
+      eventCount: 0
+    }
+  }));
+  fs.writeFileSync(path.join(dataDir, "sessions.json"), JSON.stringify(seededSessions), "utf8");
+
+  const retentionReport = {
+    sessionId: "retention-new",
+    playerCode: "PLAYER-RETENTION",
+    events: [],
+    eventCount: 0
+  };
+  const retentionCreated = await request("/api/sessions", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer test-token",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ completed: false, report: retentionReport })
+  });
+  assert.equal(retentionCreated.status, 201);
+
+  const retentionList = await request("/api/sessions", {
+    headers: { Authorization: "Bearer test-token" }
+  });
+  const retentionSessions = await retentionList.json();
+  assert.equal(retentionSessions.sessions.length, 5000);
+  assert.equal(retentionSessions.sessions.some((item) => item.id === "retention-0"), false);
+  assert.equal(retentionSessions.sessions.some((item) => item.id === "retention-new"), true);
+
   const oversized = await request("/api/sessions", {
     method: "POST",
     headers: {
