@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server/index.js",
-    "test:api": "node tests/server-smoke.js"
+    "test:api": "node tests/server-smoke.js",
+    "test:browser": "playwright test",
+    "test:smoke": "npm run test:api && npm run test:browser"
   },
   "dependencies": {
     "three": "^0.180.0"
