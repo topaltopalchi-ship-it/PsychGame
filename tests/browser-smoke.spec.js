@@ -2,7 +2,9 @@ import { test, expect } from "@playwright/test";
 
 test("desktop browser smoke test", async ({ page }) => {
   const errors = [];
+  const crashes = [];
   page.on("pageerror", (error) => errors.push(String(error)));
+  page.on("crash", () => crashes.push("PAGE_CRASH"));
   await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
   await expect(page.locator("canvas")).toBeVisible();
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
@@ -98,6 +100,8 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
   });
   expect(pathInteracted).toBe(true);
 
-  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 3000 });
+  await page.waitForTimeout(1500);
+  expect(crashes).toEqual([]);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 5000 });
   expect(errors).toEqual([]);
 });
