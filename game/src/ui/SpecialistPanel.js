@@ -57,6 +57,9 @@ export class SpecialistPanel {
       </div>
 
       <h3>برنامه تمرینی انتخاب‌شده</h3>
+      <div style="margin-bottom:8px">
+        <button id="pg-sp-new-training">شروع برنامه تمرینی جدید</button>
+      </div>
       <div id="pg-training-plan" style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
         ${this.trainingPlanView()}
       </div>
@@ -88,6 +91,62 @@ export class SpecialistPanel {
 
     this.bindTrainingButtons();
     root.querySelector("#pg-sp-refresh-training").onclick = () => this.refreshTrainingProgress();
+    root.querySelector("#pg-sp-new-training").onclick = () => this.startNewTrainingPlan();
+  }
+
+  startNewTrainingPlan() {
+    const playerCode = this.session.getPlayerCode();
+    const currentPlan = this.trainingPlan;
+    if (!currentPlan?.planId) {
+      this.trainingPlan = createTrainingPlan({
+        playerCode,
+        sourceSessionId: this.session.getSessionId()
+      });
+      this.saveTrainingPlan();
+      this.refreshTrainingPlan();
+      return;
+    }
+
+    if (!confirm("برنامه تمرینی فعلی بسته و برای سابقه نگهداری می‌شود. برنامه جدید از صفر شروع شود؟")) return;
+
+    try {
+      const runtimeKey = `psychgame_training_runtime_${playerCode}`;
+      const recoveryKey = `psychgame_training_recovery_${playerCode}`;
+      const resultKey = `psychgame_training_results_${playerCode}`;
+      const archiveKey = `psychgame_training_archive_${playerCode}_${currentPlan.planId}`;
+      const archive = {
+        version: 1,
+        archivedAt: new Date().toISOString(),
+        plan: currentPlan,
+        runtime: this.readJson(sessionStorage, runtimeKey) || this.readJson(localStorage, recoveryKey),
+        result: this.readJson(localStorage, resultKey)
+      };
+      localStorage.setItem(archiveKey, JSON.stringify(archive));
+      sessionStorage.removeItem(runtimeKey);
+      localStorage.removeItem(recoveryKey);
+      localStorage.removeItem(resultKey);
+
+      this.trainingPlan = createTrainingPlan({
+        playerCode,
+        sourceSessionId: this.session.getSessionId()
+      });
+      this.saveTrainingPlan();
+      this.refreshTrainingPlan();
+      this.refreshTrainingProgress();
+      alert("برنامه قبلی برای سابقه نگهداری شد و برنامه جدید آماده است.");
+    } catch (error) {
+      console.warn("PsychGame new training plan failed", error);
+      alert("شروع برنامه جدید ناموفق بود.");
+    }
+  }
+
+  readJson(storage, key) {
+    try {
+      const raw = storage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   refreshTrainingProgress() {
