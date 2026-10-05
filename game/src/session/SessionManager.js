@@ -14,6 +14,7 @@ export class SessionManager {
     this.storageKey = `psychgame_${this.playerCode}`;
     this.uploader = new SessionUploader({ endpoint: import.meta.env.VITE_API_URL || "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
     this.lastRemoteUpload = 0;
+    this.completedUploadStarted = false;
     this.tracker.onEvent = () => this.saveSession();
     window.addEventListener("psychgame-training-phase-completed", () => this.saveSession({ completed: true }));
     window.addEventListener("psychgame-training-room-complete", (event) => {
@@ -99,15 +100,26 @@ export class SessionManager {
       const data = this.getSessionData();
       localStorage.setItem(this.storageKey, JSON.stringify(data));
       const now = Date.now();
-      if (completed || now - this.lastRemoteUpload > 15000) {
+      if (completed) {
+        if (this.completedUploadStarted) return;
+        this.completedUploadStarted = true;
         this.lastRemoteUpload = now;
-        this.uploader.upload(this.getReport(), { completed });
+        this.uploader.upload(this.getReport(), { completed: true });
+        return;
+      }
+      if (now - this.lastRemoteUpload > 15000) {
+        this.lastRemoteUpload = now;
+        this.uploader.upload(this.getReport(), { completed: false });
       }
     } catch (error) {
       console.warn("PsychGame session save failed", error);
     }
   }
 
-  uploadCompletedSession() { return this.uploader.upload(this.getReport(), { completed: true }); }
+  uploadCompletedSession() {
+    if (this.completedUploadStarted) return Promise.resolve({ skipped: true, reason: "already-started" });
+    this.completedUploadStarted = true;
+    return this.uploader.upload(this.getReport(), { completed: true });
+  }
   exportSession() { return JSON.stringify(this.getReport(), null, 2); }
 }
