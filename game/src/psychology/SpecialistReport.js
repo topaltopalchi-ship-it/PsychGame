@@ -108,6 +108,21 @@ export class SpecialistReport {
     const completedRooms = Object.entries(rooms).filter(([, room]) => room.completed > 0).map(([id]) => id);
     const lastEvent = events[events.length - 1];
     const firstDecision = decisionEvents[0];
+    const expectedRooms = ["ROOM_01", "ROOM_02", "ROOM_03", "ROOM_04", "ROOM_05", "ROOM_06", "ROOM_07", "ROOM_08"];
+    const observedRooms = expectedRooms.filter((roomId) => rooms[roomId]);
+    const missingRooms = expectedRooms.filter((roomId) => !rooms[roomId]);
+    const dataQuality = {
+      expectedRooms,
+      observedRooms,
+      missingRooms,
+      completeRoomCount: completedRooms.length,
+      eventCount: events.length,
+      hasDecisionLatency: Number.isFinite(firstDecision?.elapsedMs),
+      hasRoomDurations: observedRooms.filter((roomId) => Number.isFinite(rooms[roomId]?.durationMs)).length,
+      note: missingRooms.length
+        ? "این گزارش بر اساس اتاق‌ها و رویدادهای ثبت‌شده تهیه شده است؛ برای اتاق یا شاخص ثبت‌نشده، نتیجه‌ای استنباط نشده است."
+        : "پوشش رویدادهای اتاق‌های ۰۱ تا ۰۸ در این جلسه ثبت شده است."
+    };
     const latestEventOfType = (type, roomId) => {
       for (let i = events.length - 1; i >= 0; i--) {
         const event = events[i];
@@ -133,6 +148,7 @@ export class SpecialistReport {
       },
       مسیر_اتاق‌ها: path,
       اتاق‌های_تکمیل‌شده: completedRooms,
+      کیفیت_داده: dataQuality,
       خلاصه_اتاق‌ها: {
         ROOM_01: {
           عنوان: "اتاق ۰۱",
@@ -270,6 +286,7 @@ export class SpecialistReport {
         ROOM_08: { behavioralProfiles: byType.ROOM_08_BEHAVIORAL_PROFILE || 0, behaviorContexts: byType.ROOM_08_BEHAVIOR_CONTEXT || 0, coreResponses: byType.ROOM_08_CORE_RESPONSE || 0, exitChecks: byType.ROOM_08_EXIT_CHECKED || 0, finalSequences: byType.ROOM_08_FINAL_SEQUENCE || 0 }
       },
       analysis: sessionData?.analysis ?? null,
+      dataQuality,
       specialistReportFa
     };
   }
