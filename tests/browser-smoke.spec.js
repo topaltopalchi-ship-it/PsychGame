@@ -258,3 +258,56 @@ test("Session upload queues failed payloads and flushes them after recovery", as
   expect(result.queuedAfterRecovery).toBe(0);
   expect(result.attempts).toBe(3);
 });
+
+
+test("Session upload queue preserves completed sessions and deduplicates progress", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+
+  const result = await page.evaluate(async () => {
+    const { SessionUploader } = await import("/PsychGame/src/session/SessionUploader.js");
+    const uploader = new SessionUploader({ endpoint: "http://upload.test" });
+    const queueKey = "psychgame_upload_queue_v1";
+    localStorage.removeItem(queueKey);
+
+    const progress = {
+      version: 1,
+      completed: false,
+      uploadedAt: "2026-01-01T00:00:00.000Z",
+      report: { sessionId: "queue-order", playerCode: "PLAYER-QUEUE", events: [] }
+    };
+    const progressLater = {
+      ...progress,
+      uploadedAt: "2026-01-01T00:00:01.000Z"
+    };
+    const completed = {
+      ...progress,
+      completed: true,
+      uploadedAt: "2026-01-01T00:00:02.000Z"
+    };
+
+    uploader.queue(progress);
+    uploader.queue(progressLater);
+    const afterProgressRetry = uploader.readQueue();
+
+    uploader.queue(completed);
+    const afterCompleted = uploader.readQueue();
+
+    uploader.queue(progressLater);
+    const afterLateProgress = uploader.readQueue();
+
+    return {
+      afterProgressRetry: afterProgressRetry.map(item => ({
+        completed: item.completed,
+        uploadedAt: item.uploadedAt
+      })),
+      afterCompleted: afterCompleted.map(item => item.completed),
+      afterLateProgress: afterLateProgress.map(item => item.completed)
+    };
+  });
+
+  expect(result.afterProgressRetry).toEqual([
+    { completed: false, uploadedAt: "2026-01-01T00:00:01.000Z" }
+  ]);
+  expect(result.afterCompleted).toEqual([true]);
+  expect(result.afterLateProgress).toEqual([true]);
+});
