@@ -120,6 +120,8 @@ export class Companion {
     // Never stack several companion lines. If a new event arrives while speaking,
     // keep only the newest line so the player hears a coherent reaction.
     if (this.speechActive) {
+      if (message === this.pendingVoice?.message) return;
+      if (message === this.queuedVoice?.message) return;
       this.queuedVoice = { message, mood };
       return;
     }
