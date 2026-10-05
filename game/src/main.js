@@ -14,6 +14,7 @@ import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
 import { Room09 } from "./rooms/Room09.js";
+import { Room10 } from "./rooms/Room10.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
