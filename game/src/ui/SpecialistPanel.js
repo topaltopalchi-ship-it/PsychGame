@@ -1,6 +1,7 @@
 import { SpecialistReport } from "../psychology/SpecialistReport.js";
 import { buildTrainingRecommendations } from "../training/TrainingRecommendations.js";
-import { createTrainingPlan, addTrainingAssignment } from "../training/TrainingAssignment.js";
+import { createTrainingPlan, addTrainingAssignment, setTrainingAssignmentLevel } from "../training/TrainingAssignment.js";
+import { TRAINING_TARGETS } from "../training/TrainingTargets.js";
 
 export class SpecialistPanel {
   constructor(session) {
@@ -90,6 +91,7 @@ export class SpecialistPanel {
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.analysis,null,2))}</pre>`;
 
     this.bindTrainingButtons();
+    this.bindTrainingLevelSelectors();
     root.querySelector("#pg-sp-refresh-training").onclick = () => this.refreshTrainingProgress();
     root.querySelector("#pg-sp-new-training").onclick = () => this.startNewTrainingPlan();
   }
@@ -225,6 +227,19 @@ export class SpecialistPanel {
     });
   }
 
+  bindTrainingLevelSelectors() {
+    this.root?.querySelectorAll("[data-training-level]").forEach((select) => {
+      select.onchange = () => {
+        const targetId = select.getAttribute("data-training-level");
+        const level = Number(select.value);
+        if (!targetId || !Number.isFinite(level)) return;
+        this.trainingPlan = setTrainingAssignmentLevel(this.trainingPlan, targetId, level);
+        this.saveTrainingPlan();
+        this.refreshTrainingPlan();
+      };
+    });
+  }
+
   trainingConsistencyView(report) {
     const check = report?.trainingConsistency;
     if (!check) return "";
@@ -245,7 +260,13 @@ export class SpecialistPanel {
     return consistency + assignments.map((item) => `
       <div style="padding:10px 0;border-bottom:1px solid #202633">
         <b>${this.escape(item.targetId)}</b>
-        <span style="opacity:.65"> · سطح ${item.level} · اختصاص‌یافته توسط متخصص</span>
+        <span style="opacity:.65"> · اختصاص‌یافته توسط متخصص</span>
+        <select data-training-level="${this.escape(item.targetId)}" style="margin-right:10px">
+          ${Array.from({ length: TRAINING_TARGETS[item.targetId]?.progression?.length || 1 }, (_, i) => {
+            const level = i + 1;
+            return `<option value="${level}" ${level === Number(item.level) ? "selected" : ""}>سطح ${level}</option>`;
+          }).join("")}
+        </select>
       </div>`).join("");
   }
 
@@ -253,6 +274,7 @@ export class SpecialistPanel {
     const block = this.root?.querySelector("#pg-training-plan");
     if (!block) return;
     block.innerHTML = this.trainingPlanView();
+    this.bindTrainingLevelSelectors();
   }
 
   loadTrainingPlan() {
