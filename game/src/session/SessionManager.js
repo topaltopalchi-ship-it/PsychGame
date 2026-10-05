@@ -1,6 +1,7 @@
 import { BehaviorTracker } from "../psychology/BehaviorTracker.js";
 import { BehaviorAnalyzer } from "../psychology/BehaviorAnalyzer.js";
-import { SpecialistReport } from "../psychology/SpecialistReport.js";\nimport { SessionUploader } from "./SessionUploader.js";
+import { SpecialistReport } from "../psychology/SpecialistReport.js";
+import { SessionUploader } from "./SessionUploader.js";
 
 export class SessionManager {
   constructor() {
@@ -10,14 +11,14 @@ export class SessionManager {
     this.playerCode = this.generatePlayerCode();
     this.sessionStart = new Date().toISOString();
     this.playerConsent = true;
-    this.storageKey = `psychgame_${this.playerCode}`;\n    this.uploader = new SessionUploader({\n      endpoint: import.meta.env.VITE_API_URL || "",\n      token: import.meta.env.VITE_AUTHOR_TOKEN || ""\n    });\n    this.lastRemoteUpload = 0;
-
+    this.storageKey = `psychgame_${this.playerCode}`;
+    this.uploader = new SessionUploader({ endpoint: import.meta.env.VITE_API_URL || "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
+    this.lastRemoteUpload = 0;
     this.tracker.onEvent = () => this.saveSession();
   }
 
   generatePlayerCode() {
-    const number = Math.floor(10000 + Math.random() * 90000);
-    return `PLAYER-${number}`;
+    return `PLAYER-${Math.floor(10000 + Math.random() * 90000)}`;
   }
 
   setConsent(value = true) {
@@ -27,25 +28,11 @@ export class SessionManager {
     this.saveSession();
   }
 
-  hasConsent() {
-    return true;
-  }
-
-  getConsentPromise() {
-    return Promise.resolve(true);
-  }
-
-  getPlayerCode() {
-    return this.playerCode;
-  }
-
-  getSessionId() {
-    return this.tracker.getSessionId();
-  }
-
-  getTracker() {
-    return this.tracker;
-  }
+  hasConsent() { return true; }
+  getConsentPromise() { return Promise.resolve(true); }
+  getPlayerCode() { return this.playerCode; }
+  getSessionId() { return this.tracker.getSessionId(); }
+  getTracker() { return this.tracker; }
 
   getAnalysis() {
     this.analyzer = new BehaviorAnalyzer(this.tracker.getEvents());
@@ -63,21 +50,22 @@ export class SessionManager {
     };
   }
 
-  getReport() {
-    const data = this.getSessionData();
-    return SpecialistReport.build(data);
-  }
+  getReport() { return SpecialistReport.build(this.getSessionData()); }
 
-  saveSession() {
+  saveSession({ completed = false } = {}) {
     try {
       const data = this.getSessionData();
-      localStorage.setItem(this.storageKey, JSON.stringify(data));\n      const now = Date.now();\n      if (completed || now - this.lastRemoteUpload > 15000) {\n        this.lastRemoteUpload = now;\n        this.uploader.upload(this.getReport(), { completed });\n      }
+      localStorage.setItem(this.storageKey, JSON.stringify(data));
+      const now = Date.now();
+      if (completed || now - this.lastRemoteUpload > 15000) {
+        this.lastRemoteUpload = now;
+        this.uploader.upload(this.getReport(), { completed });
+      }
     } catch (error) {
       console.warn("PsychGame session save failed", error);
     }
   }
 
-  uploadCompletedSession() {\n    return this.uploader.upload(this.getReport(), { completed: true });\n  }\n\n  exportSession() {
-    return JSON.stringify(this.getReport(), null, 2);
-  }
+  uploadCompletedSession() { return this.uploader.upload(this.getReport(), { completed: true }); }
+  exportSession() { return JSON.stringify(this.getReport(), null, 2); }
 }
