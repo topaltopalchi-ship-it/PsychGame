@@ -111,7 +111,7 @@ export class SpecialistPanel {
 
   trainingResultView(result) {
     if (!result) return `<div style="opacity:.6">هنوز نتیجه نهایی تمرین ثبت نشده است.</div>`;
-    const status = result.status === "completed" ? "تکمیل‌شده" : result.status === "exhausted" ? "سقف تلاش‌ها" : String(result.status || "نامشخص");
+    const status = result.status === "completed" ? "تکمیل‌شده" : result.status === "exhausted" ? "سقف تلاش‌ها" : result.status === "aborted" ? "متوقف‌شده" : String(result.status || "نامشخص");
     const assignments = Array.isArray(result.assignments) ? result.assignments : [];
     return `<div style="margin-bottom:10px"><b>وضعیت:</b> ${this.escape(status)} · <b>اقدامات نهایی:</b> ${Number(result.finalActions || 0)}</div>` +
       (assignments.length ? assignments.map(item => `<div style="padding:9px 0;border-bottom:1px solid #202633">
