@@ -5,25 +5,22 @@
 import {
   TRAINING_TARGETS,
   createTrainingAssignment,
-  getTrainingTargetLevel
+  getTrainingTargetLevel,
+  getTrainingRoomForTarget
 } from "./TrainingTargets.js";
 
-export function createTrainingPlan({
-  playerCode = null,
-  sourceSessionId = null,
-  assignments = []
-} = {}) {
+export function createTrainingPlan({ playerCode = null, sourceSessionId = null, assignments = [] } = {}) {
   const safeAssignments = [];
   const targetIds = new Set();
   for (const assignment of assignments) {
     const created = createTrainingAssignment(assignment);
     if (!created || targetIds.has(created.targetId)) continue;
     targetIds.add(created.targetId);
-    safeAssignments.push(created);
+    safeAssignments.push({ ...created, trainingRoom: getTrainingRoomForTarget(created.targetId) });
   }
 
   return {
-    version: 2,
+    version: 3,
     planId: crypto.randomUUID(),
     playerCode,
     sourceSessionId,
@@ -43,11 +40,13 @@ export function addTrainingAssignment(plan, assignment) {
 
   const created = createTrainingAssignment(assignment);
   if (next.assignments.some((item) => item.targetId === created.targetId)) return next;
-  next.assignments.push(created);
+  const enriched = { ...created, trainingRoom: getTrainingRoomForTarget(created.targetId) };
+  next.assignments.push(enriched);
   next.auditLog.push({
     action: "ASSIGN_TARGET",
-    targetId: created.targetId,
-    level: created.level,
+    targetId: enriched.targetId,
+    trainingRoom: enriched.trainingRoom,
+    level: enriched.level,
     by: "specialist",
     at: new Date().toISOString()
   });
@@ -73,6 +72,7 @@ export function setTrainingAssignmentLevel(plan, targetId, level) {
 
   next.assignments[index] = {
     ...current,
+    trainingRoom: current.trainingRoom ?? getTrainingRoomForTarget(targetId),
     level: finalLevel,
     levelChangedAt: new Date().toISOString(),
     levelChangedBy: "specialist"
@@ -82,6 +82,7 @@ export function setTrainingAssignmentLevel(plan, targetId, level) {
     targetId,
     fromLevel: current.level,
     toLevel: finalLevel,
+    trainingRoom: next.assignments[index].trainingRoom,
     by: "specialist",
     at: next.assignments[index].levelChangedAt
   });
@@ -91,7 +92,8 @@ export function setTrainingAssignmentLevel(plan, targetId, level) {
 export function getActiveAssignments(plan) {
   return (plan?.assignments || []).filter((assignment) => {
     const target = TRAINING_TARGETS[assignment.targetId];
-    return Boolean(target) && assignment.level >= 1;
+    const room = assignment.trainingRoom ?? getTrainingRoomForTarget(assignment.targetId);
+    return Boolean(target) && Number(room) >= 9 && Number(room) <= 20 && assignment.level >= 1;
   });
 }
 
@@ -128,14 +130,7 @@ export function recordTrainingAttempt(session, targetId, successful) {
       const maxAttempts = item.safeguards?.maxAttemptsPerSession ?? 30;
       const completed = successes >= 2;
 
-      return {
-        ...item,
-        attempts,
-        successes,
-        failures,
-        completed,
-        exhausted: !completed && attempts >= maxAttempts
-      };
+      return { ...item, attempts, successes, failures, completed, exhausted: !completed && attempts >= maxAttempts };
     })
   };
 
@@ -147,12 +142,7 @@ export function abortTrainingAssignment(session, targetId, reason = "manual_abor
     ...session,
     assignments: (session.assignments || []).map((item) =>
       item.targetId === targetId && !item.completed && !item.aborted && !item.exhausted
-        ? {
-            ...item,
-            aborted: true,
-            abortReason: reason,
-            abortedAt: new Date().toISOString()
-          }
+        ? { ...item, aborted: true, abortReason: reason, abortedAt: new Date().toISOString() }
         : item
     )
   };
