@@ -249,7 +249,12 @@ export class InteractionSystem {
 
   handleDrawer() {
     this.tracker.log("DRAWER_INSPECTED", { result: "KEY_REVEALED" });
-    if (this.room?.objects?.drawerKey) { this.room.objects.drawerKey.visible = true; this.room.objects.drawerKey.scale.setScalar(0.18); }
+    if (this.room?.objects?.drawerKey) {
+      const key = this.room.objects.drawerKey;
+      key.visible = true;
+      key.scale.setScalar(0.18);
+      if (!this.interactables.includes(key)) this.register(key, "KEY_FROM_DRAWER");
+    }
     this.companion?.say("داخل کشو چیزی برق زد... کلید کوچیکه. نزدیک‌تر نگاه کن.");
   }
 
@@ -260,6 +265,11 @@ export class InteractionSystem {
     }
     this.keyFound = true;
     this.tracker.log("KEY_FOUND", { source: "KEY_FROM_DRAWER" });
+    const key = this.room?.objects?.drawerKey;
+    if (key) {
+      this.interactables = this.interactables.filter(object => object !== key);
+      if (this.currentTarget === key) this.currentTarget = null;
+    }
     this.room?.hideDrawerKey?.();
     this.companion?.say("کلید رو برداشتی. حالا به در نگاه کن و دکمه تعامل رو بزن.");
   }
@@ -345,7 +355,6 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
       completedRoom?.completeRoom?.();
       if (!completedRoom?.completed) return;
       this.completed = true;
-      this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});
       window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}}));
     },3000);
   }};
