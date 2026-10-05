@@ -15,6 +15,7 @@ export class Companion {
     this.showText = false;
     this.voiceUnlocked = false;
     this.pendingVoice = null;
+    this.voiceMood = "calm";
     this.voiceReady = false;
     this.voiceTested = false;
     this.createUI();
@@ -44,11 +45,12 @@ export class Companion {
     document.head.appendChild(style);
   }
 
-  say(message, delay = 0) {
+  say(message, delay = 0, mood = "calm") {
     setTimeout(() => {
       this.text.textContent = message;
-      this.pendingVoice = message;
-      this.speak(message);
+      this.voiceMood = this.normalizeMood(mood, message);
+      this.pendingVoice = { message, mood: this.voiceMood };
+      this.speak(message, this.voiceMood);
       if (!this.showText) return;
       this.panel.style.opacity = "1";
       this.panel.querySelector("#pg-companion-avatar").style.animation = "pgCompanionPulse .9s ease-out";
@@ -71,7 +73,7 @@ export class Companion {
         const voices = window.speechSynthesis.getVoices();
         this.voiceReady = voices.length > 0;
         // Speak the latest companion message immediately after the user's gesture.
-        if (this.pendingVoice) this.speak(this.pendingVoice);
+        if (this.pendingVoice) this.speak(this.pendingVoice.message, this.pendingVoice.mood);
       } catch (error) {}
       window.removeEventListener("pointerdown", unlock);
       window.removeEventListener("touchstart", unlock);
@@ -85,16 +87,23 @@ export class Companion {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.addEventListener("voiceschanged", () => {
         this.voiceReady = window.speechSynthesis.getVoices().length > 0;
-        if (this.voiceUnlocked && this.pendingVoice) this.speak(this.pendingVoice);
+        if (this.voiceUnlocked && this.pendingVoice) this.speak(this.pendingVoice.message, this.pendingVoice.mood);
       });
     }
   }
 
-  speak(message) {
+  normalizeMood(mood, message = "") {
+    if (["calm", "tense", "fear", "stress"].includes(mood)) return mood;
+    if (/صبر کن|ترس|نترس|صدایی شنیدی|این نور|قطع و وصل|شبیه آینه|وجود نداره|دست بهش نمی‌زدم/.test(message)) return "fear";
+    if (/عجله|دوباره|چرا|مطمئنی|هنوز می‌خوای|انتخاب/.test(message)) return "stress";
+    return "calm";
+  }
+
+  speak(message, mood = "calm") {
     if (!this.voiceEnabled || !("speechSynthesis" in window)) return;
     if (!this.voiceUnlocked) { this.pendingVoice = message; return; }
 
-    this.pendingVoice = message;
+    this.pendingVoice = { message, mood };
     try {
       const synth = window.speechSynthesis;
       synth.cancel();
@@ -110,14 +119,20 @@ export class Companion {
 
       const utterance = new SpeechSynthesisUtterance(message);
       utterance.lang = voice?.lang || "fa-IR";
-      utterance.rate = 0.88;
-      utterance.pitch = 0.95;
-      utterance.volume = 1;
+      const voiceProfile = {
+        calm:  { rate: 0.88, pitch: 0.95, volume: 1.0 },
+        tense: { rate: 0.96, pitch: 0.82, volume: 1.0 },
+        stress:{ rate: 1.02, pitch: 0.78, volume: 1.0 },
+        fear:  { rate: 0.70, pitch: 0.62, volume: 0.92 }
+      }[mood] || { rate: 0.88, pitch: 0.95, volume: 1.0 };
+      utterance.rate = voiceProfile.rate;
+      utterance.pitch = voiceProfile.pitch;
+      utterance.volume = voiceProfile.volume;
       if (voice) utterance.voice = voice;
 
       utterance.onstart = () => { this.voiceTested = true; };
       utterance.onend = () => {
-        if (this.pendingVoice === message) this.pendingVoice = null;
+        if (this.pendingVoice?.message === message) this.pendingVoice = null;
       };
       utterance.onerror = (event) => {
         console.warn("Companion TTS error:", event.error);
