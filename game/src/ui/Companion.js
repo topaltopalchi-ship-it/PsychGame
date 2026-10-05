@@ -18,6 +18,11 @@ export class Companion {
     this.voiceMood = "calm";
     this.voiceReady = false;
     this.voiceTested = false;
+    this.speechActive = false;
+    this.queuedVoice = null;
+    this.lastSpokenMessage = "";
+    this.lastSpokenAt = 0;
+    this.sayTimers = new Set();
     this.createUI();
     this.installVoiceUnlock();
     this.say("خب... بریم ببینیم راه خروج کجاست.", 1000, "calm");
@@ -46,7 +51,8 @@ export class Companion {
   }
 
   say(message, delay = 0, mood = "calm") {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      this.sayTimers.delete(timer);
       this.text.textContent = message;
       this.voiceMood = this.normalizeMood(mood, message);
       this.pendingVoice = { message, mood: this.voiceMood };
@@ -61,6 +67,7 @@ export class Companion {
         this.panel.style.transform = "translate(-50%,10px)";
       }, 4800);
     }, delay);
+    this.sayTimers.add(timer);
   }
 
   installVoiceUnlock() {
@@ -72,7 +79,7 @@ export class Companion {
         window.speechSynthesis.cancel();
         const voices = window.speechSynthesis.getVoices();
         this.voiceReady = voices.length > 0;
-        // Speak the latest companion message immediately after the user's gesture.
+        // Resume the newest queued line after the user's gesture.
         if (this.pendingVoice) this.speak(this.pendingVoice.message, this.pendingVoice.mood);
       } catch (error) {}
       window.removeEventListener("pointerdown", unlock);
@@ -103,6 +110,16 @@ export class Companion {
     if (!this.voiceEnabled || !("speechSynthesis" in window)) return;
     if (!this.voiceUnlocked) { this.pendingVoice = { message, mood }; return; }
 
+    const now = Date.now();
+    if (message === this.lastSpokenMessage && now - this.lastSpokenAt < 1400) return;
+
+    // Never stack several companion lines. If a new event arrives while speaking,
+    // keep only the newest line so the player hears a coherent reaction.
+    if (this.speechActive) {
+      this.queuedVoice = { message, mood };
+      return;
+    }
+
     this.pendingVoice = { message, mood };
     try {
       const synth = window.speechSynthesis;
@@ -110,7 +127,6 @@ export class Companion {
       synth.resume();
 
       const voices = synth.getVoices();
-      // Prefer Persian, then any voice supplied by the device.
       const voice =
         voices.find(v => /^fa(-|_)/i.test(v.lang)) ||
         voices.find(v => /^ar(-|_)/i.test(v.lang)) ||
@@ -125,27 +141,40 @@ export class Companion {
         stress:{ rate: 1.02, pitch: 0.78, volume: 1.0 },
         fear:  { rate: 0.70, pitch: 0.62, volume: 0.92 }
       }[mood] || { rate: 0.88, pitch: 0.95, volume: 1.0 };
+
       utterance.rate = voiceProfile.rate;
       utterance.pitch = voiceProfile.pitch;
       utterance.volume = voiceProfile.volume;
       if (voice) utterance.voice = voice;
 
+      this.speechActive = true;
+      this.lastSpokenMessage = message;
+      this.lastSpokenAt = now;
+
       utterance.onstart = () => { this.voiceTested = true; };
       utterance.onend = () => {
+        this.speechActive = false;
         if (this.pendingVoice?.message === message) this.pendingVoice = null;
+        const next = this.queuedVoice;
+        this.queuedVoice = null;
+        if (next && next.message !== message) {
+          setTimeout(() => this.speak(next.message, next.mood), 90);
+        }
       };
       utterance.onerror = (event) => {
+        this.speechActive = false;
         console.warn("Companion TTS error:", event.error);
         this.pendingVoice = null;
+        this.queuedVoice = null;
       };
 
-      // Mobile browsers often need a short delay after the first gesture.
       setTimeout(() => {
-        if (!this.voiceUnlocked) return;
+        if (!this.voiceUnlocked || !this.speechActive) return;
         synth.resume();
         synth.speak(utterance);
       }, 120);
     } catch (error) {
+      this.speechActive = false;
       console.warn("Companion voice unavailable", error);
     }
   }
@@ -235,6 +264,11 @@ export class Companion {
   destroy() {
     clearInterval(this.timer);
     clearTimeout(this.hideTimer);
+    for (const timer of this.sayTimers) clearTimeout(timer);
+    this.sayTimers.clear();
+    this.queuedVoice = null;
+    this.pendingVoice = null;
+    this.speechActive = false;
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     this.panel.remove();
   }
