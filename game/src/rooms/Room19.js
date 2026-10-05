@@ -10,7 +10,7 @@ export class Room19 {
     this.companion = companion;
     this.objects = {};
     this.completed = false;
-    this.engine = new TrainingEngine(plan, { roomId: 19 });
+    this.engine = new TrainingEngine(plan, { roomId: 19, onEvent: (event) => this.tracker.log(event.type, event) });
     this.assignment = this.engine.getAssignments().find(
       item => ["DECISION_COMMITMENT", "REPETITION_REDUCTION", "UNCERTAINTY_TOLERANCE"].includes(item.targetId) &&
         !item.completed && !item.aborted && !item.exhausted
