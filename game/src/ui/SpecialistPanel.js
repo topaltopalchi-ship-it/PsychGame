@@ -1,10 +1,12 @@
 import { SpecialistReport } from "../psychology/SpecialistReport.js";
 import { buildTrainingRecommendations } from "../training/TrainingRecommendations.js";
+import { createTrainingPlan, addTrainingAssignment } from "../training/TrainingAssignment.js";
 
 export class SpecialistPanel {
   constructor(session) {
     this.session = session;
     this.root = null;
+    this.trainingPlan = this.loadTrainingPlan();
   }
 
   open() {
@@ -54,6 +56,11 @@ export class SpecialistPanel {
         ${this.trainingRecommendations(recommendations)}
       </div>
 
+      <h3>برنامه تمرینی انتخاب‌شده</h3>
+      <div id="pg-training-plan" style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
+        ${this.trainingPlanView()}
+      </div>
+
       <h3>مسیر طی‌شده</h3>
       <div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
         ${this.escape((report.path || []).join(" → ") || "—")}
@@ -68,6 +75,8 @@ export class SpecialistPanel {
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.eventTypes,null,2))}</pre>
       <h3>تحلیل</h3>
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.analysis,null,2))}</pre>`;
+
+    this.bindTrainingButtons();
   }
 
   trainingRecommendations(data) {
@@ -83,6 +92,73 @@ export class SpecialistPanel {
         </div>
         <button data-training-target="${this.escape(item.targetId)}">انتخاب</button>
       </div>`).join("");
+  }
+
+  bindTrainingButtons() {
+    this.root?.querySelectorAll("[data-training-target]").forEach((button) => {
+      button.onclick = () => {
+        const targetId = button.getAttribute("data-training-target");
+        if (!targetId) return;
+
+        if (!this.trainingPlan) {
+          this.trainingPlan = createTrainingPlan({
+            playerCode: this.session.getPlayerCode(),
+            sourceSessionId: this.session.getSessionId()
+          });
+        }
+
+        try {
+          this.trainingPlan = addTrainingAssignment(this.trainingPlan, {
+            targetId,
+            level: 1,
+            assignedBy: "specialist"
+          });
+          this.saveTrainingPlan();
+          this.refreshTrainingPlan();
+        } catch (error) {
+          console.warn("PsychGame training assignment failed", error);
+          alert("ذخیره هدف تمرینی ناموفق بود.");
+        }
+      };
+    });
+  }
+
+  trainingPlanView() {
+    const assignments = this.trainingPlan?.assignments || [];
+    if (!assignments.length) {
+      return `<div style="opacity:.6">هنوز هدفی توسط متخصص انتخاب نشده است.</div>`;
+    }
+
+    return assignments.map((item) => `
+      <div style="padding:10px 0;border-bottom:1px solid #202633">
+        <b>${this.escape(item.targetId)}</b>
+        <span style="opacity:.65"> · سطح ${item.level} · اختصاص‌یافته توسط متخصص</span>
+      </div>`).join("");
+  }
+
+  refreshTrainingPlan() {
+    const block = this.root?.querySelector("#pg-training-plan");
+    if (!block) return;
+    block.innerHTML = this.trainingPlanView();
+  }
+
+  loadTrainingPlan() {
+    try {
+      const key = `psychgame_training_${this.session.getPlayerCode()}`;
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  saveTrainingPlan() {
+    try {
+      const key = `psychgame_training_${this.session.getPlayerCode()}`;
+      localStorage.setItem(key, JSON.stringify(this.trainingPlan));
+    } catch (error) {
+      console.warn("PsychGame training plan save failed", error);
+    }
   }
 
   card(label, value) {
