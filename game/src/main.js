@@ -15,6 +15,7 @@ import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
 import { Room09 } from "./rooms/Room09.js";
 import { Room10 } from "./rooms/Room10.js";
+import { Room11 } from "./rooms/Room11.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -378,6 +379,29 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
     roomId,
     targetId: event.detail.targetId || null
   });
+
+  if (roomId === "ROOM_10") {
+    const plan = loadTrainingPlan();
+    const hasAttentionTraining = Boolean(
+      plan?.assignments?.some((item) => item.targetId === "ATTENTION_SUSTAIN")
+    );
+
+    if (hasAttentionTraining) {
+      clearRoomGeometry();
+      interaction.clearTargets?.();
+      activeRoom = new Room11(scene, tracker, plan, companion);
+      activeRoom.start({ previousRoom: "ROOM_10" });
+      interaction.setRoom(activeRoom, 11);
+      audioManager.setRoom(11);
+      camera.position.set(0, 1.7, 3.5);
+      player.rotation.set(0, 0, 0);
+      camera.rotation.copy(player.rotation);
+      mainLight.intensity = 20;
+      companion?.say("مرحله بعدی؛ چند لحظه روی هدف اصلی تمرکز کن.");
+      document.getElementById("pg-title").textContent = "YOL · مرحله تمرینی ۰۳";
+      return;
+    }
+  }
 
   if (roomId === "ROOM_09") {
     const plan = loadTrainingPlan();
