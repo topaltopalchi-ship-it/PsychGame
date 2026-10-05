@@ -143,6 +143,9 @@ export class InteractionSystem {
     if (this.roomNumber === 9) { this.handleRoom9(objectId); return; }
     if (this.roomNumber === 10) { this.handleRoom10(objectId); return; }
     if (this.roomNumber === 11) { this.handleRoom11(objectId); return; }
+    if (this.roomNumber === 12) { this.handleTrainingGeneric(objectId); return; }
+    if (this.roomNumber === 13) { this.handleTrainingGeneric(objectId); return; }
+    if (this.roomNumber === 14) { this.handleTrainingGeneric(objectId); return; }
 
     switch (objectId) {
       case "RED_BUTTON": this.handleRedButton(); break;
@@ -451,6 +454,20 @@ InteractionSystem.prototype.handleRoom11 = function(objectId) {
 
   if (objectId === "TRAINING_EXIT") {
     this.room?.choose?.(objectId);
+    if (this.room?.completed) this.completed = true;
+  }
+};
+
+InteractionSystem.prototype.handleTrainingGeneric = function(objectId) {
+  if (this.completed) return;
+  if (objectId === "AMBIGUOUS_A" || objectId === "AMBIGUOUS_B" ||
+      objectId === "REPEAT_A" || objectId === "REPEAT_B" ||
+      objectId === "PAUSE_TRIGGER" || objectId === "PAUSE_ACTION") {
+    this.room?.choose?.(objectId);
+    return;
+  }
+  if (objectId === "TRAINING_EXIT") {
+    this.room?.finish?.();
     if (this.room?.completed) this.completed = true;
   }
 };
