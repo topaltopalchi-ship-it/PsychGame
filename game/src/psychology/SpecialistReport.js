@@ -117,7 +117,7 @@ export class SpecialistReport {
       missingRooms,
       completeRoomCount: completedRooms.length,
       eventCount: events.length,
-      hasDecisionLatency: Number.isFinite(firstDecision?.elapsedMs),
+      hasDecisionLatency: events.some((event) => Number.isFinite(event?.reactionTimeMs)),
       hasRoomDurations: observedRooms.filter((roomId) => Number.isFinite(rooms[roomId]?.durationMs)).length,
       note: missingRooms.length
         ? "این گزارش بر اساس اتاق‌ها و رویدادهای ثبت‌شده تهیه شده است؛ برای اتاق یا شاخص ثبت‌نشده، نتیجه‌ای استنباط نشده است."
