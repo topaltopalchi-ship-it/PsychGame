@@ -1,5 +1,6 @@
 import { BehaviorTracker } from "../psychology/BehaviorTracker.js";
 import { BehaviorAnalyzer } from "../psychology/BehaviorAnalyzer.js";
+import { SpecialistReport } from "../psychology/SpecialistReport.js";
 
 export class SessionManager {
   constructor() {
@@ -11,8 +12,6 @@ export class SessionManager {
     this.playerConsent = true;
     this.storageKey = `psychgame_${this.playerCode}`;
 
-    // Persist every event as it happens so a refresh or accidental tab close
-    // does not discard the behavioral session.
     this.tracker.onEvent = () => this.saveSession();
   }
 
@@ -64,6 +63,11 @@ export class SessionManager {
     };
   }
 
+  getReport() {
+    const data = this.getSessionData();
+    return SpecialistReport.build(data);
+  }
+
   saveSession() {
     try {
       const data = this.getSessionData();
@@ -74,6 +78,6 @@ export class SessionManager {
   }
 
   exportSession() {
-    return JSON.stringify(this.getSessionData(), null, 2);
+    return JSON.stringify(this.getReport(), null, 2);
   }
 }
