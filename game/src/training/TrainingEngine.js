@@ -10,8 +10,11 @@ export class TrainingEngine {
     this.plan = plan;
     this.roomId = roomId;
     this.onEvent = onEvent;
-    this.session = createTrainingSession(plan, roomId);
+    this.storageKey = plan?.playerCode ? `psychgame_training_runtime_${plan.playerCode}` : null;
+    this.session = this.loadPersistedSession() || createTrainingSession(plan, roomId);
+    this.session.roomId = roomId;
     this.completedTargets = new Set(this.session.assignments.filter(x => x.completed).map(x => x.targetId));
+    this.persist();
   }
 
   getSession() { return structuredClone(this.session); }
@@ -36,6 +39,7 @@ export class TrainingEngine {
     if (!assignment || !this.canAttempt(targetId)) return this.getSession();
     const before = assignment;
     this.session = recordTrainingAttempt(this.session, targetId, Boolean(successful));
+    this.persist();
     const updated = this.getAssignment(targetId);
     if (updated?.completed) this.completedTargets.add(targetId);
     this.emit("TRAINING_ATTEMPT", {
@@ -62,8 +66,41 @@ export class TrainingEngine {
     const assignment = this.getAssignment(targetId);
     if (!assignment || assignment.aborted || assignment.completed) return this.getSession();
     this.session = abortTrainingAssignment(this.session, targetId, reason);
+    this.persist();
     this.emit("TRAINING_ABORT", { roomId: this.roomId, targetId, reason });
     return this.getSession();
+  }
+
+  loadPersistedSession() {
+    if (!this.storageKey) return null;
+    try {
+      const raw = sessionStorage.getItem(this.storageKey);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+  }
+
+  persist() {
+    if (!this.storageKey) return;
+    try { sessionStorage.setItem(this.storageKey, JSON.stringify(this.session)); } catch (_) {}
+  }
+
+  getSummary() {
+    return {
+      version: this.session.version,
+      sessionId: this.session.sessionId,
+      startedAt: this.session.startedAt,
+      assignments: this.session.assignments.map(item => ({
+        targetId: item.targetId,
+        level: item.level,
+        attempts: item.attempts,
+        successes: item.successes,
+        failures: item.failures,
+        completed: Boolean(item.completed),
+        exhausted: Boolean(item.exhausted),
+        aborted: Boolean(item.aborted),
+        abortReason: item.abortReason || null
+      }))
+    };
   }
 
   emit(type, data) {
