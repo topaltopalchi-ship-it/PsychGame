@@ -279,7 +279,7 @@ function resumeTrainingIfNeeded() {
   if (gameFinished || trainingFinished) return false;
   const plan = loadTrainingPlan(); const runtime = loadTrainingRuntime(); const finalResult = session.getTrainingResult?.();
   if (!plan?.assignments?.length || finalResult) return false;
-  if (plan.planId && runtime?.planId && runtime.planId !== plan.planId) return false;
+  if (plan.planId && runtime?.planId !== plan.planId) return false;
   const roomNumber = Number(runtime?.roomId); if (roomNumber < 15 || roomNumber > 20) return false;
   gameFinished = false; trainingFinished = false;
   const activeTarget = getTrainingRouteTarget(plan); const expectedRoom = activeTarget ? getTrainingRoomForTarget(activeTarget.targetId) : null;
