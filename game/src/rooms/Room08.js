@@ -3,7 +3,7 @@ import * as THREE from "three";
 export class Room08 {
   constructor(scene,tracker){
     this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;
-    this.context={};this.startedAt=0;this.result=null;this.revealDone=false;this.lightTimer=null;this.pulseTimer=null;this.endingTimer=null;this.endLight=null;this.finalTimer=null;this.endingStarted=false;
+    this.context={};this.startedAt=0;this.result=null;this.coreResponseDone=false;this.lightTimer=null;this.pulseTimer=null;this.endingTimer=null;this.endLight=null;this.finalTimer=null;this.endingStarted=false;
   }
   start(context={}){
     this.context=context||{};this.companion=context.companion||null;this.startedAt=performance.now();
@@ -40,10 +40,9 @@ export class Room08 {
     this.result={title,cautious,exploratory,switching,trustScore};
     this.tracker.log("ROOM_08_BEHAVIORAL_PROFILE",{...this.result});
   }
-  reveal(){
-    if(this.revealDone)return;this.revealDone=true;
-    const r=this.result||{title:"متعادل"};
-    this.tracker.log("ROOM_08_PROFILE_REVEALED",{profile:r.title,secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
+  triggerCoreResponse(){
+    if(this.coreResponseDone)return;this.coreResponseDone=true;
+    this.tracker.log("ROOM_08_CORE_RESPONSE",{secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
     const l=this.objects.TRUTH_LIGHT;if(l){l.intensity=3;this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.5;},900);}
     if(this.endLight){this.endLight.intensity=.9;this.pulseTimer=setTimeout(()=>{if(!this.completed&&this.endLight)this.endLight.intensity=.22;},700);}
     const core=this.objects.TRUTH_CORE;if(core){core.scale.setScalar(1.45);this.endingTimer=setTimeout(()=>{if(!this.completed)core.scale.setScalar(1);},750);}
@@ -52,7 +51,7 @@ export class Room08 {
   startEnding(){
     if(this.endingStarted)return;
     this.endingStarted=true;
-    this.reveal();
+    this.triggerCoreResponse();
     this.tracker.log("ROOM_08_FINAL_SEQUENCE",{secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
     const exit=this.objects.TRUTH_EXIT;
     if(exit){exit.scale.z=.15;exit.material=exit.material.clone();exit.material.emissive=new THREE.Color(0x260b12);exit.material.emissiveIntensity=1.8;}
@@ -69,7 +68,7 @@ export class Room08 {
     },1600);
   }
   chooseExit(){
-    this.reveal();this.tracker.log("ROOM_08_EXIT_CHECKED",{profile:this.result?.title||"متعادل"});
+    this.triggerCoreResponse();this.tracker.log("ROOM_08_EXIT_CHECKED",{roomId:"ROOM_08"});
     if(this.endLight)this.endLight.intensity=.08;
     this.companion?.say?.("در بازه... ولی فکر نکن اینجا چیزی بهت جواب می‌ده.");
   }
