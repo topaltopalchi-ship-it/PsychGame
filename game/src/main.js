@@ -244,7 +244,7 @@ function loadTrainingPlan() { try { const key = `psychgame_training_${session.ge
 function getTrainingRouteTarget(plan) {
   const assignments = Array.isArray(plan?.assignments) ? plan.assignments : [];
   const runtime = (() => { try { const raw = sessionStorage.getItem(`psychgame_training_runtime_${session.getPlayerCode()}`); return raw ? JSON.parse(raw) : null; } catch (_) { return null; } })();
-  const compatibleRuntime = !runtime || !plan?.planId || !runtime.planId || runtime.planId === plan.planId;
+  const compatibleRuntime = !runtime || !plan?.planId || runtime.planId === plan.planId;
   const states = new Map((compatibleRuntime ? (runtime?.assignments || []) : []).map(item => [item.targetId, item]));
   return assignments.find(item => { const state = states.get(item.targetId); return !state || (!state.completed && !state.aborted && !state.exhausted); }) || null;
 }
@@ -326,3 +326,4 @@ window.addEventListener("psychgame-room-complete",(event)=>{
     scheduleRoomTransition(()=>startRoom08?.({previousRoom:"ROOM_07",companion}));
   }
 });
+
