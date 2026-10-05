@@ -15,6 +15,7 @@ const child = spawn(process.execPath, ["server/index.js"], {
   env: {
     ...process.env,
     PORT: String(port),
+    DATA_DIR: dataDir,
     AUTHOR_TOKEN: "test-token",
     CORS_ORIGIN: "http://test.local"
   },
