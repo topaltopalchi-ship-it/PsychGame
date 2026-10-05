@@ -111,6 +111,7 @@ export class InteractionSystem {
   }
 
   interact() {
+    if (this.completed) return;
     const target = this.currentTarget;
     if (!target) return;
 
