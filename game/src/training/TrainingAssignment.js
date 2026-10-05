@@ -97,7 +97,7 @@ export function abortTrainingAssignment(session, targetId, reason = "manual_abor
   return {
     ...session,
     assignments: (session.assignments || []).map((item) =>
-      item.targetId === targetId
+      item.targetId === targetId && !item.completed && !item.aborted && !item.exhausted
         ? {
             ...item,
             aborted: true,
