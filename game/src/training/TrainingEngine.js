@@ -79,7 +79,13 @@ export class TrainingEngine {
 
   abort(targetId, reason = "manual_abort") {
     const assignment = this.getAssignment(targetId);
-    if (!assignment || assignment.aborted || assignment.completed || assignment.exhausted) return this.getSession();
+    if (
+      !assignment ||
+      assignment.aborted ||
+      assignment.completed ||
+      assignment.exhausted ||
+      assignment.safeguards?.allowAbort === false
+    ) return this.getSession();
     this.session = abortTrainingAssignment(this.session, targetId, reason);
     this.persist();
     this.emit("TRAINING_ABORT", { roomId: this.roomId, targetId, reason });
