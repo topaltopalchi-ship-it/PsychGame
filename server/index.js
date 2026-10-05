@@ -41,10 +41,18 @@ const server = http.createServer((req, res) => {
   if (req.url === "/api/health" && req.method === "GET") return send(res, 200, { ok: true });
 
   if (req.url === "/api/sessions" && req.method === "POST") {
+    if (!authorized(req)) return send(res, 401, { error: "Unauthorized" });
+    const contentLength = Number(req.headers["content-length"] || 0);
+    if (Number.isFinite(contentLength) && contentLength > 2_000_000) {
+      return send(res, 413, { error: "Payload too large" });
+    }
     let raw = "";
     req.on("data", chunk => {
       raw += chunk;
-      if (raw.length > 2_000_000) req.destroy();
+      if (raw.length > 2_000_000) {
+        req.destroy();
+        return;
+      }
     });
     req.on("end", () => {
       try {
