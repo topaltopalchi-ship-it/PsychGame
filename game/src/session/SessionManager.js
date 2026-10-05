@@ -10,7 +10,7 @@ export class SessionManager {
     this.analyzer = new BehaviorAnalyzer();
     this.playerCode = this.generatePlayerCode();
     this.sessionStart = new Date().toISOString();
-    this.playerConsent = false;
+    this.playerConsent = true;
     this.storageKey = `psychgame_${this.playerCode}`;
     this.uploader = new SessionUploader({ endpoint: import.meta.env.VITE_API_URL || "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
     this.lastRemoteUpload = 0;
