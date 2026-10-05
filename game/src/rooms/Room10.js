@@ -2,10 +2,11 @@ import * as THREE from "three";
 import { TrainingEngine } from "../training/TrainingEngine.js";
 
 export class Room10 {
-  constructor(scene, tracker, plan) {
+  constructor(scene, tracker, plan, companion = null) {
     this.scene = scene;
     this.tracker = tracker;
     this.plan = plan;
+    this.companion = companion;
     this.objects = {};
     this.completed = false;
     this.startedAt = 0;
