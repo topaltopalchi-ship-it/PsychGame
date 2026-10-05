@@ -26,7 +26,7 @@ export class Room08 {
     const exit=this.mesh(new THREE.BoxGeometry(2.6,2.8,.35),this.mat(0x30171d,.7),[0,1.6,6.7]);this.add("TRUTH_EXIT",exit);
     const light=new THREE.PointLight(0x7788bb,1.5,16);light.position.set(0,3.5,0);this.scene.add(light);this.objects.TRUTH_LIGHT=light;
     this.endLight=new THREE.PointLight(0x5b1720,.35,9);this.endLight.position.set(0,2.4,6.1);this.scene.add(this.endLight);
-    const ring=this.mesh(new THREE.TorusGeometry(1.35,.035,8,48),new THREE.MeshBasicMaterial({color:0x7180aa,transparent:true,opacity:.32}),[0,.08,0]);ring.rotation.x=Math.PI/2;this.add("TRUTH_RING",ring);
+    const ring=this.mesh(new THREE.TorusGeometry(1.35,.035,8,48),new THREE.MeshBasicMaterial({color:0x7180aa,transparent:true,opacity:.32}),[0,.08,0]);ring.rotation.x=Math.PI/2;this.objects.TRUTH_RING=ring;
     this.mesh(new THREE.BoxGeometry(10,.1,1.3),this.mat(0x222630,.45,.5),[0,3.72,-1]);
     for(const x of [-3.5,0,3.5]) this.mesh(new THREE.SphereGeometry(.13,14,10),new THREE.MeshStandardMaterial({color:0x9aa6d0,emissive:0x56658e,emissiveIntensity:1.8}),[x,3.4,-1]);
   }
