@@ -66,6 +66,12 @@ export function buildTrainingRecommendations(report = {}) {
   const room01 = observed.room01 || {};
   const room02 = observed.room02 || {};
   const room03 = observed.room03 || {};
+  const rooms = report.rooms || {};
+  const room04 = rooms.ROOM_04 || {};
+  const room05 = rooms.ROOM_05 || {};
+  const room06 = rooms.ROOM_06 || {};
+  const room07 = rooms.ROOM_07 || {};
+  const room08 = rooms.ROOM_08 || {};
 
   const evidence = {
     RESPONSE_INHIBITION:
@@ -82,7 +88,16 @@ export function buildTrainingRecommendations(report = {}) {
     EMOTIONAL_PAUSE:
       room01.redButtonPresses >= 2 || (room01.firstDecisionReactionTimeMs != null && room01.firstDecisionReactionTimeMs < 2000),
     UNCERTAINTY_TOLERANCE:
-      room02.pathChoices === 0 || room02.uniquePaths > 1
+      room02.pathChoices === 0 || room02.uniquePaths > 1,
+    GRADUAL_APPROACH:
+      Number(room04.markInspections || 0) > 0 || Number(room06.whisperEvents || 0) > 0,
+    EMOTIONAL_PAUSE:
+      room01.redButtonPresses >= 2 ||
+      (room01.firstDecisionReactionTimeMs != null && room01.firstDecisionReactionTimeMs < 2000) ||
+      Number(room05.reflectionGlitches || 0) > 0,
+    ATTENTION_SUSTAIN:
+      (room01.objectInteractions < 3 && room03.waitingChecks < 2) ||
+      Number(room08.behavioralProfiles || 0) > 0
   };
 
   const recommendations = RECOMMENDATION_RULES
@@ -92,8 +107,15 @@ export function buildTrainingRecommendations(report = {}) {
     .map((rule) => ({
       targetId: rule.id,
       label: rule.label,
-      source: "rooms_01_03_observation",
-      status: "SPECIALIST_REVIEW_REQUIRED"
+      source: "rooms_01_08_observation",
+      status: "SPECIALIST_REVIEW_REQUIRED",
+      evidence: {
+        roomsObserved: ["ROOM_01","ROOM_02","ROOM_03","ROOM_04","ROOM_05","ROOM_06","ROOM_07","ROOM_08"].filter((roomId) => {
+          const room = rooms[roomId];
+          return Boolean(room && (room.events || room.completed || room.interactions || room.decisions));
+        }),
+        basis: "observable gameplay behavior; specialist review required"
+      }
     }));
 
   return {
@@ -101,7 +123,7 @@ export function buildTrainingRecommendations(report = {}) {
     generatedAt: new Date().toISOString(),
     playerCode: report.playerCode || null,
     sourceSessionId: report.sessionId || profile.sessionId || null,
-    basis: "Rooms 01-03 behavioral observations",
+    basis: "Rooms 01-08 behavioral observations",
     recommendations
   };
 }
