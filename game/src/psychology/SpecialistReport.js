@@ -197,7 +197,8 @@ export class SpecialistReport {
         ROOM_07: { trustChoices: byType.ROOM_07_TRUST_CHOICE || 0, companionPrompts: byType.ROOM_07_COMPANION_PROMPT || 0, trustProfiles: byType.ROOM_07_TRUST_PROFILE || 0 },
         ROOM_08: { behavioralProfiles: byType.ROOM_08_BEHAVIORAL_PROFILE || 0, behaviorContexts: byType.ROOM_08_BEHAVIOR_CONTEXT || 0, coreResponses: byType.ROOM_08_CORE_RESPONSE || 0, exitChecks: byType.ROOM_08_EXIT_CHECKED || 0, finalSequences: byType.ROOM_08_FINAL_SEQUENCE || 0 }
       },
-      analysis: sessionData?.analysis ?? null
+      analysis: sessionData?.analysis ?? null,
+      specialistReportFa
     };
   }
 }
