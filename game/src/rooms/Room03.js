@@ -55,7 +55,7 @@ export class Room03 {
     this.clockWasInspected=true;
     if(this.memoryContext?.wrongPaths?.length){
       this.tracker.log("ROOM_03_MEMORY_CONFIRM",{wrongPaths:this.memoryContext.wrongPaths});
-      this.companion?.say?.("حتی این ساعت هم انگار می‌دونه کجا اشتباه کردی...");
+      this.companion?.say?.("حتی این ساعت هم انگار فهمیده کجا اشتباه کردی...", 0, "tense");
       if(this.memoryLight)this.memoryLight.intensity=7;
       this.clockPulseTimer=setTimeout(()=>{if(this.completed)return;if(this.memoryLight)this.memoryLight.intensity=3;},700);
     }else{
@@ -68,14 +68,14 @@ export class Room03 {
     this.exitWatched=true;
     this.tracker.log("ROOM_03_EXIT_WATCHED",{remembered:!!this.memoryContext?.wrongPaths?.length});
     if(this.memoryContext?.wrongPaths?.length){
-      this.companion?.say?.("صبر کن... فکر کنم این در همون دری نیست که اول دیدیم.");
+      this.companion?.say?.("صبر کن... این در همون دری نیست که اول دیدیم.", 0, "fear");
       if(this.objects.exit){
         const oldY=this.objects.exit.position.y;
         this.objects.exit.position.y=oldY+.06;
         this.memoryPulseTimer=setTimeout(()=>{if(this.completed)return;if(this.objects.exit)this.objects.exit.position.y=oldY;},300);
       }
     }else{
-      this.companion?.say?.("در رو دیدی. حالا مطمئن شو آماده‌ای.");
+      this.companion?.say?.("در رو دیدی... فقط مطمئن شو آماده‌ای.", 0, "calm");
     }
   }
 
@@ -90,7 +90,7 @@ export class Room03 {
     }
     if(this.memoryLight)this.memoryLight.intensity=6;
     this.clockPulseTimer=setTimeout(()=>{if(this.completed)return;if(this.memoryLight)this.memoryLight.intensity=3;},500);
-    this.memoryContext.companion?.say?.("یادت هست کدوم مسیر رو اشتباه رفتی؟ اینجا هم انگار یادش مونده...");
+    this.memoryContext.companion?.say?.("یادت هست کدوم مسیر رو اشتباه رفتی؟ انگار اینجا هم یادش مونده...", 0, "fear");
   }
 
   triggerExitGlitch(){
@@ -104,7 +104,7 @@ export class Room03 {
     }
     if(this.memoryLight)this.memoryLight.intensity=8;
     this.clockPulseTimer=setTimeout(()=>{if(this.completed)return;if(this.memoryLight)this.memoryLight.intensity=3;},450);
-    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "در خروج... چرا تکون خورد؟" : "فکر کنم در خروج رو دیدم... یا نه؟");
+    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "در خروج... چرا تکون خورد؟" : "فکر کردم در خروج رو دیدم... یا نه؟", 0, "fear");
   }
 
   update(delta){
@@ -127,7 +127,7 @@ export class Room03 {
       if(this.memoryLight)this.memoryLight.intensity=3;
       this.scene.fog.density=this.memoryContext?.wrongPaths?.length ? .08 : .025;
     },900);
-    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "این بار... مطمئن شو چیزی پشت سرت نیست." : "خب... فکر کنم وقتشه بریم.");
+    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "این بار... مطمئن شو چیزی پشت سرت نیست." : "خب... فکر کنم وقتشه بریم.", 0, this.memoryContext?.wrongPaths?.length ? "fear" : "calm");
   }
 
   startExitSequence(){
@@ -145,7 +145,7 @@ export class Room03 {
     this.tracker.log("ROOM_03_EXIT_CONFIRMED",{remembered:!!this.memoryContext?.wrongPaths?.length});
     this.scene.fog.density=.09;
     if(this.memoryLight)this.memoryLight.intensity=.4;
-    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "باشه... این بار خودت انتخاب کردی. برو." : "خوبه. اینجا تمومش می‌کنیم.");
+    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "باشه... این بار خودت انتخاب کردی. برو." : "خوبه. اینجا تمومش می‌کنیم.", 0, this.memoryContext?.wrongPaths?.length ? "tense" : "calm");
     this.confirmRestoreTimer=setTimeout(()=>{
       if(this.completed)return;
       this.scene.fog.density=this.memoryContext?.wrongPaths?.length ? .08 : .025;
@@ -163,7 +163,7 @@ export class Room03 {
     }
     this.scene.fog.density=.06;
     this.endingRestoreTimer=setTimeout(()=>{if(this.completed)return;this.scene.fog.density=this.memoryContext?.wrongPaths?.length ? .08 : .025;},1100);
-    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "اگه بری داخل... شاید این بار خودت رو جا گذاشته باشی." : "در بازه. برو.");
+    this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "اگه بری داخل... شاید این بار خودت رو جا گذاشته باشی." : "در بازه. برو.", 0, this.memoryContext?.wrongPaths?.length ? "fear" : "calm");
   }
 
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});}
