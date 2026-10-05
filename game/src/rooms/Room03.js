@@ -19,10 +19,8 @@ export class Room03 {
     const handMat=this.mat(0x25262a,.5,.15);
     const h1=this.mesh(new THREE.BoxGeometry(.045,.38,.035),handMat,[0,2.86,-5.64]);
     const h2=this.mesh(new THREE.BoxGeometry(.04,.25,.035),handMat,[.11,2.55,-5.64],[0,0,-.65]);
-    h1.userData.objectId="WAIT_CLOCK";h2.userData.objectId="WAIT_CLOCK";
     for(const angle of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
       const tick=this.mesh(new THREE.BoxGeometry(.035,.13,.03),this.mat(0x68635b,.5),[Math.sin(angle)*.53,2.7+Math.cos(angle)*.53,-5.63],[0,0,-angle]);
-      tick.userData.objectId="WAIT_CLOCK";
     }
   }
   createSeat(){
@@ -38,16 +36,14 @@ export class Room03 {
       this.mesh(new THREE.BoxGeometry(.06,3.25,.08),wood,[x,2,-5.74]);
     }
     const fixture=this.mesh(new THREE.BoxGeometry(1.5,.08,.42),brass,[0,3.86,-.4]);
-    fixture.userData.objectId="WAIT_CLOCK";
     const light=new THREE.PointLight(0xffd9a3,8,8);light.position.set(0,3.2,-.4);this.scene.add(light);
     const wallLight=new THREE.PointLight(this.memoryContext?.wrongPaths?.length?0x8b2b38:0x7187b2,3,6);wallLight.position.set(-4,2,-3.5);this.scene.add(wallLight);this.memoryLight=wallLight;
     const rug=this.mesh(new THREE.BoxGeometry(5.4,.03,2.8),this.mat(0x40332d,.98),[0,.06,.8]);
-    rug.userData.objectId="WAIT_SEAT";
   }
 
   createMemoryMark(){
     const mark=this.mesh(new THREE.BoxGeometry(1.8,.02,.5),this.mat(this.memoryContext?.wrongPaths?.length?0x5a2026:0x292d34,.9),[0,.075,-2.1]);
-    mark.userData.objectId="MEMORY_MARK";this.objects.memoryMark=mark;
+    this.objects.memoryMark=mark;
   }
 
   reactToClock(){
