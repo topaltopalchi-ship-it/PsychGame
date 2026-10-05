@@ -35,7 +35,6 @@ export class SpecialistPanel {
     root.querySelector("#pg-sp-close").onclick = () => this.close();
     root.querySelector("#pg-sp-export").onclick = () => this.export(report);
     root.querySelector("#pg-sp-remote").onclick = () => this.loadRemoteSessions();
-    root.querySelector("#pg-sp-refresh-training").onclick = () => this.refreshTrainingProgress();
 
     const body = root.querySelector("#pg-sp-body");
     body.innerHTML = `
@@ -88,6 +87,7 @@ export class SpecialistPanel {
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.analysis,null,2))}</pre>`;
 
     this.bindTrainingButtons();
+    root.querySelector("#pg-sp-refresh-training").onclick = () => this.refreshTrainingProgress();
   }
 
   refreshTrainingProgress() {
