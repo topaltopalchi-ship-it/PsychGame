@@ -25,8 +25,8 @@ export class PlayerController {
     window.addEventListener("keyup", e => {
       if(e.code==="KeyW"||e.code==="ArrowUp") this.keys.forward=false;
       if(e.code==="KeyS"||e.code==="ArrowDown") this.keys.backward=false;
-      if(e.code==="KeyA"||e.code==="ArrowLeft") this.keys.left=false;
-      if(e.code==="KeyD"||e.code==="ArrowRight") this.keys.right=false;
+      if(e.code==="KeyA"||e.code==="ArrowRight") this.keys.right=false;
+      if(e.code==="KeyD"||e.code==="ArrowLeft") this.keys.left=false;
     });
   }
 
@@ -44,9 +44,9 @@ export class PlayerController {
     const pad = document.createElement("div");
     pad.id="pg-joystick";
     pad.innerHTML='<div id="pg-stick"></div>';
-    Object.assign(pad.style,{position:"fixed",left:"50%",bottom:"22px",transform:"translateX(-50%)",width:"104px",height:"104px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none"});
+    Object.assign(pad.style,{position:"fixed",left:"22px",bottom:"22px",transform:"none",width:"104px",height:"104px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none",boxSizing:"border-box",backdropFilter:"blur(4px)"});
     const stick=pad.firstElementChild;
-    Object.assign(stick.style,{position:"absolute",left:"34px",top:"34px",width:"36px",height:"36px",borderRadius:"50%",background:"rgba(255,255,255,.28)"});
+    Object.assign(stick.style,{position:"absolute",left:"34px",top:"34px",width:"36px",height:"36px",borderRadius:"50%",background:"rgba(255,255,255,.28)",boxShadow:"0 2px 8px rgba(0,0,0,.25)"});
     document.body.appendChild(pad);
     let active=false;
     const move=e=>{
@@ -72,16 +72,14 @@ export class PlayerController {
     look.addEventListener("pointerup",lookEnd);look.addEventListener("pointercancel",()=>{lookActive=false;});
 
     const interact=document.createElement("button");
-    interact.id="pg-touch-interact"; interact.textContent="تعامل با شیء";
-    Object.assign(interact.style,{position:"fixed",right:"20px",bottom:"30px",width:"92px",height:"62px",borderRadius:"18px",border:"2px solid rgba(255,255,255,.35)",background:"rgba(120,30,25,.96)",color:"#fff",fontSize:"17px",fontWeight:"700",zIndex:"10000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.45)",touchAction:"manipulation"});
+    interact.id="pg-touch-interact"; interact.textContent="تعامل";
+    Object.assign(interact.style,{position:"fixed",right:"22px",bottom:"22px",minWidth:"108px",height:"58px",padding:"0 14px",borderRadius:"18px",border:"2px solid rgba(255,255,255,.35)",background:"rgba(120,30,25,.96)",color:"#fff",fontSize:"16px",fontWeight:"700",zIndex:"10000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.45)",touchAction:"manipulation",backdropFilter:"blur(6px)"});
     interact.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();window.psychGame?.interact?.();},{passive:false});
     interact.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();},{passive:false});
     document.body.appendChild(interact);
 
     const isTouch = window.matchMedia("(pointer:coarse)").matches || navigator.maxTouchPoints > 0;
-    if(isTouch){
-      pad.style.display="block"; look.style.display="block"; interact.style.display="block";
-    }
+    if(isTouch){pad.style.display="block";look.style.display="block";interact.style.display="block";}
     window.addEventListener("resize",()=>{
       const touch = window.matchMedia("(pointer:coarse)").matches || navigator.maxTouchPoints > 0;
       pad.style.display=touch?"block":"none";
@@ -111,25 +109,15 @@ export class PlayerController {
 
   update(delta) {
     this.direction.set(0,0,0);
-
     const keyboardX = (this.keys.right ? 1 : 0) - (this.keys.left ? 1 : 0);
     const keyboardZ = (this.keys.backward ? 1 : 0) - (this.keys.forward ? 1 : 0);
     const hasKeyboard = keyboardX !== 0 || keyboardZ !== 0;
-
     this.direction.x = keyboardX + this.touchMove.x;
     this.direction.z = keyboardZ + this.touchMove.y;
-
     const length = this.direction.length();
     if(length === 0)return;
-
-    // Keep touch input analog: tiny joystick movement now means tiny movement speed.
-    // Keyboard input remains full-speed and diagonal movement is normalized.
-    if (hasKeyboard) {
-      this.direction.normalize();
-    } else {
-      this.direction.multiplyScalar(Math.min(length, 1) / length);
-    }
-
+    if (hasKeyboard) this.direction.normalize();
+    else this.direction.multiplyScalar(Math.min(length, 1) / length);
     const movement=this.direction.clone().applyEuler(new THREE.Euler(0,this.camera.rotation.y,0));
     this.camera.position.add(movement.multiplyScalar(this.speed*delta));
     this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, this.bounds.minX, this.bounds.maxX);
