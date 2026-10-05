@@ -80,7 +80,7 @@ export class Room05 {
     if(this.choiceLocked)return; this.choiceLocked=true;
     const repeated=Object.values(this.observations).filter(v=>v>1).length;
     this.tracker.log("ROOM_05_CHOICE",{firstMirror:this.firstMirror,lastMirror:this.lastMirror,glitchCount:this.glitchCount,repeatedMirrorChecks:repeated});
-    this.companion?.say?.("باشه... وقتشه از اینجا بریم.");
+    this.companion?.say?.("باشه... فکر کنم وقتشه از اینجا بریم.", 0, "calm");
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_05",firstMirror:this.firstMirror,glitchCount:this.glitchCount});}
