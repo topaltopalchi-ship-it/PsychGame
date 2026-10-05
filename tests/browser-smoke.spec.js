@@ -186,4 +186,20 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
   await completeRooms04To08(page);
   expect(crashes).toEqual([]);
   expect(errors).toEqual([]);
+
+  const sessionSnapshot = await page.evaluate(() => {
+    const playerCode = window.psychGame?.getPlayerCode?.();
+    const raw = playerCode ? localStorage.getItem(`psychgame_${playerCode}`) : null;
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    return {
+      playerCode,
+      eventTypes: Array.isArray(session.events) ? session.events.map((event) => event.type) : [],
+      eventCount: Array.isArray(session.events) ? session.events.length : 0
+    };
+  });
+
+  expect(sessionSnapshot).not.toBeNull();
+  expect(sessionSnapshot.eventCount).toBeGreaterThan(0);
+  expect(sessionSnapshot.eventTypes).toContain("ROOM_08_FINAL_SEQUENCE");
 });
