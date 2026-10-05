@@ -176,6 +176,48 @@ export class BehaviorAnalyzer {
     return "NOT_OBSERVED";
   }
 
+  buildPhase1Profile() {
+    const events = this.events.filter((event) =>
+      ["ROOM_01", "ROOM_02", "ROOM_03"].includes(event.roomId)
+    );
+
+    const room01 = events.filter((event) => event.roomId === "ROOM_01");
+    const room02 = events.filter((event) => event.roomId === "ROOM_02");
+    const room03 = events.filter((event) => event.roomId === "ROOM_03");
+
+    const redButton = room01.find((event) => event.type === "RED_BUTTON_PRESS");
+    const pathChoices = room02.filter((event) => event.type === "PATH_CHOICE");
+    const uniquePaths = new Set(pathChoices.map((event) => event.path).filter(Boolean));
+    const waitingChecks = room03.filter((event) =>
+      ["WAITING_OBJECT_INSPECTED", "WAITING_SEAT_INSPECTED", "WAITING_EXIT_CHECKED"].includes(event.type)
+    );
+
+    return {
+      source: "ROOMS_01_03",
+      sessionId: this.events[0]?.sessionId || null,
+      observed: {
+        room01: {
+          redButtonPresses: room01.filter((event) => event.type === "RED_BUTTON_PRESS").length,
+          firstDecisionReactionTimeMs: redButton?.reactionTimeMs ?? null,
+          retriesAfterFailure: room01.filter((event) => event.type === "RETRY_AFTER_FAILURE").length,
+          objectInteractions: room01.filter((event) => event.type === "OBJECT_INTERACTION").length
+        },
+        room02: {
+          pathChoices: pathChoices.length,
+          uniquePaths: uniquePaths.size,
+          pathSwitches: Math.max(0, uniquePaths.size - 1),
+          firstPathReactionTimeMs: pathChoices[0]?.reactionTimeMs ?? null,
+          idleEvents: room02.filter((event) => event.type === "BEHAVIOR_IDLE_EVENT").length
+        },
+        room03: {
+          waitingChecks: waitingChecks.length,
+          firstWaitingReactionTimeMs: waitingChecks[0]?.reactionTimeMs ?? null,
+          memoryResponses: room03.filter((event) => event.type === "ROOM_03_MEMORY_RESPONSE").length
+        }
+      }
+    };
+  }
+
   getReport() {
     const analysis =
       this.analyze();
@@ -188,7 +230,10 @@ export class BehaviorAnalyzer {
         "Gameplay behavior indicators; not a clinical diagnosis.",
 
       indicators:
-        analysis
+        analysis,
+
+      phase1Profile:
+        this.buildPhase1Profile()
     };
   }
 }
