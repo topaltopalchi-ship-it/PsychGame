@@ -25,6 +25,7 @@ export class BehaviorTracker {
       type,
       timestamp: new Date().toISOString(),
       elapsedMs: Math.round(performance.now() - this.sessionStart),
+      roomId: data?.roomId ?? null,
       ...data
     };
 
