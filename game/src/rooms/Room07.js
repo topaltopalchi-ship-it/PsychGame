@@ -39,7 +39,7 @@ export class Room07 {
   promptCompanion(){
     if(this.completed||this.promptActive)return;this.promptActive=true;
     this.tracker.log("ROOM_07_COMPANION_PROMPT",{secondsSinceEntry:Math.round((performance.now()-this.startedAt)/100)/10});
-    this.companion?.say?.("اینجا دو راه داری. می‌خوای به من اعتماد کنی، یا این یکی رو خودت انتخاب کنی؟");
+    this.companion?.say?.("اینجا دو راه داری... می‌خوای به من اعتماد کنی، یا خودت انتخاب کنی؟", 0, "tense");
   }
   choose(id){
     if(this.completed)return;
@@ -49,15 +49,15 @@ export class Room07 {
     if(id==="FOLLOW_COMPANION")this.followCount++;else this.ignoreCount++;
     this.choiceCount++;
     this.tracker.log("ROOM_07_TRUST_CHOICE",{choice:id,firstChoice:this.firstChoice,choiceSwitches:this.choiceSwitches,followCount:this.followCount,ignoreCount:this.ignoreCount});
-    if(id==="FOLLOW_COMPANION")this.companion?.say?.("پس این بار به من اعتماد کردی. فقط یادت باشه... من همیشه درست نمی‌گم.");
-    else this.companion?.say?.("باشه. این یکی رو خودت انتخاب کردی. من فقط دنبالت میام.");
+    if(id==="FOLLOW_COMPANION")this.companion?.say?.("پس این بار به من اعتماد کردی... فقط یادت باشه، من همیشه درست نمی‌گم.", 0, "calm");
+    else this.companion?.say?.("باشه... این یکی رو خودت انتخاب کردی. من فقط دنبالت میام.", 0, "calm");
     const l=this.objects.COMP_LIGHT;if(l){l.intensity=id==="FOLLOW_COMPANION"?3.1:1.9;if(this.lightTimer)clearTimeout(this.lightTimer);this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.25;},600);}
     const glow=this.objects.COMP_BEACON_GLOW;if(glow){this.choiceVisualScale=id==="FOLLOW_COMPANION"?1.35:.8;glow.scale.setScalar(this.choiceVisualScale);if(this.beaconPulseTimer)clearTimeout(this.beaconPulseTimer);this.beaconPulseTimer=setTimeout(()=>{if(!this.completed)glow.scale.setScalar(1);},600);}
   }
   chooseExit(){
     if(this.completed)return;
     this.tracker.log("ROOM_07_TRUST_PROFILE",{firstChoice:this.firstChoice,lastChoice:this.lastChoice,followCount:this.followCount,ignoreCount:this.ignoreCount,choiceSwitches:this.choiceSwitches});
-    this.companion?.say?.("باشه... انتخابت رو دیدم. حالا بیا بریم.");
+    this.companion?.say?.("باشه... انتخابت رو دیدم. حالا بریم.", 0, "calm");
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_07",firstChoice:this.firstChoice,followCount:this.followCount,ignoreCount:this.ignoreCount});}
