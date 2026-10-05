@@ -47,7 +47,7 @@ export class SpecialistPanel {
         ${this.escape((report.path || []).join(" → ") || "—")}
       </div>
       <h3>اتاق‌ها</h3>${this.rooms(report.rooms)}
-      <h3>جزئیات اتاق‌های ۰۴ تا ۰۸</h3>
+      <h3>Timeline رفتار</h3><pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px;max-height:420px;overflow:auto">${this.escape(JSON.stringify(report.timeline,null,2))}</pre>\n      <h3>جزئیات اتاق‌های ۰۴ تا ۰۸</h3>
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.roomDetails,null,2))}</pre>
       <h3>انواع رویداد</h3>
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.eventTypes,null,2))}</pre>
