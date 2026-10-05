@@ -331,6 +331,7 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
 };
 
 InteractionSystem.prototype.handleRoom3 = function(objectId) {
+  if (this.completed) return;
   if (objectId === "WAIT_CLOCK") {
       this.room?.reactToClock?.();
     this.tracker.log("WAITING_OBJECT_INSPECTED",{roomId:"ROOM_03",reactionTimeMs:this.lastLookedObject==="WAIT_CLOCK"&&this.lookStartTime!==null?Math.round(performance.now()-this.lookStartTime):null});
@@ -378,6 +379,7 @@ InteractionSystem.prototype.handleRoom4 = function(objectId) {
 
 
 InteractionSystem.prototype.handleRoom5 = function(objectId) {
+  if (this.completed) return;
   if (objectId === "MIRROR_LEFT" || objectId === "MIRROR_CENTER" || objectId === "MIRROR_RIGHT") {
     this.room?.reactToMirror?.(objectId);
     if((this.room?.observations?.[objectId]||0)>=2) window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:"whisper"}}));
@@ -400,6 +402,7 @@ InteractionSystem.prototype.handleRoom5 = function(objectId) {
 
 
 InteractionSystem.prototype.handleRoom6 = function(objectId) {
+  if (this.completed) return;
   if (objectId === "REC_FAMILIAR" || objectId === "REC_UNKNOWN" || objectId === "REC_STATIC") {
     this.room?.reactToRecording?.(objectId); window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:objectId==="REC_STATIC"?"warning":"whisper"}})); return;
   }
@@ -413,6 +416,7 @@ InteractionSystem.prototype.handleRoom6 = function(objectId) {
 
 
 InteractionSystem.prototype.handleRoom7 = function(objectId) {
+  if (this.completed) return;
   if (objectId === "FOLLOW_COMPANION" || objectId === "GO_ALONE") {
     this.room?.choose?.(objectId); window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:"warning"}})); return;
   }
