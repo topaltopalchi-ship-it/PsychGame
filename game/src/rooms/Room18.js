@@ -28,6 +28,7 @@ export class Room18 {
   }
 
   start(context = {}) {
+    if (!this.assignment) { this.skip(); return; }
     this.create();
     this.tracker.log("ROOM_ENTER", {
       roomId: "ROOM_18",
@@ -130,6 +131,8 @@ export class Room18 {
       }));
     }
   }
+
+  skip() { this.completed = true; window.dispatchEvent(new CustomEvent("psychgame-training-room-complete", { detail: { roomId: "ROOM_18", targetId: null, skipped: true } })); }
 
   getInteractableObjects() { return Object.values(this.objects); }
 
