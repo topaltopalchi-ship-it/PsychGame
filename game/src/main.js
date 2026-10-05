@@ -459,8 +459,6 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
   if (roomId === "ROOM_20" && event.detail.final) {
     trainingFinished = true;
     gameFinished = true;
-    session.saveSession({ completed: true });
-    session.uploadCompletedSession();
     clearRoomTransitionTimers();
     interaction.currentTarget = null;
     interaction.finishLook();
