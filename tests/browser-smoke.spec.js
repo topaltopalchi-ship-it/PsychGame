@@ -62,6 +62,60 @@ async function completeRoom01(page) {
   expect(doorInteracted).toBe(true);
 }
 
+
+
+async function interactCenter(page, xRatio = 0.5, yRatios = [0.45, 0.5, 0.55, 0.6]) {
+  return page.evaluate(({ xRatio, yRatios }) => {
+    return yRatios.some((ratio) =>
+      window.psychGame?.interactAt?.(
+        window.innerWidth * xRatio,
+        window.innerHeight * ratio
+      ) === true
+    );
+  }, { xRatio, yRatios });
+}
+
+async function walk(page, key, ms) {
+  await page.keyboard.down(key);
+  await page.waitForTimeout(ms);
+  await page.keyboard.up(key);
+}
+
+async function completeRooms04To08(page) {
+  // Room 04: exit is sufficient; mark inspection is optional.
+  await walk(page, "KeyS", 1200);
+  expect(await interactCenter(page)).toBe(true);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۵", { timeout: 5000 });
+
+  // Room 05: inspect a mirror, then return to the exit.
+  await walk(page, "KeyW", 3000);
+  expect(await interactCenter(page)).toBe(true);
+  await walk(page, "KeyS", 4000);
+  expect(await interactCenter(page)).toBe(true);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۶", { timeout: 5000 });
+
+  // Room 06: inspect one recording before leaving.
+  await walk(page, "KeyW", 3000);
+  expect(await interactCenter(page)).toBe(true);
+  await walk(page, "KeyS", 4000);
+  expect(await interactCenter(page)).toBe(true);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۷", { timeout: 5000 });
+
+  // Room 07: make one trust choice, then leave.
+  await walk(page, "KeyW", 3000);
+  expect(await interactCenter(page, 0.35)).toBe(true);
+  await walk(page, "KeyS", 4000);
+  expect(await interactCenter(page)).toBe(true);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۸", { timeout: 5000 });
+
+  // Room 08: inspect the core, then take the exit.
+  await walk(page, "KeyW", 2200);
+  expect(await interactCenter(page)).toBe(true);
+  await walk(page, "KeyS", 5000);
+  expect(await interactCenter(page)).toBe(true);
+  await expect(page.locator("#pg-title")).toContainText("پایان", { timeout: 5000 });
+}
+
 test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
@@ -104,5 +158,32 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
   await page.waitForTimeout(1500);
   expect(crashes).toEqual([]);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 5000 });
+  expect(errors).toEqual([]);
+});
+
+
+test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) => {
+  test.setTimeout(60000);
+  const errors = [];
+  const crashes = [];
+  page.on("pageerror", (error) => errors.push(String(error)));
+  page.on("crash", () => crashes.push("PAGE_CRASH"));
+
+  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
+
+  await completeRoom01(page);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
+
+  await walk(page, "KeyW", 3500);
+  expect(await interactCenter(page)).toBe(true);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 5000 });
+
+  // Room 03 is intentionally wait-based; allow its completion timer to fire.
+  await page.waitForTimeout(3500);
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۴", { timeout: 5000 });
+
+  await completeRooms04To08(page);
+  expect(crashes).toEqual([]);
   expect(errors).toEqual([]);
 });
