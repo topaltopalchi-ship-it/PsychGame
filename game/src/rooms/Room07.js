@@ -19,22 +19,16 @@ export class Room07 {
     this.mesh(new THREE.PlaneGeometry(16,14),this.mat(0x15171b,.9),[0,0,0]).rotation.x=-Math.PI/2;
     const w=this.mat(0x101217,.95);this.mesh(new THREE.BoxGeometry(16,4,.3),w,[0,2,-6]);
     this.mesh(new THREE.BoxGeometry(10,.035,8),this.mat(0x1d2028,.82,.08),[0,.02,0]);
-    for(const x of [-6,-3,0,3,6]){
-      this.mesh(new THREE.BoxGeometry(.04,.04,8),this.mat(0x4f5666,.45,.25),[x,.05,0]);
-    }
-    for(const x of [-5,0,5]){
-      const strip=this.mesh(new THREE.BoxGeometry(2.2,.05,.08),this.mat(0x687896,.35,.3,0x394966),[x,3.45,-5.78]);
-      strip.userData.objectId="COMP_BEACON";
-    }this.mesh(new THREE.BoxGeometry(16,4,.3),w,[0,2,6]);this.mesh(new THREE.BoxGeometry(.3,4,12),w,[-8,2,0]);this.mesh(new THREE.BoxGeometry(.3,4,12),w,[8,2,0]);
-    const beacon=this.mesh(new THREE.CylinderGeometry(.22,.22,2.2,12),this.mat(0x4a2028,.5,.3),[0,1.1,0]);this.add("COMP_BEACON",beacon); const glow=this.mesh(new THREE.SphereGeometry(.32,12,12),new THREE.MeshBasicMaterial({color:0x9b3038,transparent:true,opacity:.35}),[0,2.25,0]);this.add("COMP_BEACON_GLOW",glow);
+    for(const x of [-6,-3,0,3,6]) this.mesh(new THREE.BoxGeometry(.04,.04,8),this.mat(0x4f5666,.45,.25),[x,.05,0]);
+    for(const x of [-5,0,5]) this.mesh(new THREE.BoxGeometry(2.2,.05,.08),this.mat(0x687896,.35,.3),[x,3.45,-5.78]);
+    this.mesh(new THREE.BoxGeometry(16,4,.3),w,[0,2,6]);this.mesh(new THREE.BoxGeometry(.3,4,12),w,[-8,2,0]);this.mesh(new THREE.BoxGeometry(.3,4,12),w,[8,2,0]);
+    const beacon=this.mesh(new THREE.CylinderGeometry(.22,.22,2.2,12),this.mat(0x4a2028,.5,.3),[0,1.1,0]);this.objects.COMP_BEACON=beacon;
+    const glow=this.mesh(new THREE.SphereGeometry(.32,12,12),new THREE.MeshBasicMaterial({color:0x9b3038,transparent:true,opacity:.35}),[0,2.25,0]);this.objects.COMP_BEACON_GLOW=glow;
     const trust=this.mesh(new THREE.BoxGeometry(2.6,1.2,.4),this.mat(0x1d2830,.6,.2),[-3,1,-3.8]);this.add("FOLLOW_COMPANION",trust);
     const alone=this.mesh(new THREE.BoxGeometry(2.6,1.2,.4),this.mat(0x302024,.6,.2),[3,1,-3.8]);this.add("GO_ALONE",alone);
     const exit=this.mesh(new THREE.BoxGeometry(2.5,2.8,.3),this.mat(0x29171c,.7),[0,1.6,5.7]);this.add("COMP_EXIT",exit);
     const light=new THREE.PointLight(0x69769d,1.25,14);light.position.set(0,3,0);this.scene.add(light);this.objects.COMP_LIGHT=light;
-    for(const x of [-5,5]){
-      const pillar=this.mesh(new THREE.CylinderGeometry(.16,.2,3.2,18),this.mat(0x252a34,.6,.3),[x,1.6,-2.2]);
-      pillar.userData.objectId="COMP_BEACON";
-    }
+    for(const x of [-5,5]) this.mesh(new THREE.CylinderGeometry(.16,.2,3.2,18),this.mat(0x252a34,.6,.3),[x,1.6,-2.2]);
   }
   promptCompanion(){
     if(this.completed||this.promptActive)return;this.promptActive=true;
