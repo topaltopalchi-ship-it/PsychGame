@@ -103,6 +103,17 @@ try {
   assert.equal(stored.id, "smoke-session");
   assert.equal(stored.completed, true);
 
+  const progressAfterCompletion = await request("/api/sessions", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer test-token",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ completed: false, report: { ...report, eventCount: 1 } })
+  });
+  assert.equal(progressAfterCompletion.status, 200);
+  assert.equal((await progressAfterCompletion.json()).preservedCompleted, true);
+
   const oversized = await request("/api/sessions", {
     method: "POST",
     headers: {
