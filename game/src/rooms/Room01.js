@@ -43,6 +43,12 @@ export class Room01 {
     this.completed = true;
   }
 
+  destroy() {
+    if (this.buttonPulseTimer) clearTimeout(this.buttonPulseTimer);
+    this.buttonPulseTimer = null;
+    this.objects = {};
+  }
+
   mesh(geometry, material, position, rotation = [0, 0, 0]) {
     const m = new THREE.Mesh(geometry, material);
     m.position.set(...position);
