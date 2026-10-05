@@ -296,8 +296,12 @@ window.addEventListener("psychgame-game-complete",(event)=>{
   if(event.detail?.roomId!=="ROOM_08")return;
   const titleEl=document.getElementById("pg-title");
   const hintEl=document.getElementById("pg-hint");
+  const targetEl=document.getElementById("pg-target");
+  const interactButton=document.getElementById("pg-touch-interact");
   if(titleEl)titleEl.textContent="YOL · پایان";
   if(hintEl)hintEl.textContent="سفر تمام شد.";
+  if(targetEl)targetEl.style.display="none";
+  if(interactButton)interactButton.style.display="none";
   audioManager.playPulse("dark");
 });
 
