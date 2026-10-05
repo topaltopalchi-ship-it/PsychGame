@@ -10,7 +10,7 @@ export class SessionManager {
     this.analyzer = new BehaviorAnalyzer();
     this.playerCode = this.generatePlayerCode();
     this.sessionStart = new Date().toISOString();
-    this.playerConsent = true;
+    this.playerConsent = false;
     this.storageKey = `psychgame_${this.playerCode}`;
     this.uploader = new SessionUploader({ endpoint: import.meta.env.VITE_API_URL || "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
     this.lastRemoteUpload = 0;
@@ -122,7 +122,7 @@ export class SessionManager {
       playerCode: this.playerCode,
       sessionId: this.getSessionId(),
       sessionStart: this.sessionStart,
-      consent: true,
+      consent: this.playerConsent,
       events: this.tracker.getEvents(),
       analysis: this.getAnalysis(),
       trainingResult: this.getTrainingResult(),
