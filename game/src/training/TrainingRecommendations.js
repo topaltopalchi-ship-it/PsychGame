@@ -61,26 +61,47 @@ const RECOMMENDATION_RULES = [
 ];
 
 export function buildTrainingRecommendations(report = {}) {
+  const profile = report.phase1Profile || {};
+  const observed = profile.observed || {};
+  const room01 = observed.room01 || {};
+  const room02 = observed.room02 || {};
+  const room03 = observed.room03 || {};
+
+  const evidence = {
+    RESPONSE_INHIBITION:
+      room01.firstDecisionReactionTimeMs != null && room01.firstDecisionReactionTimeMs < 2000,
+    WAIT_TOLERANCE:
+      room03.waitingChecks >= 2 ||
+      (room03.firstWaitingReactionTimeMs != null && room03.firstWaitingReactionTimeMs < 2000),
+    DECISION_COMMITMENT:
+      room02.pathSwitches > 0,
+    ATTENTION_SUSTAIN:
+      room01.objectInteractions < 3 && room03.waitingChecks < 2,
+    REPETITION_REDUCTION:
+      room01.retriesAfterFailure >= 2 || room02.pathChoices > 2,
+    EMOTIONAL_PAUSE:
+      room01.redButtonPresses >= 2 || (room01.firstDecisionReactionTimeMs != null && room01.firstDecisionReactionTimeMs < 2000),
+    UNCERTAINTY_TOLERANCE:
+      room02.pathChoices === 0 || room02.uniquePaths > 1
+  };
+
   const recommendations = RECOMMENDATION_RULES
-    .filter((rule) => {
-      try {
-        return Boolean(rule.evidence(report));
-      } catch {
-        return false;
-      }
-    })
+    .filter((rule) => Boolean(evidence[rule.id]) || (() => {
+      try { return Boolean(rule.evidence(report)); } catch { return false; }
+    })())
     .map((rule) => ({
       targetId: rule.id,
       label: rule.label,
-      source: "gameplay_observation",
+      source: "rooms_01_03_observation",
       status: "SPECIALIST_REVIEW_REQUIRED"
     }));
 
   return {
-    version: 1,
+    version: 2,
     generatedAt: new Date().toISOString(),
     playerCode: report.playerCode || null,
-    sourceSessionId: report.sessionId || null,
+    sourceSessionId: report.sessionId || profile.sessionId || null,
+    basis: "Rooms 01-03 behavioral observations",
     recommendations
   };
 }
