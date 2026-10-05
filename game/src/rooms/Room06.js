@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 export class Room06 {
   constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.companion=null;this.observations={};this.firstChoice=null;this.playCount=0;this.lastChoice=null;this.switchCount=0;this.startedAt=0;this.sequenceDone=false;this.whisperTimer=null;this.pulseTimer=null;this.signalTimer=null;this.signalRestoreTimer=null;this.whisperTriggered=false;this.signalTriggered=false;}
-  start(context={}){this.companion=context.companion||null;this.startedAt=performance.now();this.scene.fog=new THREE.FogExp2(0x07090d,.03);this.createRoom();this.whisperTimer=setTimeout(()=>this.triggerWhisper(),7500);this.signalTimer=setTimeout(()=>this.triggerSignalDistortion(),10500);this.tracker.log("ROOM_ENTER",{roomId:"ROOM_06",roomName:"RECORDING_ROOM",previousRoom:context.previousRoom||"ROOM_05"});}
+  start(context={}){this.companion=context.companion||null;this.startedAt=performance.now();this.scene.fog=new THREE.FogExp2(0x07090d,.03);this.createRoom();this.whisperTimer=setTimeout(()=>{if(this.completed)return;this.triggerWhisper();},7500);this.signalTimer=setTimeout(()=>{if(this.completed)return;this.triggerSignalDistortion();},10500);this.tracker.log("ROOM_ENTER",{roomId:"ROOM_06",roomName:"RECORDING_ROOM",previousRoom:context.previousRoom||"ROOM_05"});}
   mat(color,r=.5,m=.1){return new THREE.MeshStandardMaterial({color,roughness:r,metalness:m});}
   mesh(g,m,p=[0,0,0]){const o=new THREE.Mesh(g,m);o.position.set(...p);this.scene.add(o);return o;}
   add(id,o){o.userData.objectId=id;this.objects[id]=o;return o;}
