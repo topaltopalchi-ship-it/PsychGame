@@ -483,7 +483,7 @@ function resumeTrainingIfNeeded() {
 
   const resumeRoom = expectedRoom || roomNumber;
   startTrainingRoom(resumeRoom, plan, runtime?.roomId || null);
-  companion?.say("وضعیت تمرین قبلی بازیابی شد و از همان مرحله ادامه پیدا می‌کند.");
+  companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm");
   return true;
 }
 
