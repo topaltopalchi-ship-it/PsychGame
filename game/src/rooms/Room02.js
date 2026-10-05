@@ -79,7 +79,7 @@ export class Room02 {
       if(target){
         const old=target.intensity;
         target.intensity=old*.35;
-        const timer=setTimeout(()=>{target.intensity=old;this.observationTimers=this.observationTimers.filter(t=>t!==timer);},420);this.observationTimers.push(timer);
+        const timer=setTimeout(()=>{if(this.completed){this.observationTimers=this.observationTimers.filter(t=>t!==timer);return;}target.intensity=old;this.observationTimers=this.observationTimers.filter(t=>t!==timer);},420);this.observationTimers.push(timer);
       }
       this.companion?.say?.(path==="PATH_CENTER" ? "چرا دوباره به همین مسیر نگاه می‌کنی؟" : "فکر کنم این مسیر متوجه شد که دیدیش...");
     }
