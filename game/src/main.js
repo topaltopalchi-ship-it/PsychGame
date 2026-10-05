@@ -292,6 +292,15 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+window.addEventListener("psychgame-game-complete",(event)=>{
+  if(event.detail?.roomId!=="ROOM_08")return;
+  const titleEl=document.getElementById("pg-title");
+  const hintEl=document.getElementById("pg-hint");
+  if(titleEl)titleEl.textContent="YOL · پایان";
+  if(hintEl)hintEl.textContent="سفر تمام شد.";
+  audioManager.playPulse("dark");
+});
+
 window.addEventListener("psychgame-audio-pulse",(event)=>{
   audioManager.playPulse(event.detail?.type || "dark");
 });
