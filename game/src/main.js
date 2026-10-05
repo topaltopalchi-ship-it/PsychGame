@@ -370,12 +370,38 @@ function finishGameWithoutTraining() {
 }
 
 window.addEventListener("psychgame-training-room-complete", (event) => {
-  if (event.detail?.roomId !== "ROOM_09" || trainingFinished) return;
-  trainingFinished = true;
+  const roomId = event.detail?.roomId;
+  if (!roomId || trainingFinished) return;
+
   tracker.log("TRAINING_PHASE_ROOM_COMPLETED", {
-    roomId: "ROOM_09",
+    roomId,
     targetId: event.detail.targetId || null
   });
+
+  if (roomId === "ROOM_09") {
+    const plan = loadTrainingPlan();
+    const hasDecisionTraining = Boolean(
+      plan?.assignments?.some((item) => item.targetId === "DECISION_COMMITMENT")
+    );
+
+    if (hasDecisionTraining) {
+      clearRoomGeometry();
+      interaction.clearTargets?.();
+      activeRoom = new Room10(scene, tracker, plan);
+      activeRoom.start({ previousRoom: "ROOM_09", companion });
+      interaction.setRoom(activeRoom, 10);
+      audioManager.setRoom(10);
+      camera.position.set(0, 1.7, 3.5);
+      player.rotation.set(0, 0, 0);
+      camera.rotation.copy(player.rotation);
+      mainLight.intensity = 20;
+      companion?.say("مرحله بعدی؛ این بار روی ثبات تصمیم تمرکز کن.");
+      document.getElementById("pg-title").textContent = "YOL · مرحله تمرینی ۰۲";
+      return;
+    }
+  }
+
+  trainingFinished = true;
   finishGameWithoutTraining();
 });
 
