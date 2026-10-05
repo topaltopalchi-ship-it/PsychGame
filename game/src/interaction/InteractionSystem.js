@@ -42,7 +42,7 @@ export class InteractionSystem {
   setCompanion(companion) { this.companion = companion; }
   setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.gameFinished = false; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
 
-  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer); this.room8CompletionTimer = null; this.room3CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
+  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer); this.room8CompletionTimer = null; this.room3CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.room8GameCompleteDispatched = false; this.interactionCounts = {}; }
 
   register(object, objectId) {
     object.userData.interactable = true;
@@ -61,7 +61,12 @@ export class InteractionSystem {
   }
 
   update() {
-    if (this.gameFinished) return;
+    if (this.gameFinished || this.completed || this.room?.completed || this.room?.exitSequenceStarted) {
+      this.finishLook();
+      this.currentTarget = null;
+      window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId: null } }));
+      return;
+    }
     this.raycaster.setFromCamera(this.center, this.camera);
     const hits = this.raycaster.intersectObjects(this.interactables, true);
     const resolved = hits.map(h => this.resolveTarget(h.object)).find(Boolean);
@@ -106,6 +111,7 @@ export class InteractionSystem {
   }
 
   interactAt(clientX, clientY) {
+    if (this.gameFinished || this.completed || this.room?.completed || this.room?.exitSequenceStarted) return false;
     const x = (clientX / window.innerWidth) * 2 - 1;
     const y = -(clientY / window.innerHeight) * 2 + 1;
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera);
