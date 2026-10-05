@@ -84,13 +84,18 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
   await completeRoom01(page);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
 
-  // Main.js clamps Room 02 movement at z=-2.0; 3.5s is enough to reach it.
+  // Target the lower part of the center path panel so the decorative
+  // PATH_CLUE glow above it cannot consume the raycast.
   await page.keyboard.down("KeyW");
   await page.waitForTimeout(3500);
   await page.keyboard.up("KeyW");
-  const pathInteracted = await page.evaluate(() =>
-    window.psychGame?.interactAt?.(window.innerWidth * 0.5, window.innerHeight * 0.5) === true
-  );
+  const pathInteracted = await page.evaluate(() => {
+    const ys = [0.54, 0.56, 0.58, 0.60];
+    return ys.some((ratio) => window.psychGame?.interactAt?.(
+      window.innerWidth * 0.5,
+      window.innerHeight * ratio
+    ) === true);
+  });
   expect(pathInteracted).toBe(true);
 
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 3000 });
