@@ -1,6 +1,6 @@
 import { BehaviorTracker } from "../psychology/BehaviorTracker.js";
 import { BehaviorAnalyzer } from "../psychology/BehaviorAnalyzer.js";
-import { SpecialistReport } from "../psychology/SpecialistReport.js";
+import { SpecialistReport } from "../psychology/SpecialistReport.js";\nimport { SessionUploader } from "./SessionUploader.js";
 
 export class SessionManager {
   constructor() {
@@ -10,7 +10,7 @@ export class SessionManager {
     this.playerCode = this.generatePlayerCode();
     this.sessionStart = new Date().toISOString();
     this.playerConsent = true;
-    this.storageKey = `psychgame_${this.playerCode}`;
+    this.storageKey = `psychgame_${this.playerCode}`;\n    this.uploader = new SessionUploader({\n      endpoint: import.meta.env.VITE_API_URL || "",\n      token: import.meta.env.VITE_AUTHOR_TOKEN || ""\n    });\n    this.lastRemoteUpload = 0;
 
     this.tracker.onEvent = () => this.saveSession();
   }
@@ -71,13 +71,13 @@ export class SessionManager {
   saveSession() {
     try {
       const data = this.getSessionData();
-      localStorage.setItem(this.storageKey, JSON.stringify(data));
+      localStorage.setItem(this.storageKey, JSON.stringify(data));\n      const now = Date.now();\n      if (completed || now - this.lastRemoteUpload > 15000) {\n        this.lastRemoteUpload = now;\n        this.uploader.upload(this.getReport(), { completed });\n      }
     } catch (error) {
       console.warn("PsychGame session save failed", error);
     }
   }
 
-  exportSession() {
+  uploadCompletedSession() {\n    return this.uploader.upload(this.getReport(), { completed: true });\n  }\n\n  exportSession() {
     return JSON.stringify(this.getReport(), null, 2);
   }
 }
