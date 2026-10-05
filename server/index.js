@@ -64,8 +64,15 @@ const server = http.createServer((req, res) => {
         };
 
         const index = sessions.findIndex(item => item.id === record.id);
-        if (index >= 0) sessions[index] = record;
-        else sessions.push(record);
+        if (index >= 0) {
+          const existing = sessions[index];
+          if (existing.completed && !record.completed) {
+            return send(res, 200, { ok: true, id: record.id, preservedCompleted: true });
+          }
+          sessions[index] = record;
+        } else {
+          sessions.push(record);
+        }
         writeSessions(sessions.slice(-5000));
         return send(res, 201, { ok: true, id: record.id });
       } catch {
