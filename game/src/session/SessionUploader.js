@@ -67,7 +67,10 @@ export class SessionUploader {
 
       filtered.push(payload);
       localStorage.setItem(this.queueKey, JSON.stringify(filtered.slice(-20)));
-    } catch {}
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   payloadId(payload) {
