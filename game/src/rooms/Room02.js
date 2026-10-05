@@ -3,7 +3,7 @@ export class Room02 {
   constructor(scene,tracker){this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;this.selectedPath=null;this.pathLights=[];this.scareFigure=null;this.scareTimer=null;this.originalFogDensity=.024;this.observedPaths={PATH_LEFT:0,PATH_CENTER:0,PATH_RIGHT:0};this.lastObservedPath=null;this.psychTimer=null;this.idleTime=0;this.whisperTriggered=false;this.observationTimers=[];this.idleTimer=null;}
   start(context={}){this.scene.fog=new THREE.FogExp2(0x0b0d12,.024);this.createFloor();this.createWalls();this.createCeiling();this.createPaths();this.createClue();this.createBench();this.createDecisionMarker();this.createAtmosphere();this.createStoryDetails();this.createPathLighting();this.createDreadProps();this.createScareFigure();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_02",roomName:"MULTIPLE_PATHS",previousPath:context.previousPath||"UNKNOWN"});}
   getInteractableObjects(){return Object.values(this.objects);}
-  completeRoom(path){this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
+  completeRoom(path){if(this.completed)return;this.completed=true;this.selectedPath=path||this.selectedPath;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_02",path:this.selectedPath||"UNKNOWN"});}
   mesh(g,mat,pos,rot=[0,0,0]){const m=new THREE.Mesh(g,mat);m.position.set(...pos);m.rotation.set(...rot);m.castShadow=true;m.receiveShadow=true;this.scene.add(m);return m;}
   mat(color,roughness=.8,metalness=0,emissive=null){const o={color,roughness,metalness};if(emissive){o.emissive=emissive;o.emissiveIntensity=.7;}return new THREE.MeshStandardMaterial(o);}
   createFloor(){this.mesh(new THREE.BoxGeometry(12,.2,12),this.mat(0x24262b,.95),[0,-.1,0]);this.mesh(new THREE.BoxGeometry(8,.04,7),this.mat(0x303238,1),[0,.02,-.2]);for(const x of [-3.1,0,3.1])this.mesh(new THREE.BoxGeometry(.08,.025,7),this.mat(0x54575d,.9),[x,.045,-.2]);}
@@ -87,7 +87,7 @@ export class Room02 {
 
   update(delta){
     this.idleTime+=delta;
-    if(!this.whisperTriggered && this.idleTime>18){
+    if(this.completed)return;if(!this.whisperTriggered && this.idleTime>18){
       this.whisperTriggered=true;
       this.tracker.log("PSYCHOLOGICAL_IDLE_EVENT",{roomId:"ROOM_02",idleSeconds:Math.round(this.idleTime)});
       this.pathLights.forEach((light,i)=>{
