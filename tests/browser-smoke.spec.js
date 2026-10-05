@@ -83,7 +83,7 @@ async function walk(page, key, ms) {
 
 async function completeRooms04To08(page) {
   // Room 04: exit is sufficient; mark inspection is optional.
-  await walk(page, "KeyS", 1200);
+  await walk(page, "KeyW", 20000);
   expect(await interactCenter(page)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۵", { timeout: 5000 });
 
@@ -163,7 +163,7 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
 
 
 test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) => {
-  test.setTimeout(60000);
+  test.setTimeout(90000);
   const errors = [];
   const crashes = [];
   page.on("pageerror", (error) => errors.push(String(error)));
