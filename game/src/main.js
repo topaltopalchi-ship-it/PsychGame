@@ -13,6 +13,7 @@ import { Room08 } from "./rooms/Room08.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
+import { Room09 } from "./rooms/Room09.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -57,6 +58,7 @@ const room01 = new Room01(scene, tracker);
 let activeRoom = room01;
 const behavioralHistory = { hallBehavior:{}, mirrorBehavior:{}, recordingBehavior:{}, trustBehavior:{} };
 let gameFinished = false;
+let trainingFinished = false;
 const roomTransitionTimers = new Set();
 
 function scheduleRoomTransition(callback, delay = 900) {
@@ -316,12 +318,79 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+function loadTrainingPlan() {
+  try {
+    const key = `psychgame_training_${session.getPlayerCode()}`;
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function startRoom09(context = { previousRoom: "ROOM_08" }) {
+  if (gameFinished || trainingFinished) return;
+  const plan = loadTrainingPlan();
+  if (!plan?.assignments?.length) {
+    finishGameWithoutTraining();
+    return;
+  }
+
+  clearRoomGeometry();
+  interaction.clearTargets?.();
+  activeRoom = new Room09(scene, tracker, plan);
+  activeRoom.start(context);
+  interaction.setRoom(activeRoom, 9);
+  audioManager.setRoom(9);
+  camera.position.set(0, 1.7, 3.5);
+  player.rotation.set(0, 0, 0);
+  camera.rotation.copy(player.rotation);
+  mainLight.intensity = 20;
+  companion?.say("مرحله تمرینی شروع شد.");
+  document.getElementById("pg-title").textContent = "YOL · مرحله تمرینی ۰۱";
+}
+
+function finishGameWithoutTraining() {
+  if (gameFinished) return;
+  gameFinished = true;
+  session.saveSession({ completed: true });
+  session.uploadCompletedSession();
+  clearRoomTransitionTimers();
+  interaction.currentTarget = null;
+  interaction.finishLook();
+  const titleEl = document.getElementById("pg-title");
+  const hintEl = document.getElementById("pg-hint");
+  const targetEl = document.getElementById("pg-target");
+  const interactButton = document.getElementById("pg-touch-interact");
+  if (titleEl) titleEl.textContent = "YOL · پایان";
+  if (hintEl) hintEl.textContent = "سفر تمام شد.";
+  if (targetEl) targetEl.style.display = "none";
+  if (interactButton) interactButton.style.display = "none";
+  audioManager.playPulse("dark");
+}
+
+window.addEventListener("psychgame-training-room-complete", (event) => {
+  if (event.detail?.roomId !== "ROOM_09" || trainingFinished) return;
+  trainingFinished = true;
+  tracker.log("TRAINING_PHASE_ROOM_COMPLETED", {
+    roomId: "ROOM_09",
+    targetId: event.detail.targetId || null
+  });
+  finishGameWithoutTraining();
+});
+
 window.addEventListener("psychgame-game-complete",(event)=>{
   if(event.detail?.roomId!=="ROOM_08" || gameFinished)return;
   gameFinished = true;\n  session.saveSession({ completed: true });\n  session.uploadCompletedSession();
   clearRoomTransitionTimers();
   interaction.currentTarget = null;
   interaction.finishLook();
+  const trainingPlan = loadTrainingPlan();
+  if (trainingPlan?.assignments?.length) {
+    gameFinished = false;
+    startRoom09({ previousRoom: "ROOM_08" });
+    return;
+  }
   const titleEl=document.getElementById("pg-title");
   const hintEl=document.getElementById("pg-hint");
   const targetEl=document.getElementById("pg-target");
