@@ -24,11 +24,24 @@ export class Room04 {
   createRoom(){
     const wall=this.mat(0x171b21), floor=this.mat(0x24262b), trim=this.mat(0x3a3030);
     this.mesh(new THREE.BoxGeometry(4,.2,38),floor,[0,-.1,-10]);
+    this.mesh(new THREE.BoxGeometry(.9,.035,34),this.mat(0x30272b,.85),[0,.02,-10]);
+    for(const z of [6,0,-6,-12,-18,-24]){
+      this.mesh(new THREE.BoxGeometry(.08,.035,1.8),this.mat(0x8d6670,.45,.25,0x3d1f27),[-1.05,.04,z]);
+      this.mesh(new THREE.BoxGeometry(.08,.035,1.8),this.mat(0x8d6670,.45,.25,0x3d1f27),[1.05,.04,z]);
+    }
     this.mesh(new THREE.BoxGeometry(.18,4,38),wall,[-2,2,-10]);
     this.mesh(new THREE.BoxGeometry(.18,4,38),wall,[2,2,-10]);
     for(const z of [7,0,-7,-14,-21,-28]){
       const frame=this.mesh(new THREE.BoxGeometry(3.7,.12,.18),trim,[0,3.45,z]);
       frame.userData.objectId="HALL_MARK";
+    }
+    for(const z of [5,-2,-9,-16,-23]){
+      const panel=this.mesh(new THREE.BoxGeometry(3.55,2.8,.08),this.mat(0x20242c,.82,.08),[0,1.7,z]);
+      panel.userData.objectId="HALL_MARK";
+      this.mesh(new THREE.BoxGeometry(3.1,.06,.06),this.mat(0x6b4c50,.5,.3),[0,3.05,z+.03]);
+      const lamp=this.mesh(new THREE.BoxGeometry(.55,.08,.18),this.mat(0x9ca9bd,.3,.45,0x687a9a),[0,3.35,z]);
+      lamp.userData.objectId="HALL_MARK";
+      const point=new THREE.PointLight(0x9aa8c4,1.6,4); point.position.set(0,3.1,z); this.scene.add(point);
     }
     const exit=this.mesh(new THREE.BoxGeometry(1.7,3.1,.16),this.mat(0x4b535b,.65),[0,1.55,-27.7]);
     exit.userData.objectId="HALL_EXIT"; this.objects.exit=exit;
