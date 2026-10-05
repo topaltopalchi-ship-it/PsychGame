@@ -27,9 +27,13 @@ export class Room16 {
   }
   finish(){
     if(this.completed||!this.engine||!this.engine.canAttempt("GRADUAL_APPROACH")) return;
-    if(this.steps<this.requiredSteps){this.engine.recordAttempt("GRADUAL_APPROACH",false,{steps:this.steps,requiredSteps:this.requiredSteps});return;}
+    if(this.steps<this.requiredSteps){
+      this.engine.recordAttempt("GRADUAL_APPROACH",false,{steps:this.steps,requiredSteps:this.requiredSteps});
+      if(this.engine.isExhausted("GRADUAL_APPROACH")) this.complete();
+      return;
+    }
     this.engine.recordAttempt("GRADUAL_APPROACH",true,{steps:this.steps,requiredSteps:this.requiredSteps});
-    if(this.engine.isCompleted("GRADUAL_APPROACH")) this.complete();
+    if(this.engine.isCompleted("GRADUAL_APPROACH") || this.engine.isExhausted("GRADUAL_APPROACH")) this.complete();
     else { this.steps=0; this.tracker.log("TRAINING_RETRY",{roomId:"ROOM_16",targetId:"GRADUAL_APPROACH"}); }
   }
   complete(){this.completed=true;window.dispatchEvent(new CustomEvent("psychgame-training-room-complete",{detail:{roomId:"ROOM_16",targetId:"GRADUAL_APPROACH"}}));}
