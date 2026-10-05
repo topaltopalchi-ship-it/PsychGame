@@ -199,7 +199,13 @@ export class SpecialistPanel {
     try {
       const key = `psychgame_training_${this.session.getPlayerCode()}`;
       const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const plan = JSON.parse(raw);
+      if (plan && !plan.planId) {
+        plan.planId = crypto.randomUUID();
+        localStorage.setItem(key, JSON.stringify(plan));
+      }
+      return plan;
     } catch {
       return null;
     }
