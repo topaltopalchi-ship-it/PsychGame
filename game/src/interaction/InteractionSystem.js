@@ -417,6 +417,11 @@ InteractionSystem.prototype.handleRoom6 = function(objectId) {
   }
   if (objectId === "REC_EXIT") {
     if (this.completed) return;
+    if (!this.room?.firstChoice) {
+      this.tracker.log("ROOM_06_EXIT_BLOCKED",{roomId:"ROOM_06",reason:"NO_RECORDING_CHECK"});
+      this.companion?.say?.("هنوز هیچ صدایی رو بررسی نکردی. اول یکی از دستگاه‌ها رو امتحان کن.");
+      return;
+    }
     this.room?.chooseExit?.(); this.room?.completeRoom?.(); this.completed=true;
     this.tracker.log("ROOM_06_EXIT_CHECKED",{roomId:"ROOM_06"});
     window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_06",behavior:{firstChoice:this.room?.firstChoice||null,lastChoice:this.room?.lastChoice||null,switchCount:this.room?.switchCount||0,totalChecks:this.room?.playCount||0}}}));
