@@ -19,6 +19,12 @@ import { Room11 } from "./rooms/Room11.js";
 import { Room12 } from "./rooms/Room12.js";
 import { Room13 } from "./rooms/Room13.js";
 import { Room14 } from "./rooms/Room14.js";
+import { Room15 } from "./rooms/Room15.js";
+import { Room16 } from "./rooms/Room16.js";
+import { Room17 } from "./rooms/Room17.js";
+import { Room18 } from "./rooms/Room18.js";
+import { Room19 } from "./rooms/Room19.js";
+import { Room20 } from "./rooms/Room20.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -423,6 +429,33 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
       document.getElementById("pg-title").textContent = "YOL · مرحله تمرینی ۰۳";
       return;
     }
+  }
+
+  if (roomId === "ROOM_14") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.length){
+      clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room15(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_14"}); interaction.setRoom(activeRoom,15); audioManager.setRoom(15); return;
+    }
+  }
+  if (roomId === "ROOM_15") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.length){ clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room16(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_15"}); interaction.setRoom(activeRoom,16); audioManager.setRoom(16); return; }
+  }
+  if (roomId === "ROOM_16") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.length){ clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room17(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_16"}); interaction.setRoom(activeRoom,17); audioManager.setRoom(17); return; }
+  }
+  if (roomId === "ROOM_17") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.length){ clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room18(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_17"}); interaction.setRoom(activeRoom,18); audioManager.setRoom(18); return; }
+  }
+  if (roomId === "ROOM_18") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.length){ clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room19(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_18"}); interaction.setRoom(activeRoom,19); audioManager.setRoom(19); return; }
+  }
+  if (roomId === "ROOM_19") {
+    const plan=loadTrainingPlan();
+    if(plan?.assignments?.length){ clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room20(scene,tracker,plan,companion); activeRoom.start({previousRoom:"ROOM_19"}); interaction.setRoom(activeRoom,20); audioManager.setRoom(20); return; }
   }
 
   if (roomId === "ROOM_09") {
