@@ -109,6 +109,58 @@ export class SpecialistReport {
     const lastEvent = events[events.length - 1];
     const firstDecision = decisionEvents[0];
 
+    const specialistReportFa = {
+      title: "گزارش رفتاری بازی برای متخصص",
+      methodology: "این گزارش بر پایه شاخص‌های رفتاری ثبت‌شده در روند بازی تهیه شده است و تشخیص بالینی یا نتیجه‌گیری قطعی درباره وضعیت روان‌شناختی بازیکن نیست.",
+      session: {
+        playerCode: sessionData?.playerCode ?? null,
+        sessionId: sessionData?.sessionId ?? null,
+        تعداد_رویدادها: events.length,
+        مدت_جلسه_میلی_ثانیه: Number.isFinite(lastEvent?.elapsedMs) ? lastEvent.elapsedMs : null,
+        تعداد_تصمیم‌ها: decisionEvents.length,
+        زمان_تا_اولین_تصمیم_میلی_ثانیه: Number.isFinite(firstDecision?.elapsedMs) ? firstDecision.elapsedMs : null
+      },
+      مسیر_اتاق‌ها: path,
+      اتاق‌های_تکمیل‌شده: completedRooms,
+      خلاصه_اتاق‌ها: {
+        ROOM_04: {
+          عنوان: "اتاق ۰۴",
+          رویدادهای_حرکتی: byType.ROOM_04_MOVEMENT || 0,
+          بررسی_نشانه: byType.ROOM_04_MARK_INSPECTED || 0,
+          جابه‌جایی_حافظه: byType.ROOM_04_MEMORY_SHIFT || 0,
+          اختلال_حلقه: byType.ROOM_04_LOOP_GLITCH || 0
+        },
+        ROOM_05: {
+          عنوان: "اتاق ۰۵",
+          بررسی_آینه: byType.ROOM_05_MIRROR_INSPECTED || 0,
+          اختلال_بازتاب: byType.ROOM_05_REFLECTION_GLITCH || 0,
+          تصمیم: byType.ROOM_05_CHOICE || 0
+        },
+        ROOM_06: {
+          عنوان: "اتاق ۰۶",
+          بررسی_ضبط: byType.ROOM_06_RECORDING_CHECKED || 0,
+          رویداد_نجوا: byType.ROOM_06_WHISPER_EVENT || 0,
+          اعوجاج_سیگنال: byType.ROOM_06_SIGNAL_DISTORTION || 0,
+          پروفایل_اعتماد: byType.ROOM_06_TRUST_PROFILE || 0
+        },
+        ROOM_07: {
+          عنوان: "اتاق ۰۷",
+          انتخاب_اعتماد: byType.ROOM_07_TRUST_CHOICE || 0,
+          درخواست_همراه: byType.ROOM_07_COMPANION_PROMPT || 0,
+          پروفایل_اعتماد: byType.ROOM_07_TRUST_PROFILE || 0
+        },
+        ROOM_08: {
+          عنوان: "اتاق ۰۸",
+          پروفایل_رفتاری: byType.ROOM_08_BEHAVIORAL_PROFILE || 0,
+          زمینه_رفتاری: byType.ROOM_08_BEHAVIOR_CONTEXT || 0,
+          پاسخ_هسته: byType.ROOM_08_CORE_RESPONSE || 0,
+          بررسی_خروج: byType.ROOM_08_EXIT_CHECKED || 0,
+          توالی_پایانی: byType.ROOM_08_FINAL_SEQUENCE || 0
+        }
+      },
+      تحلیل_ثبت‌شده: sessionData?.analysis ?? null
+    };
+
     return {
       generatedAt: new Date().toISOString(),
       playerCode: sessionData?.playerCode ?? null,
