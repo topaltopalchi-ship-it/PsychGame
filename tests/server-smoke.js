@@ -132,8 +132,8 @@ try {
   });
   assert.equal(listed.status, 200);
   const listedSessions = await listed.json();
-  assert.equal(Array.isArray(listedSessions), true);
-  const listedSmoke = listedSessions.find((item) => item.id === "smoke-session");
+  assert.equal(Array.isArray(listedSessions.sessions), true);
+  const listedSmoke = listedSessions.sessions.find((item) => item.id === "smoke-session");
   assert.ok(listedSmoke);
   assert.equal("events" in listedSmoke, false);
   assert.equal("analysis" in listedSmoke, false);
