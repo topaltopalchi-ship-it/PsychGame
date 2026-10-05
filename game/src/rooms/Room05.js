@@ -15,7 +15,13 @@ export class Room05 {
   mat(color,roughness=.35,metalness=.15){return new THREE.MeshStandardMaterial({color,roughness,metalness});}
   mesh(g,m,p=[0,0,0]){const o=new THREE.Mesh(g,m);o.position.set(...p);this.scene.add(o);return o;}
   add(id,o){o.userData.objectId=id;this.objects[id]=o;return o;}
-  createFloor(){this.mesh(new THREE.PlaneGeometry(18,18),this.mat(0x15151a,.9),[0,0,0]).rotation.x=-Math.PI/2;}
+  createFloor(){
+    this.mesh(new THREE.PlaneGeometry(18,18),this.mat(0x15151a,.9),[0,0,0]).rotation.x=-Math.PI/2;
+    this.mesh(new THREE.BoxGeometry(15,.035,8),this.mat(0x22222a,.75,.08),[0,.02,0]);
+    for(const x of [-7,-3.6,0,3.6,7]){
+      this.mesh(new THREE.BoxGeometry(.045,.04,10),this.mat(0x596079,.35,.3,0x22283b),[x,.05,0]);
+    }
+  }
   createWalls(){
     const m=this.mat(0x111116,.95);
     this.mesh(new THREE.BoxGeometry(18,4,0.3),m,[0,2,-6]);
@@ -38,6 +44,11 @@ export class Room05 {
     this.add("MIRROR_EXIT",exit);
   }
   createAtmosphere(){
+    const ceiling=this.mesh(new THREE.BoxGeometry(15,.12,1.2),this.mat(0x252832,.45,.5),[0,3.7,-1.2]);
+    for(const x of [-5.4,0,5.4]){
+      const lamp=this.mesh(new THREE.SphereGeometry(.14,16,12),new THREE.MeshStandardMaterial({color:0x9ba8d0,emissive:0x55658f,emissiveIntensity:1.8}),[x,3.45,-1.2]);
+      const point=new THREE.PointLight(0x7889c4,.9,5); point.position.set(x,3.3,-1.2); this.scene.add(point);
+    }
     const l=new THREE.PointLight(0x6875a8,1.2,14);l.position.set(0,3.2,-2);this.scene.add(l);this.objects.MIRROR_LIGHT=l;
     const glow=this.mesh(new THREE.SphereGeometry(.16,12,12),new THREE.MeshBasicMaterial({color:0x8899ff}),[0,3.1,-3]);this.add("MIRROR_GLOW",glow);
     const ceiling=this.mesh(new THREE.BoxGeometry(14,.08,1.8),new THREE.MeshStandardMaterial({color:0x222630,roughness:.55,metalness:.35}),[0,3.75,-.8]); this.add("MIRROR_CEILING",ceiling);
