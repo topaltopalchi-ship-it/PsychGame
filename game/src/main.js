@@ -57,6 +57,22 @@ const room01 = new Room01(scene, tracker);
 let activeRoom = room01;
 const behavioralHistory = { hallBehavior:{}, mirrorBehavior:{}, recordingBehavior:{}, trustBehavior:{} };
 let gameFinished = false;
+const roomTransitionTimers = new Set();
+
+function scheduleRoomTransition(callback, delay = 900) {
+  const timer = setTimeout(() => {
+    roomTransitionTimers.delete(timer);
+    if (gameFinished) return;
+    callback();
+  }, delay);
+  roomTransitionTimers.add(timer);
+  return timer;
+}
+
+function clearRoomTransitionTimers() {
+  roomTransitionTimers.forEach((timer) => clearTimeout(timer));
+  roomTransitionTimers.clear();
+}
 
 room01.start();
 interaction.setRoom(room01, 1);
@@ -191,7 +207,7 @@ function startRoom02(previousPath = "ROOM_01") {
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_01") setTimeout(() => startRoom02("ROOM_01"), 900);
+  if (event.detail?.roomId === "ROOM_01") scheduleRoomTransition(() => startRoom02("ROOM_01"));
 });
 
 function startRoom03(context = { previousPath: "ROOM_02" }) {
@@ -210,7 +226,7 @@ function startRoom03(context = { previousPath: "ROOM_02" }) {
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_02") setTimeout(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion }), 900);
+  if (event.detail?.roomId === "ROOM_02") scheduleRoomTransition(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion }));
 });
 
 function startRoom04(context = { previousRoom: "ROOM_03" }) {
@@ -229,7 +245,7 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) {
   document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_03") setTimeout(() => startRoom04({ previousRoom:"ROOM_03", companion }), 900);
+  if (event.detail?.roomId === "ROOM_03") scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion }));
 });
 
 window.psychGame = {
@@ -299,6 +315,7 @@ window.addEventListener("resize", () => {
 window.addEventListener("psychgame-game-complete",(event)=>{
   if(event.detail?.roomId!=="ROOM_08" || gameFinished)return;
   gameFinished = true;
+  clearRoomTransitionTimers();
   interaction.currentTarget = null;
   interaction.finishLook();
   const titleEl=document.getElementById("pg-title");
