@@ -2,13 +2,13 @@
 // These are behavioral domains, not diagnoses. The specialist retains final control.
 
 const RECOMMENDATION_RULES = [
-  { id: "WAIT_TOLERANCE", label: "تحمل تأخیر", evidence: ({ analysis = {} }) => analysis.decisionLatency?.level === "SHORT" },
+  { id: "WAIT_TOLERANCE", label: "تحمل تأخیر", evidence: ({ analysis = {} }) => analysis.decisionLatency === "SHORT" },
   { id: "RESPONSE_INHIBITION", label: "مهار پاسخ فوری", evidence: ({ analysis = {} }) => analysis.riskTaking?.level === "HIGH" || analysis.decisionLatency?.level === "SHORT" },
-  { id: "ATTENTION_SUSTAIN", label: "تداوم توجه", evidence: ({ analysis = {}, lookSummary = {} }) => analysis.exploration?.level === "LOW" || Number(lookSummary?.totalLookMs || 0) < 3000 },
+  { id: "ATTENTION_SUSTAIN", label: "تداوم توجه", evidence: ({ analysis = {}, lookSummary = {} }) => analysis.exploration === "LOW" || Number(lookSummary?.totalLookMs || 0) < 3000 },
   { id: "DECISION_COMMITMENT", label: "ثبات تصمیم", evidence: ({ roomDetails = {} }) => Object.values(roomDetails).some(room => Number(room?.choiceSwitches || 0) > 0) },
-  { id: "UNCERTAINTY_TOLERANCE", label: "تحمل ابهام", evidence: ({ analysis = {} }) => analysis.helpSeeking?.level === "OBSERVED" },
+  { id: "UNCERTAINTY_TOLERANCE", label: "تحمل ابهام", evidence: ({ analysis = {} }) => analysis.helpSeeking === "OBSERVED" },
   { id: "REPETITION_REDUCTION", label: "کاهش رفتار تکراری", evidence: ({ repeatedInteractions = {} }) => Object.values(repeatedInteractions).some(value => Number(value || 0) >= 3) },
-  { id: "GRADUAL_APPROACH", label: "رویارویی تدریجی", evidence: ({ analysis = {} }) => analysis.persistence?.level === "LOW" },
+  { id: "GRADUAL_APPROACH", label: "رویارویی تدریجی", evidence: ({ analysis = {} }) => analysis.persistence === "LOW" },
   { id: "EMOTIONAL_PAUSE", label: "مکث پیش از واکنش", evidence: ({ analysis = {} }) => analysis.riskTaking?.level === "MODERATE" || analysis.riskTaking?.level === "HIGH" }
 ];
 
@@ -18,16 +18,40 @@ export function buildTrainingRecommendations(report = {}) {
   const room01 = observed.room01 || {};
   const room02 = observed.room02 || {};
   const room03 = observed.room03 || {};
+  const roomBehavior = report.analysis?.roomBehavior || {};
+  const room04 = roomBehavior.ROOM_04 || {};
+  const room05 = roomBehavior.ROOM_05 || {};
+  const room06 = roomBehavior.ROOM_06 || {};
+  const room07 = roomBehavior.ROOM_07 || {};
+  const room08 = roomBehavior.ROOM_08 || {};
 
   const evidence = {
     RESPONSE_INHIBITION: room01.firstDecisionReactionTimeMs != null && room01.firstDecisionReactionTimeMs < 2000,
     WAIT_TOLERANCE: room03.waitingChecks >= 2 || (room03.firstWaitingReactionTimeMs != null && room03.firstWaitingReactionTimeMs < 2000),
-    DECISION_COMMITMENT: room02.pathSwitches > 0,
+    DECISION_COMMITMENT:
+      room02.pathSwitches > 0 ||
+      Number(room06.switches || 0) > 0 ||
+      Number(room07.switches || 0) > 0,
     ATTENTION_SUSTAIN: room01.objectInteractions < 3 && room03.waitingChecks < 2,
-    REPETITION_REDUCTION: room01.retriesAfterFailure >= 2 || room02.pathChoices > 2,
+    REPETITION_REDUCTION:
+      room01.retriesAfterFailure >= 2 ||
+      room02.pathChoices > 2 ||
+      Number(room05.switches || 0) > 1 ||
+      Number(room06.switches || 0) > 1,
     EMOTIONAL_PAUSE: room01.redButtonPresses >= 2 || (room01.firstDecisionReactionTimeMs != null && room01.firstDecisionReactionTimeMs < 2000),
-    UNCERTAINTY_TOLERANCE: room02.pathChoices === 0 || room02.uniquePaths > 1,
-    GRADUAL_APPROACH: Boolean(report.rooms?.ROOM_04?.events || report.rooms?.ROOM_05?.events || report.rooms?.ROOM_06?.events)
+    UNCERTAINTY_TOLERANCE:
+      room02.pathChoices === 0 ||
+      room02.uniquePaths > 1 ||
+      Number(room05.blockedExits || 0) > 0 ||
+      Number(room06.blockedExits || 0) > 0 ||
+      Number(room07.blockedExits || 0) > 0 ||
+      Number(room08.blockedExits || 0) > 0,
+    GRADUAL_APPROACH:
+      Number(room04.inspections || 0) > 0 ||
+      Number(room05.inspections || 0) > 0 ||
+      Number(room06.inspections || 0) > 0 ||
+      Number(room07.inspections || 0) > 0 ||
+      Number(room08.inspections || 0) > 0
   };
 
   const recommendations = RECOMMENDATION_RULES
