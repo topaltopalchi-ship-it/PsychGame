@@ -297,8 +297,10 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener("psychgame-game-complete",(event)=>{
-  if(event.detail?.roomId!=="ROOM_08")return;
+  if(event.detail?.roomId!=="ROOM_08" || gameFinished)return;
   gameFinished = true;
+  interaction.currentTarget = null;
+  interaction.finishLook();
   const titleEl=document.getElementById("pg-title");
   const hintEl=document.getElementById("pg-hint");
   const targetEl=document.getElementById("pg-target");
