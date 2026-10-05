@@ -5,7 +5,7 @@ import { getTrainingTargetLevel } from "../training/TrainingTargets.js";
 export class Room16 {
   constructor(scene, tracker, plan, companion=null) { this.scene=scene; this.tracker=tracker; this.plan=plan; this.companion=companion; this.objects={}; this.completed=false; this.steps=0; this.engine=null; this.target=null; }
   start(context={}) {
-    const a=(this.plan?.assignments||[]).find(x=>x.targetId==="GRADUAL_APPROACH");
+    const a=(this.plan?.assignments||[]).find(x=>x.targetId==="GRADUAL_APPROACH" && !x.completed && !x.aborted && !x.exhausted);
     this.engine=new TrainingEngine(this.plan,{roomId:16,onEvent:e=>this.tracker.log(e.type,e)});
     if(!a){ this.skip(); return; }
     this.target=getTrainingTargetLevel(a); this.requiredSteps=Number(this.target?.config?.exposureSteps||1); this.create();
