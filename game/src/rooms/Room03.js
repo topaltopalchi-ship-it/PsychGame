@@ -101,7 +101,7 @@ export class Room03 {
     }
   }
   getInteractableObjects(){return Object.values(this.objects);}
-  destroy(){for(const t of ["memoryResponseTimer","clockPulseTimer","memoryPulseTimer","exitGlitchTimer","finalBeatTimer","endingTimer","confirmTimer","finalRestoreTimer","confirmRestoreTimer","endingRestoreTimer"]){if(this[t])clearTimeout(this[t]);}this.objects={};}
+  destroy(){this.completed=true;for(const t of ["memoryResponseTimer","clockPulseTimer","memoryPulseTimer","exitGlitchTimer","finalBeatTimer","endingTimer","confirmTimer","finalRestoreTimer","confirmRestoreTimer","endingRestoreTimer"]){if(this[t])clearTimeout(this[t]);}this.objects={};}
   triggerFinalBeat(){
     if(this.completed||this.finalBeatDone)return;
     this.finalBeatDone=true;
