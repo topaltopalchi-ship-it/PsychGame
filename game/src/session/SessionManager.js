@@ -2,6 +2,7 @@ import { BehaviorTracker } from "../psychology/BehaviorTracker.js";
 import { BehaviorAnalyzer } from "../psychology/BehaviorAnalyzer.js";
 import { SpecialistReport } from "../psychology/SpecialistReport.js";
 import { SessionUploader } from "./SessionUploader.js";
+import { buildTrainingRecommendations } from "../training/TrainingRecommendations.js";
 
 export class SessionManager {
   constructor() {
@@ -51,6 +52,18 @@ export class SessionManager {
   getAnalysis() {
     this.analyzer = new BehaviorAnalyzer(this.tracker.getEvents());
     return this.analyzer.getReport();
+  }
+
+  getPhase1Profile() {
+    return this.analyzer.buildPhase1Profile();
+  }
+
+  getTrainingRecommendations() {
+    return buildTrainingRecommendations({
+      playerCode: this.playerCode,
+      sessionId: this.getSessionId(),
+      phase1Profile: this.getPhase1Profile()
+    });
   }
 
   getTrainingResult() {
@@ -125,6 +138,8 @@ export class SessionManager {
       consent: this.playerConsent,
       events: this.tracker.getEvents(),
       analysis: this.getAnalysis(),
+      phase1Profile: this.getPhase1Profile(),
+      trainingRecommendations: this.getTrainingRecommendations(),
       trainingResult: this.getTrainingResult(),
       trainingProgress: this.getTrainingProgress(),
       trainingConsistency: this.getTrainingConsistency()
