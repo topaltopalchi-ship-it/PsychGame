@@ -120,7 +120,7 @@ export class Room18 {
       return;
     }
 
-    if (this.engine.isCompleted(this.assignment.targetId)) {
+    if (this.engine.isCompleted(this.assignment.targetId) || this.engine.isExhausted(this.assignment.targetId)) {
       this.completed = true;
       window.dispatchEvent(new CustomEvent("psychgame-training-room-complete", {
         detail: { roomId: "ROOM_18", targetId: this.assignment.targetId }
