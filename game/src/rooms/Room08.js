@@ -33,11 +33,11 @@ export class Room08 {
     this.tracker.log("ROOM_08_FINAL_SEQUENCE",{secondsInRoom:Math.round((performance.now()-this.startedAt)/100)/10});
     const exit=this.objects.TRUTH_EXIT;if(exit){exit.scale.z=.15;exit.material=exit.material.clone();exit.material.emissive=new THREE.Color(0x260b12);exit.material.emissiveIntensity=1.8;}
     if(this.objects.TRUTH_LIGHT)this.objects.TRUTH_LIGHT.intensity=.18;if(this.endLight)this.endLight.intensity=1.4;const core=this.objects.TRUTH_CORE;if(core)core.scale.setScalar(1.2);
-    this.finalTimer=setTimeout(()=>{if(this.completed&&!this.endingStarted)return;if(exit){exit.scale.z=1;exit.material.emissiveIntensity=.2;}if(this.objects.TRUTH_LIGHT)this.objects.TRUTH_LIGHT.intensity=1.5;if(this.endLight)this.endLight.intensity=.12;if(core)core.scale.setScalar(1);},1600);}
+    this.finalTimer=setTimeout(()=>{if(this.completed)return;if(exit){exit.scale.z=1;exit.material.emissiveIntensity=.2;}if(this.objects.TRUTH_LIGHT)this.objects.TRUTH_LIGHT.intensity=1.5;if(this.endLight)this.endLight.intensity=.12;if(core)core.scale.setScalar(1);},1600);}
   chooseExit(){this.triggerCoreResponse();this.tracker.log("ROOM_08_EXIT_CHECKED",{roomId:"ROOM_08"});if(this.endLight)this.endLight.intensity=.08;
     this.companion?.say?.("در بازه... ولی فکر نکن اینجا چیزی بهت جواب می‌ده.", 0, "tense");}
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_08"});}
-  update(delta){if(this.objects.TRUTH_CORE){this.objects.TRUTH_CORE.rotation.y+=delta*.35;this.objects.TRUTH_CORE.rotation.x+=delta*.12;}if(this.objects.TRUTH_RING){this.objects.TRUTH_RING.rotation.z+=delta*.12;this.objects.TRUTH_RING.material.opacity=.24+Math.sin(performance.now()*.002)*.08;}}
+  update(delta){if(this.completed)return;if(this.objects.TRUTH_CORE){this.objects.TRUTH_CORE.rotation.y+=delta*.35;this.objects.TRUTH_CORE.rotation.x+=delta*.12;}if(this.objects.TRUTH_RING){this.objects.TRUTH_RING.rotation.z+=delta*.12;this.objects.TRUTH_RING.material.opacity=.24+Math.sin(performance.now()*.002)*.08;}}
   destroy(){this.completed=true;if(this.lightTimer)clearTimeout(this.lightTimer);if(this.pulseTimer)clearTimeout(this.pulseTimer);if(this.endingTimer)clearTimeout(this.endingTimer);if(this.finalTimer)clearTimeout(this.finalTimer);if(this.endLight)this.scene.remove(this.endLight);this.objects={};}
 }
