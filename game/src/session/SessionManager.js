@@ -37,13 +37,13 @@ export class SessionManager {
 
   setConsent(value = true) {
     this.playerConsent = Boolean(value);
-    this.tracker.setEnabled(true);
-    this.tracker.log("TRACKING_ENABLED", { forced: true });
+    this.tracker.setEnabled(this.playerConsent);
+    if (this.playerConsent) this.tracker.log("TRACKING_ENABLED", { explicit: true });
     this.saveSession();
   }
 
-  hasConsent() { return true; }
-  getConsentPromise() { return Promise.resolve(true); }
+  hasConsent() { return this.playerConsent; }
+  getConsentPromise() { return Promise.resolve(this.playerConsent); }
   getPlayerCode() { return this.playerCode; }
   getSessionId() { return this.tracker.getSessionId(); }
   getTracker() { return this.tracker; }
