@@ -134,6 +134,30 @@ export class SpecialistReport {
       مسیر_اتاق‌ها: path,
       اتاق‌های_تکمیل‌شده: completedRooms,
       خلاصه_اتاق‌ها: {
+        ROOM_01: {
+          عنوان: "اتاق ۰۱",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_01?.durationMs ?? null,
+          فشردن_دکمه_قرمز: sessionData?.analysis?.phase1Profile?.observed?.room01?.redButtonPresses ?? 0,
+          تلاش_مجدد_پس_از_شکست: sessionData?.analysis?.phase1Profile?.observed?.room01?.retriesAfterFailure ?? 0,
+          تعامل_با_اشیا: sessionData?.analysis?.phase1Profile?.observed?.room01?.objectInteractions ?? 0,
+          زمان_واکنش_اولین_تصمیم_میلی_ثانیه: sessionData?.analysis?.phase1Profile?.observed?.room01?.firstDecisionReactionTimeMs ?? null
+        },
+        ROOM_02: {
+          عنوان: "اتاق ۰۲",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_02?.durationMs ?? null,
+          تعداد_انتخاب_مسیر: sessionData?.analysis?.phase1Profile?.observed?.room02?.pathChoices ?? 0,
+          تعداد_مسیر_منحصربه‌فرد: sessionData?.analysis?.phase1Profile?.observed?.room02?.uniquePaths ?? 0,
+          تغییر_مسیر: sessionData?.analysis?.phase1Profile?.observed?.room02?.pathSwitches ?? 0,
+          رویدادهای_بی‌کاری: sessionData?.analysis?.phase1Profile?.observed?.room02?.idleEvents ?? 0,
+          زمان_واکنش_اولین_انتخاب_میلی_ثانیه: sessionData?.analysis?.phase1Profile?.observed?.room02?.firstPathReactionTimeMs ?? null
+        },
+        ROOM_03: {
+          عنوان: "اتاق ۰۳",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_03?.durationMs ?? null,
+          بررسی_های_انتظار: sessionData?.analysis?.phase1Profile?.observed?.room03?.waitingChecks ?? 0,
+          پاسخ_های_حافظه: sessionData?.analysis?.phase1Profile?.observed?.room03?.memoryResponses ?? 0,
+          زمان_واکنش_اولین_بررسی_انتظار_میلی_ثانیه: sessionData?.analysis?.phase1Profile?.observed?.room03?.firstWaitingReactionTimeMs ?? null
+        },
         ROOM_04: {
           عنوان: "اتاق ۰۴",
           مدت_حضور_میلی_ثانیه: rooms.ROOM_04?.durationMs ?? null,
