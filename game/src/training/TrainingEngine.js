@@ -3,7 +3,12 @@
 // It does not diagnose the player or choose a clinical protocol.
 
 import { getTrainingTargetLevel } from "./TrainingTargets.js";
-import { createTrainingSession, recordTrainingAttempt, abortTrainingAssignment } from "./TrainingAssignment.js";
+import {
+  createTrainingSession,
+  getActiveAssignments,
+  recordTrainingAttempt,
+  abortTrainingAssignment
+} from "./TrainingAssignment.js";
 
 export class TrainingEngine {
   constructor(plan, { roomId = 9, onEvent = null } = {}) {
@@ -19,7 +24,11 @@ export class TrainingEngine {
       : createTrainingSession(plan, roomId);
     this.session.planId = this.planId;
     this.session.roomId = roomId;
-    this.completedTargets = new Set(this.session.assignments.filter(x => x.completed).map(x => x.targetId));
+    this.completedTargets = new Set(
+      (Array.isArray(this.session.assignments) ? this.session.assignments : [])
+        .filter(x => x.completed)
+        .map(x => x.targetId)
+    );
     this.persist();
   }
 
@@ -98,24 +107,50 @@ export class TrainingEngine {
   }
 
   syncAssignments(session, plan) {
-    const activeAssignments = Array.isArray(plan?.assignments) ? plan.assignments : [];
-    const existingIds = new Set((session.assignments || []).map(item => item.targetId));
-    const additions = activeAssignments
-      .filter(item => item?.targetId && !existingIds.has(item.targetId))
-      .map(item => ({
-        ...item,
-        target: getTrainingTargetLevel(item),
-        attempts: 0,
-        successes: 0,
-        failures: 0,
-        aborted: false,
-        completed: false,
-        exhausted: false
-      }));
+    const activeAssignments = getActiveAssignments(plan);
+    const persistedAssignments = Array.isArray(session?.assignments) ? session.assignments : [];
+    const stateByTargetId = new Map(
+      persistedAssignments
+        .filter(item => item?.targetId)
+        .map(item => [item.targetId, item])
+    );
 
-    return additions.length
-      ? { ...session, assignments: [...(session.assignments || []), ...additions] }
-      : session;
+    const assignments = activeAssignments.map((assignment) => {
+      const previous = stateByTargetId.get(assignment.targetId);
+      if (!previous) {
+        return {
+          ...assignment,
+          target: getTrainingTargetLevel(assignment),
+          attempts: 0,
+          successes: 0,
+          failures: 0,
+          aborted: false,
+          completed: false,
+          exhausted: false
+        };
+      }
+
+      return {
+        ...assignment,
+        target: getTrainingTargetLevel(assignment),
+        attempts: Number.isFinite(Number(previous.attempts))
+          ? Math.max(0, Math.trunc(Number(previous.attempts)))
+          : 0,
+        successes: Number.isFinite(Number(previous.successes))
+          ? Math.max(0, Math.trunc(Number(previous.successes)))
+          : 0,
+        failures: Number.isFinite(Number(previous.failures))
+          ? Math.max(0, Math.trunc(Number(previous.failures)))
+          : 0,
+        aborted: Boolean(previous.aborted),
+        completed: Boolean(previous.completed),
+        exhausted: Boolean(previous.exhausted),
+        ...(previous.abortReason ? { abortReason: previous.abortReason } : {}),
+        ...(previous.abortedAt ? { abortedAt: previous.abortedAt } : {})
+      };
+    });
+
+    return { ...session, assignments };
   }
 
   persist() {
