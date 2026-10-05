@@ -3,6 +3,7 @@ export class SessionUploader {
     this.endpoint = String(endpoint || "").replace(/\/$/, "");
     this.token = token || "";
     this.queueKey = "psychgame_upload_queue_v1";
+    this.flushing = false;
   }
 
   isConfigured() {
@@ -10,6 +11,7 @@ export class SessionUploader {
   }
 
   async upload(report, { completed = false } = {}) {
+    await this.flushQueue();
     if (!this.isConfigured() || !report) return { skipped: true };
 
     const payload = {
@@ -43,9 +45,55 @@ export class SessionUploader {
   queue(payload) {
     try {
       const current = JSON.parse(localStorage.getItem(this.queueKey) || "[]");
+      const id = this.payloadId(payload);
+      if (current.some(item => this.payloadId(item) === id)) return;
       current.push(payload);
       localStorage.setItem(this.queueKey, JSON.stringify(current.slice(-20)));
     } catch {}
+  }
+
+  payloadId(payload) {
+    return payload?.report?.sessionId
+      ? `${payload.report.sessionId}:${payload.completed ? "completed" : "progress"}`
+      : `${payload?.uploadedAt || ""}:${payload?.report?.playerCode || ""}`;
+  }
+
+  async flushQueue() {
+    if (this.flushing || !this.isConfigured()) return;
+    this.flushing = true;
+    try {
+      const queue = this.readQueue();
+      if (!queue.length) return;
+      const remaining = [];
+      for (const payload of queue) {
+        try {
+          const response = await fetch(this.endpoint + "/api/sessions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(this.token ? { Authorization: "Bearer " + this.token } : {})
+            },
+            body: JSON.stringify(payload),
+            keepalive: true
+          });
+          if (!response.ok) throw new Error("Upload failed: " + response.status);
+        } catch (_) {
+          remaining.push(payload);
+        }
+      }
+      localStorage.setItem(this.queueKey, JSON.stringify(remaining.slice(-20)));
+    } catch (_) {
+      // Keep the existing queue intact if storage/network handling fails.
+    } finally {
+      this.flushing = false;
+    }
+  }
+
+  readQueue() {
+    try {
+      const value = JSON.parse(localStorage.getItem(this.queueKey) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch (_) { return []; }
   }
 
   clearQueue() {
