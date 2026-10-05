@@ -21,8 +21,8 @@ export class Room18 {
     this.target = this.assignment ? getTrainingTargetLevel(this.assignment) : null;
     this.startedAt = 0;
     this.focusStartedAt = 0;
-    this.focusTargetMs = this.target?.config?.durationMs || 15000;
-    this.requiredPauseMs = this.target?.config?.requiredPauseMs || 3000;
+    this.focusTargetMs = Number(this.target?.config?.durationMs || 15000);
+    this.requiredPauseMs = Number(this.target?.config?.requiredPauseMs || 3000);
     this.triggered = false;
     this.actions = 0;
   }
@@ -33,7 +33,9 @@ export class Room18 {
     this.tracker.log("ROOM_ENTER", {
       roomId: "ROOM_18",
       previousRoom: context.previousRoom || null,
-      trainingTarget: this.assignment?.targetId || null
+      trainingTarget: this.assignment?.targetId || null,
+      trainingLevel: this.target?.level || this.assignment?.level || 1,
+      targetConfig: this.target?.config || null
     });
   }
 
