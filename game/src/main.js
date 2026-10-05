@@ -158,6 +158,8 @@ const targetLabels = {
   PATH_CENTER: "مسیر وسط — انتخاب کن",
   PATH_RIGHT: "مسیر راست — انتخاب کن",
   PATH_CLUE: "تابلو — بررسی کن",
+  WAIT_CLOCK: "ساعت — صبر کن", WAIT_SEAT: "صندلی — بررسی کن", WAIT_EXIT: "در خروج — انتخاب کن",
+  HALL_MARK: "علامت راهرو — بررسی کن", HALL_EXIT: "در انتهای راهرو — خروج",
   MIRROR_LEFT: "آینه چپ — بررسی کن", MIRROR_CENTER: "آینه وسط — بررسی کن", MIRROR_RIGHT: "آینه راست — بررسی کن", MIRROR_EXIT: "در خروج — باز کن",
   REC_FAMILIAR: "صدای آشنا — گوش بده", REC_UNKNOWN: "صدای ناشناس — گوش بده", REC_STATIC: "نویز — گوش بده", REC_EXIT: "در خروج — باز کن",
   FOLLOW_COMPANION: "اعتماد به همراه — انتخاب کن", GO_ALONE: "تنهایی — انتخاب کن", COMP_EXIT: "در خروج — باز کن",
