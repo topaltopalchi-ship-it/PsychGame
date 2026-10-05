@@ -35,6 +35,7 @@ export class SpecialistPanel {
     root.querySelector("#pg-sp-close").onclick = () => this.close();
     root.querySelector("#pg-sp-export").onclick = () => this.export(report);
     root.querySelector("#pg-sp-remote").onclick = () => this.loadRemoteSessions();
+    root.querySelector("#pg-sp-refresh-training").onclick = () => this.refreshTrainingProgress();
 
     const body = root.querySelector("#pg-sp-body");
     body.innerHTML = `
@@ -62,8 +63,9 @@ export class SpecialistPanel {
       </div>
 
       <h3>پیشرفت فعلی تمرین</h3>
-      <div id="pg-training-progress" style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
-        ${this.trainingProgressView(report.trainingProgress)}
+      <div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
+        <div id="pg-training-progress">${this.trainingProgressView(report.trainingProgress)}</div>
+        <button id="pg-sp-refresh-training" style="margin-top:12px">به‌روزرسانی پیشرفت</button>
       </div>
 
       <h3>نتیجه تمرین تخصصی</h3>
@@ -86,6 +88,13 @@ export class SpecialistPanel {
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.analysis,null,2))}</pre>`;
 
     this.bindTrainingButtons();
+  }
+
+  refreshTrainingProgress() {
+    if (!this.root) return;
+    const progress = SpecialistReport.build(this.session.getSessionData()).trainingProgress;
+    const block = this.root.querySelector("#pg-training-progress");
+    if (block) block.innerHTML = this.trainingProgressView(progress);
   }
 
   trainingProgressView(progress) {
