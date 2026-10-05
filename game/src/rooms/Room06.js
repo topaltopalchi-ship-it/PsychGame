@@ -27,7 +27,7 @@ export class Room06 {
       const knob=this.mesh(new THREE.CylinderGeometry(.12,.12,.06,20),this.mat(0x8b6d4c,.3,.6),[x,1.35,-2.2],[Math.PI/2,0,0]);
       
     }
-    const signal=this.mesh(new THREE.BoxGeometry(5.5,.06,.06),new THREE.MeshBasicMaterial({color:0x6d7890}),[0,2.0,-5.52]);this.add("REC_SIGNAL",signal);
+    const signal=this.mesh(new THREE.BoxGeometry(5.5,.06,.06),new THREE.MeshBasicMaterial({color:0x6d7890}),[0,2.0,-5.52]);this.objects.REC_SIGNAL=signal;
     const light=new THREE.PointLight(0x60709a,1.3,14);light.position.set(0,3.3,0);this.scene.add(light);this.objects.REC_LIGHT=light;
   }
   reactToRecording(id){
