@@ -371,6 +371,7 @@ InteractionSystem.prototype.handleRoom7 = function(objectId) {
 
 
 InteractionSystem.prototype.handleRoom8 = function(objectId) {
+  if (this.completed) return;
   if (objectId === "TRUTH_CORE") {
     this.room?.triggerCoreResponse?.(); window.dispatchEvent(new CustomEvent("psychgame-audio-pulse",{detail:{type:"whisper"}})); return;
   }
