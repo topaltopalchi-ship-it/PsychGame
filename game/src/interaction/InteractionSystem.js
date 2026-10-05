@@ -218,7 +218,6 @@ export class InteractionSystem {
       this.tracker.log("DOOR_CHECKED", { status: "UNLOCKED", result: "SAFE_EXIT" });
       if (!this.completed) {
         this.completed = true;
-        this.tracker.log("ROOM_COMPLETED", { roomId: "ROOM_01", path: "NO_BUTTON" });
         this.room?.completeRoom?.();
         this.companion?.say("در بازه. بدون دردسر می‌تونی از اتاق خارج بشی.");
         window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01" } }));
@@ -242,7 +241,6 @@ export class InteractionSystem {
 
     if (!this.completed) {
       this.completed = true;
-      this.tracker.log("ROOM_COMPLETED", { roomId: "ROOM_01" });
       this.room?.completeRoom?.();
       this.companion?.say("بازش کردی... فکر کنم آماده‌ای بریم اتاق بعدی.");
       window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01" } }));
