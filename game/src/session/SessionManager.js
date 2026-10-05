@@ -136,6 +136,7 @@ export class SessionManager {
     try {
       const data = this.getSessionData();
       localStorage.setItem(this.storageKey, JSON.stringify(data));
+
       const now = Date.now();
       if (completed) {
         if (this.completedUploadStarted) return;
@@ -144,6 +145,7 @@ export class SessionManager {
         this.uploader.upload(this.getReport(), { completed: true });
         return;
       }
+
       if (now - this.lastRemoteUpload > 15000) {
         this.lastRemoteUpload = now;
         this.uploader.upload(this.getReport(), { completed: false });
@@ -152,7 +154,6 @@ export class SessionManager {
       console.warn("PsychGame session save failed", error);
     }
   }
-
   resetTrainingUploadState() {
     this.completedUploadStarted = false;
     this.lastRemoteUpload = 0;
