@@ -90,8 +90,8 @@ Client-side Vite variables:
 Server variables:
 
 - `PORT` — API port; defaults to `8787`.
-- `AUTHOR_TOKEN` — optional bearer token required by session GET/POST endpoints.
-- `CORS_ORIGIN` — allowed CORS origin; defaults to `*` for local development. Production deployments should set this to the exact game origin.
+- `AUTHOR_TOKEN` — bearer token required by session GET/POST endpoints. In production, the server refuses to start if it is missing.
+- `CORS_ORIGIN` — allowed CORS origin; defaults to `*` for local development. In production, the server refuses to start unless this is set to an exact origin.
 
 If `AUTHOR_TOKEN` is enabled, the client must be configured with the matching token. Treat client-side tokens as non-secret because browser applications expose them to the user.
 
