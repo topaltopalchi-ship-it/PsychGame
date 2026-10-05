@@ -88,7 +88,7 @@ export class Room03 {
       this.objects.exit.position.x=oldX+(this.memoryContext?.wrongPaths?.length?.28:.12);
       this.exitGlitchTimer=setTimeout(()=>{if(this.objects.exit)this.objects.exit.position.x=oldX;},380);
     }
-    this.memoryLight?.intensity=8;
+    if(this.memoryLight)this.memoryLight.intensity=8;
     this.clockPulseTimer=setTimeout(()=>{if(this.memoryLight)this.memoryLight.intensity=3;},450);
     this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "در خروج... چرا تکون خورد؟" : "فکر کنم در خروج رو دیدم... یا نه؟");
   }
