@@ -71,7 +71,7 @@ export class Room04 {
     this.markObservations++;
     this.tracker.log("ROOM_04_MARK_INSPECTED",{turnCount:this.turnCount,explored:this.explored,observations:this.markObservations,maxDepth:Math.round(this.maxDepth*10)/10});
     if(this.markObservations===2){
-      this.companion?.say?.("دوباره همین علامت... یا فقط داری چیزی رو به یاد میاری که وجود نداره؟");
+      this.companion?.say?.("دوباره همین علامت... یا فقط داری چیزی رو به یاد میاری که وجود نداره؟", 0, "tense");
     }
   }
 
@@ -86,7 +86,7 @@ export class Room04 {
       marks.forEach((m,i)=>{m.position.z += i%2===0 ? .22 : -.22;});
       this.memoryShiftTimer=setTimeout(()=>{if(this.completed)return;marks.forEach((m,i)=>{m.position.z += i%2===0 ? -.22 : .22;});},700);
     }
-    this.companion?.say?.("نه... این علامت‌ها جای قبلی‌شون نیستن. یا شاید حافظه‌ی تو عوض شده.");
+    this.companion?.say?.("نه... این علامت‌ها جای قبلی‌شون نیستن. یا شاید حافظه‌ی تو عوض شده.", 0, "fear");
   }
 
   triggerGlitch(){
@@ -98,7 +98,7 @@ export class Room04 {
       if(this.objects.endLight)this.objects.endLight.intensity=0.4;
       this.glitchTimer=setTimeout(()=>{if(this.completed)return;if(this.objects.lamp)this.objects.lamp.intensity=1.5;if(this.objects.endLight)this.objects.endLight.intensity=2.2;},180);
     }
-    this.companion?.say?.("صبر کن... این نور قبلاً این‌طوری نبود.");
+    this.companion?.say?.("صبر کن... این نور قبلاً این‌طوری نبود.", 0, "fear");
   }
 
   update(delta, player){
