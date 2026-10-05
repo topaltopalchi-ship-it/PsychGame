@@ -282,8 +282,10 @@ function startRoom08(context={previousRoom:"ROOM_07"}) {
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
-  player.update(delta);
-  if (!gameFinished) activeRoom?.update?.(delta, player);
+  if (!gameFinished) {
+    player.update(delta);
+    activeRoom?.update?.(delta, player);
+  }
   interaction.update();
   renderer.render(scene, camera);
 }
