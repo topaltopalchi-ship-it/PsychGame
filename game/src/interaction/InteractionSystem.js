@@ -287,7 +287,10 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
     return;
   }
   if (objectId === "PATH_LEFT" || objectId === "PATH_RIGHT") {
-    this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId });
+    const reactionTimeMs = this.lastLookedObject === objectId && this.lookStartTime !== null
+      ? Math.round(performance.now() - this.lookStartTime)
+      : null;
+    this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId, reactionTimeMs });
     this.tracker.log("FAILURE", { roomId: "ROOM_02", cause: objectId });
     this.tracker.log("PATH_RETURN", { roomId: "ROOM_02", path: objectId });
     this.room?.triggerPathScare?.(objectId);
@@ -301,7 +304,10 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
     return;
   }
   if (objectId === "PATH_CENTER") {
-    this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId });
+    const reactionTimeMs = this.lastLookedObject === objectId && this.lookStartTime !== null
+      ? Math.round(performance.now() - this.lookStartTime)
+      : null;
+    this.tracker.log("PATH_CHOICE", { roomId: "ROOM_02", path: objectId, reactionTimeMs });
     this.room?.completeRoom?.("PATH_CENTER");
     this.completed = true;
     this.companion?.say("مسیر درست رو پیدا کردی. حالا می‌ریم مرحله بعد.");
