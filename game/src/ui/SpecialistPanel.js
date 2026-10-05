@@ -165,13 +165,24 @@ export class SpecialistPanel {
     });
   }
 
+  trainingConsistencyView(report) {
+    const check = report?.trainingConsistency;
+    if (!check) return "";
+    if (check.consistent) {
+      return `<div style="margin:10px 0;padding:10px;border:1px solid #26332b;border-radius:8px">همگام‌سازی نتیجه تمرین و وضعیت Runtime: <b>تأیید شد</b></div>`;
+    }
+    const items = Array.isArray(check.mismatches) ? check.mismatches : [];
+    return `<div style="margin:10px 0;padding:10px;border:1px solid #4a2d2d;border-radius:8px">وضعیت Runtime و نتیجه نهایی نیازمند بررسی است. اختلاف‌ها: ${this.escape(items.join("، ") || "نامشخص")}</div>`;
+  }
+
   trainingPlanView() {
     const assignments = this.trainingPlan?.assignments || [];
     if (!assignments.length) {
       return `<div style="opacity:.6">هنوز هدفی توسط متخصص انتخاب نشده است.</div>`;
     }
 
-    return assignments.map((item) => `
+    const consistency = this.trainingConsistencyView(this.report);
+    return consistency + assignments.map((item) => `
       <div style="padding:10px 0;border-bottom:1px solid #202633">
         <b>${this.escape(item.targetId)}</b>
         <span style="opacity:.65"> · سطح ${item.level} · اختصاص‌یافته توسط متخصص</span>
