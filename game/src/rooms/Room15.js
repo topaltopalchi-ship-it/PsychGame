@@ -1,21 +1,17 @@
 import * as THREE from "three";
 import { TrainingEngine } from "../training/TrainingEngine.js";
-import { getTrainingTargetLevel } from "../training/TrainingTargets.js";
 
 export class Room15 {
   constructor(scene, tracker, plan, companion = null) {
     this.scene = scene; this.tracker = tracker; this.plan = plan; this.companion = companion;
-    this.objects = {}; this.completed = false; this.assignment = null; this.target = null; this.engine = null; this.lastActionAt = 0;
+    this.objects = {}; this.completed = false; this.assignment = null; this.engine = null; this.lastActionAt = 0;
   }
   start(context = {}) {
     this.engine = new TrainingEngine(this.plan, { roomId: 15, onEvent: e => this.tracker.log(e.type, e) });
     this.assignment = this.engine.getAssignments().find(x => x.targetId === "RESPONSE_INHIBITION" && !x.completed && !x.aborted && !x.exhausted) || null;
     if (!this.assignment) return this.skip();
-    this.target = getTrainingTargetLevel(this.assignment);
-    this.requiredPauseMs = Number(this.target?.config?.requiredPauseMs || 2000);
     this.createRoom();
-    this.tracker.log("ROOM_ENTER", { roomId: "ROOM_15", trainingTarget: "RESPONSE_INHIBITION", trainingLevel: this.target?.level || this.assignment.level,
-      requiredPauseMs: this.requiredPauseMs, previousRoom: context.previousRoom || null });
+    this.tracker.log("ROOM_ENTER", { roomId: "ROOM_15", trainingTarget: "RESPONSE_INHIBITION", trainingLevel: this.assignment.level, previousRoom: context.previousRoom || null });
   }
   mat(c) { return new THREE.MeshStandardMaterial({ color: c, roughness: .72 }); }
   add(id, o) { o.userData.objectId = id; this.objects[id] = o; this.scene.add(o); return o; }
@@ -28,12 +24,12 @@ export class Room15 {
   choose(id) {
     if (this.completed || !this.assignment) return;
     const now = performance.now(); const pause = this.lastActionAt ? now - this.lastActionAt : 0;
-    this.tracker.log("TRAINING_INHIBITION_ACTION", { roomId: "ROOM_15", objectId: id, requiredPauseMs: this.requiredPauseMs });
+    this.tracker.log("TRAINING_INHIBITION_ACTION", { roomId: "ROOM_15", objectId: id, requiredPauseMs: this.assignment.target?.config?.requiredPauseMs || 0 });
     if (id === "INHIBITION_TRIGGER") { this.lastActionAt = now; this.companion?.say?.("مکث کن. هنوز لازم نیست واکنش نشان بدهی."); }
   }
   finish() {
     if (this.completed || !this.assignment) return;
-    const required = this.requiredPauseMs;
+    const required = Number(this.assignment.target?.config?.requiredPauseMs || 2000);
     const elapsed = this.lastActionAt ? performance.now() - this.lastActionAt : 0;
     const success = elapsed >= required;
     this.engine.recordAttempt(this.assignment.targetId, success, { requiredPauseMs: required, elapsedMs: Math.round(elapsed) });
