@@ -31,7 +31,7 @@ export class InteractionSystem {
   setCompanion(companion) { this.companion = companion; }
   setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
 
-  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); this.room8CompletionTimer = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
+  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); this.room8CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
 
   register(object, objectId) {
     object.userData.interactable = true;
