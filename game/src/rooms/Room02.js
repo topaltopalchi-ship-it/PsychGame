@@ -81,7 +81,7 @@ export class Room02 {
         target.intensity=old*.35;
         const timer=setTimeout(()=>{if(this.completed){this.observationTimers=this.observationTimers.filter(t=>t!==timer);return;}target.intensity=old;this.observationTimers=this.observationTimers.filter(t=>t!==timer);},420);this.observationTimers.push(timer);
       }
-      this.companion?.say?.(path==="PATH_CENTER" ? "چرا دوباره به همین مسیر نگاه می‌کنی؟" : "فکر کنم این مسیر متوجه شد که دیدیش...");
+      this.companion?.say?.(path==="PATH_CENTER" ? "چرا دوباره به همین مسیر نگاه می‌کنی؟" : "فکر کنم این مسیر متوجه شد که دیدیش...", 0, "stress");
     }
   }
 
@@ -97,7 +97,7 @@ export class Room02 {
         if(this.completed)return;
         this.pathLights.forEach(light=>{light.intensity=Math.max(light.intensity,2.2);});
       },900);
-      this.companion?.say?.("هنوز اینجایی؟ ... فکر کردم انتخابت رو کرده‌ای.");
+      this.companion?.say?.("هنوز اینجایی؟ ... فکر کردم انتخابت رو کرده‌ای.", 0, "tense");
     }
   }
 
