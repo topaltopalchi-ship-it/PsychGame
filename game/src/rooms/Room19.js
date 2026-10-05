@@ -24,6 +24,7 @@ export class Room19 {
   }
 
   start(context = {}) {
+    if (!this.assignment) { this.skip(); return; }
     this.create();
     this.tracker.log("ROOM_ENTER", {
       roomId: "ROOM_19",
@@ -120,6 +121,8 @@ export class Room19 {
     this.choiceRepeats = 0;
     this.startTime = 0;
   }
+
+  skip() { this.completed = true; window.dispatchEvent(new CustomEvent("psychgame-training-room-complete", { detail: { roomId: "ROOM_19", targetId: null, skipped: true } })); }
 
   getInteractableObjects() { return Object.values(this.objects); }
   destroy() {
