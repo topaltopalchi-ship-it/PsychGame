@@ -60,7 +60,7 @@ export class Room08 {
     const core=this.objects.TRUTH_CORE;
     if(core){core.scale.setScalar(1.2);}
     this.finalTimer=setTimeout(()=>{
-      if(this.completed)return;
+      if(this.completed&&!this.endingStarted)return;
       if(exit){exit.scale.z=1;exit.material.emissiveIntensity=.2;}
       if(this.objects.TRUTH_LIGHT)this.objects.TRUTH_LIGHT.intensity=1.5;
       if(this.endLight)this.endLight.intensity=.12;
