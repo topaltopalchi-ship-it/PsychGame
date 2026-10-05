@@ -9,18 +9,25 @@ import {
   getTrainingRoomForTarget
 } from "./TrainingTargets.js";
 
+function resolveTrainingRoom(targetId) {
+  const room = Number(getTrainingRoomForTarget(targetId));
+  return room >= 9 && room <= 20 ? room : null;
+}
+
 export function createTrainingPlan({ playerCode = null, sourceSessionId = null, assignments = [] } = {}) {
   const safeAssignments = [];
   const targetIds = new Set();
   for (const assignment of assignments) {
     const created = createTrainingAssignment(assignment);
     if (!created || targetIds.has(created.targetId)) continue;
+    const trainingRoom = resolveTrainingRoom(created.targetId);
+    if (!trainingRoom) continue;
     targetIds.add(created.targetId);
-    safeAssignments.push({ ...created, trainingRoom: getTrainingRoomForTarget(created.targetId) });
+    safeAssignments.push({ ...created, trainingRoom });
   }
 
   return {
-    version: 3,
+    version: 4,
     planId: crypto.randomUUID(),
     playerCode,
     sourceSessionId,
@@ -39,13 +46,15 @@ export function addTrainingAssignment(plan, assignment) {
   };
 
   const created = createTrainingAssignment(assignment);
-  if (next.assignments.some((item) => item.targetId === created.targetId)) return next;
-  const enriched = { ...created, trainingRoom: getTrainingRoomForTarget(created.targetId) };
+  const trainingRoom = resolveTrainingRoom(created.targetId);
+  if (!trainingRoom || next.assignments.some((item) => item.targetId === created.targetId)) return next;
+
+  const enriched = { ...created, trainingRoom };
   next.assignments.push(enriched);
   next.auditLog.push({
     action: "ASSIGN_TARGET",
     targetId: enriched.targetId,
-    trainingRoom: enriched.trainingRoom,
+    trainingRoom,
     level: enriched.level,
     by: "specialist",
     at: new Date().toISOString()
@@ -63,28 +72,31 @@ export function setTrainingAssignmentLevel(plan, targetId, level) {
   if (index < 0) return next;
   const current = next.assignments[index];
   const target = TRAINING_TARGETS[targetId];
-  if (!target) return next;
+  const trainingRoom = resolveTrainingRoom(targetId);
+  if (!target || !trainingRoom) return next;
+
   const requestedLevel = Number(level);
   const safeLevel = Number.isFinite(requestedLevel)
     ? Math.max(1, Math.min(Math.trunc(requestedLevel), target.progression.length))
     : current.level;
   const finalLevel = Math.min(safeLevel, Number(current.maxLevel) || target.progression.length);
+  const changedAt = new Date().toISOString();
 
   next.assignments[index] = {
     ...current,
-    trainingRoom: current.trainingRoom ?? getTrainingRoomForTarget(targetId),
+    trainingRoom,
     level: finalLevel,
-    levelChangedAt: new Date().toISOString(),
+    levelChangedAt: changedAt,
     levelChangedBy: "specialist"
   };
   next.auditLog.push({
     action: "CHANGE_LEVEL",
     targetId,
+    trainingRoom,
     fromLevel: current.level,
     toLevel: finalLevel,
-    trainingRoom: next.assignments[index].trainingRoom,
     by: "specialist",
-    at: next.assignments[index].levelChangedAt
+    at: changedAt
   });
   return next;
 }
@@ -92,16 +104,15 @@ export function setTrainingAssignmentLevel(plan, targetId, level) {
 export function getActiveAssignments(plan) {
   return (plan?.assignments || []).filter((assignment) => {
     const target = TRAINING_TARGETS[assignment.targetId];
-    const room = assignment.trainingRoom ?? getTrainingRoomForTarget(assignment.targetId);
-    return Boolean(target) && Number(room) >= 9 && Number(room) <= 20 && assignment.level >= 1;
+    const room = Number(assignment.trainingRoom ?? getTrainingRoomForTarget(assignment.targetId));
+    return Boolean(target) && room >= 9 && room <= 20 && assignment.level >= 1;
   });
 }
 
 export function createTrainingSession(plan, roomId) {
   const assignments = getActiveAssignments(plan);
-
   return {
-    version: 1,
+    version: 2,
     sessionId: crypto.randomUUID(),
     planId: plan?.planId || null,
     roomId,
@@ -119,22 +130,18 @@ export function createTrainingSession(plan, roomId) {
 }
 
 export function recordTrainingAttempt(session, targetId, successful) {
-  const next = {
+  return {
     ...session,
     assignments: (session.assignments || []).map((item) => {
       if (item.targetId !== targetId || item.completed || item.aborted || item.exhausted) return item;
-
       const attempts = item.attempts + 1;
       const successes = item.successes + (successful ? 1 : 0);
       const failures = item.failures + (successful ? 0 : 1);
       const maxAttempts = item.safeguards?.maxAttemptsPerSession ?? 30;
       const completed = successes >= 2;
-
       return { ...item, attempts, successes, failures, completed, exhausted: !completed && attempts >= maxAttempts };
     })
   };
-
-  return next;
 }
 
 export function abortTrainingAssignment(session, targetId, reason = "manual_abort") {
