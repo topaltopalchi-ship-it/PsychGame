@@ -19,12 +19,19 @@ export class InteractionSystem {
     this.roomNumber = 1;
     this.keyFound = false;
     this.completed = false;
+    this.gameFinished = false;
     this.room8CompletionTimer = null;
     this.lastLookedObject = null;
     this.lookStartTime = null;
     this.interactionCounts = {};
     window.addEventListener("keydown", (event) => {
       if (event.code === "KeyE") this.interact();
+    });
+    window.addEventListener("psychgame-game-complete", () => {
+      this.gameFinished = true;
+      this.currentTarget = null;
+      this.finishLook();
+      window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId: null } }));
     });
   }
 
@@ -50,6 +57,7 @@ export class InteractionSystem {
   }
 
   update() {
+    if (this.gameFinished) return;
     this.raycaster.setFromCamera(this.center, this.camera);
     const hits = this.raycaster.intersectObjects(this.interactables, true);
     const resolved = hits.map(h => this.resolveTarget(h.object)).find(Boolean);
@@ -111,7 +119,7 @@ export class InteractionSystem {
   }
 
   interact() {
-    if (this.completed) return;
+    if (this.completed || this.gameFinished) return;
     const target = this.currentTarget;
     if (!target) return;
 
