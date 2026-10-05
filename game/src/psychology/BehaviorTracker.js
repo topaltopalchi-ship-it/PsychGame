@@ -39,12 +39,6 @@ export class BehaviorTracker {
     this.events.push(event);
 
 
-    console.log(
-      "[PsychGame Event]",
-      event
-    );
-
-
     return event;
   }
 
