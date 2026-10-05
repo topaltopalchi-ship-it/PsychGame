@@ -301,8 +301,10 @@ function finishGameWithoutTraining() {
 
 window.addEventListener("psychgame-training-room-complete", (event) => {
   const roomId = event.detail?.roomId; if (!roomId || trainingFinished) return;
-  tracker.log("TRAINING_PHASE_ROOM_COMPLETED", { roomId, targetId: event.detail.targetId || null });
   const completedRoomNumber = Number(String(roomId).replace("ROOM_", ""));
+  const expectedRoomClass = { 15: "Room15", 16: "Room16", 17: "Room17", 18: "Room18", 19: "Room19", 20: "Room20" }[completedRoomNumber];
+  if (!expectedRoomClass || activeRoom?.constructor?.name !== expectedRoomClass || !activeRoom.completed || interaction.room !== activeRoom || interaction.roomNumber !== completedRoomNumber) return;
+  tracker.log("TRAINING_PHASE_ROOM_COMPLETED", { roomId, targetId: event.detail.targetId || null });
   if (completedRoomNumber >= 15 && completedRoomNumber <= 19) { scheduleRoomTransition(() => continueTraining(roomId), 500); return; }
   if (roomId === "ROOM_20" && event.detail.final) { trainingFinished = true; gameFinished = true; clearRoomTransitionTimers(); interaction.currentTarget = null; interaction.finishLook(); const titleEl = document.getElementById("pg-title"); const hintEl = document.getElementById("pg-hint"); const targetEl = document.getElementById("pg-target"); const interactButton = document.getElementById("pg-touch-interact"); if (titleEl) titleEl.textContent = "YOL · پایان تمرین"; if (hintEl) hintEl.textContent = "مرحله تمرینی تمام شد."; if (targetEl) targetEl.style.display = "none"; if (interactButton) interactButton.style.display = "none"; audioManager.playPulse("dark"); }
 });
