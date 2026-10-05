@@ -4,9 +4,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: browser-smoke
+  cancel-in-progress: true
+
 jobs:
   browser-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
