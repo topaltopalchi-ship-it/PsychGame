@@ -110,12 +110,15 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
 
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
 
-  // Room 02: the center path is directly ahead from the room spawn.
-  // Move from z=3.5 to the path at z=-4.02 and interact with PATH_CENTER.
+  // Room 02: move close to the center path at z=-4.02.
+  // From the spawn at z=3.5 this takes about 4.8s at the current speed.
   await page.keyboard.down("KeyW");
-  await page.waitForTimeout(2900);
+  await page.waitForTimeout(4800);
   await page.keyboard.up("KeyW");
-  await page.keyboard.press("KeyE");
+  const pathInteracted = await page.evaluate(() =>
+    window.psychGame?.interactAt?.(window.innerWidth * 0.5, window.innerHeight * 0.5) === true
+  );
+  expect(pathInteracted).toBe(true);
 
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 3000 });
   expect(errors).toEqual([]);
