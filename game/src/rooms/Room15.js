@@ -8,7 +8,7 @@ export class Room15 {
   }
   start(context = {}) {
     this.engine = new TrainingEngine(this.plan, { roomId: 15, onEvent: e => this.tracker.log(e.type, e) });
-    this.assignment = this.engine.getAssignments().find(x => x.targetId === "RESPONSE_INHIBITION") || null;
+    this.assignment = this.engine.getAssignments().find(x => x.targetId === "RESPONSE_INHIBITION" && !x.completed && !x.aborted && !x.exhausted) || null;
     if (!this.assignment) return this.skip();
     this.createRoom();
     this.tracker.log("ROOM_ENTER", { roomId: "ROOM_15", trainingTarget: "RESPONSE_INHIBITION", trainingLevel: this.assignment.level, previousRoom: context.previousRoom || null });
