@@ -163,13 +163,13 @@ function clearRoomGeometry() {
   activeRoom?.destroy?.();
   scene.children.slice().forEach((child) => {
     if (child === ambientLight || child === mainLight || child === rimLight) return;
-    if (!child.isMesh && !child.isLight) return;
 
-    if (child.isMesh) {
-      child.geometry?.dispose?.();
-      const materials = Array.isArray(child.material) ? child.material : [child.material];
+    child.traverse?.((node) => {
+      if (!node.isMesh) return;
+      node.geometry?.dispose?.();
+      const materials = Array.isArray(node.material) ? node.material : [node.material];
       materials.forEach((material) => material?.dispose?.());
-    }
+    });
 
     scene.remove(child);
   });
