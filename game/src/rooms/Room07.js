@@ -48,7 +48,7 @@ export class Room07 {
     this.lastChoice=id;
     if(id==="FOLLOW_COMPANION")this.followCount++;else this.ignoreCount++;
     this.choiceCount++;
-    this.tracker.log("ROOM_07_TRUST_CHOICE",{choice:id,firstChoice:this.firstChoice,choiceSwitches:this.choiceSwitches,followCount:this.followCount,ignoreCount:this.ignoreCount});
+    this.tracker.log("ROOM_07_TRUST_CHOICE",{choice:id,firstChoice:this.firstChoice,choiceSwitches:this.choiceSwitches,followCount:this.followCount,ignoreCount:this.ignoreCount,reactionTimeMs:Math.round(performance.now()-this.startedAt)});
     if(id==="FOLLOW_COMPANION")this.companion?.say?.("پس این بار به من اعتماد کردی... فقط یادت باشه، من همیشه درست نمی‌گم.", 0, "calm");
     else this.companion?.say?.("باشه... این یکی رو خودت انتخاب کردی. من فقط دنبالت میام.", 0, "calm");
     const l=this.objects.COMP_LIGHT;if(l){l.intensity=id==="FOLLOW_COMPANION"?3.1:1.9;if(this.lightTimer)clearTimeout(this.lightTimer);this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.25;},600);}
