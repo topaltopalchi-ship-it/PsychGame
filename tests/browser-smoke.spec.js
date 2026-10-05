@@ -256,5 +256,5 @@ test("Session upload queues failed payloads and flushes them after recovery", as
   expect(result.queuedAfterFailure).toBe(1);
   expect(result.second.uploaded).toBe(true);
   expect(result.queuedAfterRecovery).toBe(0);
-  expect(result.attempts).toBe(2);
+  expect(result.attempts).toBe(3);
 });
