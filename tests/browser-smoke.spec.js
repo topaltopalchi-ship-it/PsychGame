@@ -413,3 +413,44 @@ test("Concurrent session uploads are serialized without duplicate queue entries"
   expect(result.queue).toEqual(["concurrent-a", "concurrent-b"]);
   expect(result.results.every(item => item.queued === true)).toBe(true);
 });
+
+
+test("Session uploader tolerates corrupted local upload queue storage", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+
+  const result = await page.evaluate(async () => {
+    const { SessionUploader } = await import("/PsychGame/src/session/SessionUploader.js");
+    const uploader = new SessionUploader({ endpoint: "http://upload.test" });
+    const queueKey = "psychgame_upload_queue_v1";
+    localStorage.setItem(queueKey, "{not-valid-json");
+
+    const before = uploader.readQueue();
+
+    let fetchCalls = 0;
+    const originalFetch = window.fetch;
+    window.fetch = async () => {
+      fetchCalls += 1;
+      throw new Error("simulated outage");
+    };
+
+    try {
+      const result = await uploader.upload({
+        sessionId: "corrupt-storage",
+        playerCode: "PLAYER-CORRUPT",
+        events: []
+      });
+      return {
+        before,
+        result,
+        stored: localStorage.getItem(queueKey)
+      };
+    } finally {
+      window.fetch = originalFetch;
+      localStorage.removeItem(queueKey);
+    }
+  });
+
+  expect(result.before).toEqual([]);
+  expect(result.result.queued).toBe(true);
+  expect(JSON.parse(result.stored)).toHaveLength(1);
+});
