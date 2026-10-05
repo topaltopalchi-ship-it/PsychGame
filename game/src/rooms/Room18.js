@@ -10,7 +10,10 @@ export class Room18 {
     this.companion = companion;
     this.objects = {};
     this.completed = false;
-    this.engine = new TrainingEngine(plan, {\n      roomId: 18,\n      onEvent: (event) => this.tracker.log(event.type, event)\n    });
+    this.engine = new TrainingEngine(plan, {
+      roomId: 18,
+      onEvent: (event) => this.tracker.log(event.type, event)
+    });
     this.assignment = this.engine.getAssignments().find(
       item => ["RESPONSE_INHIBITION", "EMOTIONAL_PAUSE", "ATTENTION_SUSTAIN"].includes(item.targetId) &&
         !item.completed && !item.aborted && !item.exhausted
@@ -129,6 +132,7 @@ export class Room18 {
   }
 
   getInteractableObjects() { return Object.values(this.objects); }
+
   destroy() {
     this.objects = {};
     this.engine = null;
