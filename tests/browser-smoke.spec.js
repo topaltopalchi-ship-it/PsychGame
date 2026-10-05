@@ -29,7 +29,6 @@ test("mobile touch UI smoke test", async ({ browser }) => {
   await context.close();
 });
 
-
 test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
@@ -59,11 +58,16 @@ test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) =
   await page.waitForTimeout(200);
   await page.keyboard.press("KeyE");
 
-  // Reach the exit door at the east wall.
+  // Move to the east wall. The door is slightly to the right of the
+  // camera's forward ray, so use the real pointer interaction API at the
+  // projected door position instead of relying on an imprecise center ray.
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(2500);
   await page.keyboard.up("KeyD");
-  await page.keyboard.press("KeyE");
+  const doorInteracted = await page.evaluate(() =>
+    window.psychGame?.interactAt?.(window.innerWidth * 0.825, window.innerHeight * 0.5) === true
+  );
+  expect(doorInteracted).toBe(true);
 
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
   expect(errors).toEqual([]);
