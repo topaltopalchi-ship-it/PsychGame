@@ -91,10 +91,6 @@ export class AuthorPanel {
       code !==
       this.authorCode
     ) {
-      console.warn(
-        "Invalid author code."
-      );
-
       return false;
     }
 
