@@ -454,3 +454,33 @@ test("Session uploader tolerates corrupted local upload queue storage", async ({
   expect(result.result.queued).toBe(true);
   expect(JSON.parse(result.stored)).toHaveLength(1);
 });
+
+
+test("Session uploader reports when local queue storage is unavailable", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+
+  const result = await page.evaluate(async () => {
+    const { SessionUploader } = await import("/PsychGame/src/session/SessionUploader.js");
+    const uploader = new SessionUploader({ endpoint: "http://upload.test" });
+    const storage = window.localStorage;
+    const originalFetch = window.fetch;
+    const originalSetItem = storage.setItem.bind(storage);
+    window.fetch = async () => { throw new Error("simulated outage"); };
+    storage.setItem = () => { throw new Error("simulated storage failure"); };
+
+    try {
+      return await uploader.upload({
+        sessionId: "storage-failure",
+        playerCode: "PLAYER-STORAGE",
+        events: []
+      });
+    } finally {
+      storage.setItem = originalSetItem;
+      window.fetch = originalFetch;
+      storage.removeItem("psychgame_upload_queue_v1");
+    }
+  });
+
+  expect(result.uploaded).toBe(false);
+  expect(result.queued).toBe(false);
+});
