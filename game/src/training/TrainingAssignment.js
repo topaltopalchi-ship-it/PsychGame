@@ -23,12 +23,13 @@ export function createTrainingPlan({
   }
 
   return {
-    version: 1,
+    version: 2,
     planId: crypto.randomUUID(),
     playerCode,
     sourceSessionId,
     createdAt: new Date().toISOString(),
     assignedBy: "specialist",
+    auditLog: [],
     assignments: safeAssignments
   };
 }
@@ -36,33 +37,54 @@ export function createTrainingPlan({
 export function addTrainingAssignment(plan, assignment) {
   const next = {
     ...plan,
-    assignments: Array.isArray(plan?.assignments) ? [...plan.assignments] : []
+    assignments: Array.isArray(plan?.assignments) ? [...plan.assignments] : [],
+    auditLog: Array.isArray(plan?.auditLog) ? [...plan.auditLog] : []
   };
 
   const created = createTrainingAssignment(assignment);
-  if (next.assignments.some((item) => item.targetId === created.targetId)) {
-    return next;
-  }
+  if (next.assignments.some((item) => item.targetId === created.targetId)) return next;
   next.assignments.push(created);
+  next.auditLog.push({
+    action: "ASSIGN_TARGET",
+    targetId: created.targetId,
+    level: created.level,
+    by: "specialist",
+    at: new Date().toISOString()
+  });
   return next;
 }
 
 export function setTrainingAssignmentLevel(plan, targetId, level) {
-  const next = { ...plan, assignments: Array.isArray(plan?.assignments) ? plan.assignments.map(item => ({ ...item })) : [] };
+  const next = {
+    ...plan,
+    assignments: Array.isArray(plan?.assignments) ? plan.assignments.map(item => ({ ...item })) : [],
+    auditLog: Array.isArray(plan?.auditLog) ? [...plan.auditLog] : []
+  };
   const index = next.assignments.findIndex(item => item.targetId === targetId);
   if (index < 0) return next;
   const current = next.assignments[index];
   const target = TRAINING_TARGETS[targetId];
+  if (!target) return next;
   const requestedLevel = Number(level);
   const safeLevel = Number.isFinite(requestedLevel)
     ? Math.max(1, Math.min(Math.trunc(requestedLevel), target.progression.length))
     : current.level;
+  const finalLevel = Math.min(safeLevel, Number(current.maxLevel) || target.progression.length);
+
   next.assignments[index] = {
     ...current,
-    level: Math.min(safeLevel, Number(current.maxLevel) || target.progression.length),
+    level: finalLevel,
     levelChangedAt: new Date().toISOString(),
     levelChangedBy: "specialist"
   };
+  next.auditLog.push({
+    action: "CHANGE_LEVEL",
+    targetId,
+    fromLevel: current.level,
+    toLevel: finalLevel,
+    by: "specialist",
+    at: next.assignments[index].levelChangedAt
+  });
   return next;
 }
 
@@ -79,6 +101,7 @@ export function createTrainingSession(plan, roomId) {
   return {
     version: 1,
     sessionId: crypto.randomUUID(),
+    planId: plan?.planId || null,
     roomId,
     startedAt: new Date().toISOString(),
     assignments: assignments.map((assignment) => ({
@@ -97,9 +120,7 @@ export function recordTrainingAttempt(session, targetId, successful) {
   const next = {
     ...session,
     assignments: (session.assignments || []).map((item) => {
-      if (item.targetId !== targetId || item.completed || item.aborted || item.exhausted) {
-        return item;
-      }
+      if (item.targetId !== targetId || item.completed || item.aborted || item.exhausted) return item;
 
       const attempts = item.attempts + 1;
       const successes = item.successes + (successful ? 1 : 0);
