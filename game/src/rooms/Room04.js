@@ -82,7 +82,7 @@ export class Room04 {
     this.tracker.log("ROOM_04_LOOP_GLITCH",{turnCount:this.turnCount,explored:this.explored});
     if(this.objects.lamp){
       this.objects.lamp.intensity=9;
-      this.objects.endLight?.intensity=0.4;
+      if(this.objects.endLight)this.objects.endLight.intensity=0.4;
       this.glitchTimer=setTimeout(()=>{if(this.objects.lamp)this.objects.lamp.intensity=1.5;if(this.objects.endLight)this.objects.endLight.intensity=2.2;},180);
     }
     this.companion?.say?.("صبر کن... این نور قبلاً این‌طوری نبود.");
