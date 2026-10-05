@@ -12,10 +12,12 @@ export class TrainingEngine {
     this.onEvent = onEvent;
     this.storageKey = plan?.playerCode ? `psychgame_training_runtime_${plan.playerCode}` : null;
     this.recoveryKey = plan?.playerCode ? `psychgame_training_recovery_${plan.playerCode}` : null;
+    this.planId = plan?.planId || null;
     const persisted = this.loadPersistedSession();
     this.session = persisted
       ? this.syncAssignments(persisted, plan)
       : createTrainingSession(plan, roomId);
+    this.session.planId = this.planId;
     this.session.roomId = roomId;
     this.completedTargets = new Set(this.session.assignments.filter(x => x.completed).map(x => x.targetId));
     this.persist();
@@ -77,18 +79,22 @@ export class TrainingEngine {
 
   loadPersistedSession() {
     if (!this.storageKey) return null;
+    let persisted = null;
     try {
       const activeRaw = sessionStorage.getItem(this.storageKey);
-      if (activeRaw) return JSON.parse(activeRaw);
+      if (activeRaw) persisted = JSON.parse(activeRaw);
     } catch (_) {}
 
-    if (!this.recoveryKey) return null;
-    try {
-      const recoveryRaw = localStorage.getItem(this.recoveryKey);
-      return recoveryRaw ? JSON.parse(recoveryRaw) : null;
-    } catch (_) {
-      return null;
+    if (!persisted && this.recoveryKey) {
+      try {
+        const recoveryRaw = localStorage.getItem(this.recoveryKey);
+        if (recoveryRaw) persisted = JSON.parse(recoveryRaw);
+      } catch (_) {}
     }
+
+    if (!persisted) return null;
+    if (persisted.planId && this.planId && persisted.planId !== this.planId) return null;
+    return persisted;
   }
 
   syncAssignments(session, plan) {
