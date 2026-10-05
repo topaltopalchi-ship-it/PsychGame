@@ -335,18 +335,19 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
     return;
   }
   if (objectId === "WAIT_EXIT") {
-    if (this.completed) return;
-    this.completed=true;
+    if (this.completed || this.room?.exitSequenceStarted) return;
     this.room?.startExitSequence?.();
     this.tracker.log("WAITING_EXIT_CHECKED",{roomId:"ROOM_03"});
-    this.room?.completeRoom?.();
-    this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});
     this.companion?.say("انتخابت ثبت شد. اتاق بعدی آماده‌ست.");
     if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer);
     const completedRoom = this.room;
     this.room3CompletionTimer = setTimeout(()=>{
       this.room3CompletionTimer = null;
-      if (this.room !== completedRoom || !this.completed) return;
+      if (this.room !== completedRoom || this.completed) return;
+      completedRoom?.completeRoom?.();
+      if (!completedRoom?.completed) return;
+      this.completed = true;
+      this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});
       window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}}));
     },3000);
   }};
