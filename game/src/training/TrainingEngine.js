@@ -11,6 +11,7 @@ export class TrainingEngine {
     this.roomId = roomId;
     this.onEvent = onEvent;
     this.storageKey = plan?.playerCode ? `psychgame_training_runtime_${plan.playerCode}` : null;
+    this.recoveryKey = plan?.playerCode ? `psychgame_training_recovery_${plan.playerCode}` : null;
     const persisted = this.loadPersistedSession();
     this.session = persisted
       ? this.syncAssignments(persisted, plan)
@@ -77,9 +78,17 @@ export class TrainingEngine {
   loadPersistedSession() {
     if (!this.storageKey) return null;
     try {
-      const raw = sessionStorage.getItem(this.storageKey);
-      return raw ? JSON.parse(raw) : null;
-    } catch (_) { return null; }
+      const activeRaw = sessionStorage.getItem(this.storageKey);
+      if (activeRaw) return JSON.parse(activeRaw);
+    } catch (_) {}
+
+    if (!this.recoveryKey) return null;
+    try {
+      const recoveryRaw = localStorage.getItem(this.recoveryKey);
+      return recoveryRaw ? JSON.parse(recoveryRaw) : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   syncAssignments(session, plan) {
@@ -105,7 +114,11 @@ export class TrainingEngine {
 
   persist() {
     if (!this.storageKey) return;
-    try { sessionStorage.setItem(this.storageKey, JSON.stringify(this.session)); } catch (_) {}
+    const raw = JSON.stringify(this.session);
+    try { sessionStorage.setItem(this.storageKey, raw); } catch (_) {}
+    try {
+      if (this.recoveryKey) localStorage.setItem(this.recoveryKey, raw);
+    } catch (_) {}
   }
 
   getSummary() {
