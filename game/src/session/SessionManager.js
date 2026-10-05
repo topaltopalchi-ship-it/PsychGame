@@ -16,6 +16,7 @@ export class SessionManager {
     this.lastRemoteUpload = 0;
     this.completedUploadStarted = false;
     this.tracker.onEvent = () => this.saveSession();
+    window.addEventListener("pagehide", () => this.saveSession());
     window.addEventListener("psychgame-training-phase-completed", () => this.saveSession({ completed: true }));
     window.addEventListener("psychgame-training-room-complete", (event) => {
       if (event?.detail?.trainingResult) this.saveSession({ completed: true });
