@@ -8,6 +8,7 @@ const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path
 const dataFile = path.join(dataDir, "sessions.json");
 const PORT = Number(process.env.PORT || 8787);
 const AUTHOR_TOKEN = process.env.AUTHOR_TOKEN || "";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
 fs.mkdirSync(dataDir, { recursive: true });
 if (!fs.existsSync(dataFile)) fs.writeFileSync(dataFile, "[]", "utf8");
@@ -46,7 +47,7 @@ function authorized(req) {
 function send(res, status, body) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "*",
+    "Access-Control-Allow-Origin": CORS_ORIGIN,
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
   });
