@@ -29,7 +29,8 @@ export class InteractionSystem {
       if (event.code === "KeyE") this.interact();
     });
     window.addEventListener("psychgame-game-complete", () => {
-      this.gameFinished = true;
+      // Main.js owns the final/training transition. Keep interaction blocked by
+      // the room completion state without preemptively consuming the event.
       this.currentTarget = null;
       this.finishLook();
       window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId: null } }));
