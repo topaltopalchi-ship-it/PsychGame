@@ -130,7 +130,7 @@ export class InteractionSystem {
   }
 
   interact(options = {}) {
-    if (this.completed || this.gameFinished) return;
+    if (this.completed || this.gameFinished || this.room?.completed || this.room?.exitSequenceStarted) return;
     const target = this.currentTarget;
     if (!target) return;
 
