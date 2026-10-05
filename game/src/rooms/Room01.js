@@ -45,6 +45,7 @@ export class Room01 {
   }
 
   destroy() {
+    this.completed = true;
     if (this.buttonPulseTimer) clearTimeout(this.buttonPulseTimer);
     this.buttonPulseTimer = null;
     this.objects = {};
