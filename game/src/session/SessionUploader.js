@@ -42,9 +42,9 @@ export class SessionUploader {
       if (!response.ok) throw new Error("Upload failed: " + response.status);
       return { uploaded: true };
     } catch (error) {
-      this.queue(payload);
+      const queued = this.queue(payload);
       console.warn("PsychGame remote upload failed; queued locally.", error);
-      return { uploaded: false, queued: true };
+      return { uploaded: false, queued };
     }
   }
 
