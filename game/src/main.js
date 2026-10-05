@@ -421,6 +421,45 @@ function startRoom09(context = { previousRoom: "ROOM_08" }) {
   continueTraining(context.previousRoom || "ROOM_08");
 }
 
+function loadTrainingRuntime() {
+  try {
+    const runtimeKey = `psychgame_training_runtime_${session.getPlayerCode()}`;
+    const recoveryKey = `psychgame_training_recovery_${session.getPlayerCode()}`;
+    const raw = sessionStorage.getItem(runtimeKey) || localStorage.getItem(recoveryKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function resumeTrainingIfNeeded() {
+  if (gameFinished || trainingFinished) return false;
+
+  const plan = loadTrainingPlan();
+  const runtime = loadTrainingRuntime();
+  const finalResult = session.getTrainingResult?.();
+
+  if (!plan?.assignments?.length || finalResult) return false;
+
+  const roomNumber = Number(runtime?.roomId);
+  if (roomNumber < 15 || roomNumber > 20) return false;
+
+  gameFinished = false;
+  trainingFinished = false;
+
+  const activeTarget = getTrainingRouteTarget(plan);
+  if (!activeTarget && roomNumber !== 20) {
+    continueTraining(runtime?.roomId || null);
+    return true;
+  }
+
+  startTrainingRoom(roomNumber, plan, runtime?.roomId || null);
+  companion?.say("وضعیت تمرین قبلی بازیابی شد و از همان مرحله ادامه پیدا می‌کند.");
+  return true;
+}
+
+setTimeout(resumeTrainingIfNeeded, 0);
+
 
 function finishGameWithoutTraining() {
   if (gameFinished) return;
