@@ -93,7 +93,8 @@ export class Room02 {
       this.pathLights.forEach((light,i)=>{
         light.intensity*=i===1?0.45:0.7;
       });
-      setTimeout(()=>{
+      this.idleTimer=setTimeout(()=>{
+        if(this.completed)return;
         this.pathLights.forEach(light=>{light.intensity=Math.max(light.intensity,2.2);});
       },900);
       this.companion?.say?.("هنوز اینجایی؟ ... فکر کردم انتخابت رو کرده‌ای.");
@@ -114,6 +115,7 @@ export class Room02 {
     if(this.scene.fog) this.scene.fog.density=.07;
     this.tracker.log("PATH_SCARE",{roomId:"ROOM_02",path});
     this.scareTimer=setTimeout(()=>{
+      if(this.completed)return;
       if(target) target.intensity/=2.8;
       if(figure) figure.visible=false;
       if(this.scene.fog) this.scene.fog.density=this.originalFogDensity;
