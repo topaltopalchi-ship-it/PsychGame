@@ -52,5 +52,5 @@ export class Room06 {
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_06",firstChoice:this.firstChoice,totalChecks:this.playCount});}
   update(delta){if(this.completed)return;if(this.objects.REC_SPEAKER)this.objects.REC_SPEAKER.rotation.y=Math.sin(performance.now()*.001)*.015;}
-  destroy(){if(this.whisperTimer)clearTimeout(this.whisperTimer);if(this.pulseTimer)clearTimeout(this.pulseTimer);if(this.signalTimer)clearTimeout(this.signalTimer);if(this.signalRestoreTimer)clearTimeout(this.signalRestoreTimer);this.objects={};}
+  destroy(){this.completed=true;if(this.whisperTimer)clearTimeout(this.whisperTimer);if(this.pulseTimer)clearTimeout(this.pulseTimer);if(this.signalTimer)clearTimeout(this.signalTimer);if(this.signalRestoreTimer)clearTimeout(this.signalRestoreTimer);this.objects={};}
 }
