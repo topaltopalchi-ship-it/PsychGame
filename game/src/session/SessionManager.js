@@ -15,6 +15,10 @@ export class SessionManager {
     this.uploader = new SessionUploader({ endpoint: import.meta.env.VITE_API_URL || "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
     this.lastRemoteUpload = 0;
     this.tracker.onEvent = () => this.saveSession();
+    window.addEventListener("psychgame-training-phase-completed", () => this.saveSession({ completed: true }));
+    window.addEventListener("psychgame-training-room-complete", (event) => {
+      if (event?.detail?.trainingResult) this.saveSession({ completed: true });
+    });
   }
 
   generatePlayerCode() {
@@ -39,6 +43,15 @@ export class SessionManager {
     return this.analyzer.getReport();
   }
 
+  getTrainingResult() {
+    try {
+      const raw = localStorage.getItem(`psychgame_training_results_${this.playerCode}`);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   getSessionData() {
     return {
       playerCode: this.playerCode,
@@ -46,7 +59,8 @@ export class SessionManager {
       sessionStart: this.sessionStart,
       consent: true,
       events: this.tracker.getEvents(),
-      analysis: this.getAnalysis()
+      analysis: this.getAnalysis(),
+      trainingResult: this.getTrainingResult()
     };
   }
 
