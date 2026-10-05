@@ -318,12 +318,12 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
 InteractionSystem.prototype.handleRoom3 = function(objectId) {
   if (objectId === "WAIT_CLOCK") {
       this.room?.reactToClock?.();
-    this.tracker.log("WAITING_OBJECT_INSPECTED",{roomId:"ROOM_03"});
+    this.tracker.log("WAITING_OBJECT_INSPECTED",{roomId:"ROOM_03",reactionTimeMs:this.lastLookedObject==="WAIT_CLOCK"&&this.lookStartTime!==null?Math.round(performance.now()-this.lookStartTime):null});
     this.companion?.say("ساعت جلو نمی‌ره... شاید بهتره کمی صبر کنی.");
     return;
   }
   if (objectId === "WAIT_SEAT") {
-    this.tracker.log("WAITING_SEAT_INSPECTED",{roomId:"ROOM_03"});
+    this.tracker.log("WAITING_SEAT_INSPECTED",{roomId:"ROOM_03",reactionTimeMs:this.lastLookedObject==="WAIT_SEAT"&&this.lookStartTime!==null?Math.round(performance.now()-this.lookStartTime):null});
     this.companion?.say("می‌تونی صبر کنی، یا دنبال راه خروج بگردی.");
     return;
   }
