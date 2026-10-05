@@ -21,7 +21,10 @@ export class BehaviorAnalyzer {
         this.calculateDecisionLatency(),
 
       helpSeeking:
-        this.calculateHelpSeeking()
+        this.calculateHelpSeeking(),
+
+      roomBehavior:
+        this.calculateRoomBehavior()
     };
   }
 
@@ -159,6 +162,38 @@ export class BehaviorAnalyzer {
     }
 
     return "LONG";
+  }
+
+  calculateRoomBehavior() {
+    const rooms = {};
+
+    for (const roomId of ["ROOM_04", "ROOM_05", "ROOM_06", "ROOM_07", "ROOM_08"]) {
+      const roomEvents = this.events.filter(event => event.roomId === roomId);
+      if (!roomEvents.length) continue;
+
+      const interactions = roomEvents.filter(event => event.type === "OBJECT_INTERACTION").length;
+      const inspections = roomEvents.filter(event =>
+        String(event.type || "").includes("INSPECTED") ||
+        String(event.type || "").includes("CHECKED")
+      ).length;
+      const switches = roomEvents.reduce(
+        (sum, event) => sum + Number(event.choiceSwitches || 0) + Number(event.switchCount || 0),
+        0
+      );
+      const retries = roomEvents.filter(event => event.type === "RETRY_AFTER_FAILURE").length;
+      const blockedExits = roomEvents.filter(event => String(event.type || "").endsWith("_EXIT_BLOCKED")).length;
+
+      rooms[roomId] = {
+        interactions,
+        inspections,
+        switches,
+        retries,
+        blockedExits,
+        observedEvents: roomEvents.length
+      };
+    }
+
+    return rooms;
   }
 
   calculateHelpSeeking() {
