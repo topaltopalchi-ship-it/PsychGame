@@ -203,3 +203,58 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
   expect(sessionSnapshot.eventCount).toBeGreaterThan(0);
   expect(sessionSnapshot.eventTypes).toContain("ROOM_08_FINAL_SEQUENCE");
 });
+
+
+test("Session upload queues failed payloads and flushes them after recovery", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+
+  const result = await page.evaluate(async () => {
+    const { SessionUploader } = await import("/PsychGame/src/session/SessionUploader.js");
+    const queueKey = "psychgame_upload_queue_v1";
+    localStorage.removeItem(queueKey);
+
+    let attempts = 0;
+    const originalFetch = window.fetch;
+    window.fetch = async (url, options) => {
+      attempts += 1;
+      if (attempts === 1) throw new Error("simulated network failure");
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" }
+      });
+    };
+
+    try {
+      const uploader = new SessionUploader({ endpoint: "http://upload.test", token: "test-token" });
+      const report = {
+        sessionId: "upload-queue-smoke",
+        playerCode: "PLAYER-UPLOAD",
+        events: [],
+        eventCount: 0
+      };
+
+      const first = await uploader.upload(report, { completed: true });
+      const queuedAfterFailure = uploader.readQueue();
+
+      const second = await uploader.upload(report, { completed: true });
+      const queuedAfterRecovery = uploader.readQueue();
+
+      return {
+        first,
+        second,
+        attempts,
+        queuedAfterFailure: queuedAfterFailure.length,
+        queuedAfterRecovery: queuedAfterRecovery.length
+      };
+    } finally {
+      window.fetch = originalFetch;
+      localStorage.removeItem(queueKey);
+    }
+  });
+
+  expect(result.first.queued).toBe(true);
+  expect(result.queuedAfterFailure).toBe(1);
+  expect(result.second.uploaded).toBe(true);
+  expect(result.queuedAfterRecovery).toBe(0);
+  expect(result.attempts).toBe(2);
+});
