@@ -4,13 +4,20 @@ export class SessionUploader {
     this.token = token || "";
     this.queueKey = "psychgame_upload_queue_v1";
     this.flushing = false;
+    this.uploadChain = Promise.resolve();
   }
 
   isConfigured() {
     return Boolean(this.endpoint);
   }
 
-  async upload(report, { completed = false } = {}) {
+  upload(report, { completed = false } = {}) {
+    const task = () => this._upload(report, { completed });
+    this.uploadChain = this.uploadChain.then(task, task);
+    return this.uploadChain;
+  }
+
+  async _upload(report, { completed = false } = {}) {
     await this.flushQueue();
     if (!this.isConfigured() || !report) return { skipped: true };
 
