@@ -91,7 +91,7 @@ Server variables:
 
 - `PORT` — API port; defaults to `8787`.
 - `AUTHOR_TOKEN` — optional bearer token required by session GET/POST endpoints.
-- `CORS_ORIGIN` — allowed CORS origin; defaults to `*`.
+- `CORS_ORIGIN` — allowed CORS origin; defaults to `*` for local development. Production deployments should set this to the exact game origin.
 
 If `AUTHOR_TOKEN` is enabled, the client must be configured with the matching token. Treat client-side tokens as non-secret because browser applications expose them to the user.
 
@@ -132,6 +132,6 @@ The CI workflow also builds the application and runs the browser smoke suite on 
 
 ## Privacy and interpretation
 
-Gameplay events may contain sensitive behavioral information. Production deployments should use appropriate access control, transport security, storage protection, retention policies, and consent procedures.
+Gameplay events may contain sensitive behavioral information. Production deployments should use HTTPS, exact-origin CORS, server-side access control, storage protection, retention policies, and explicit consent procedures. The browser-exposed `VITE_AUTHOR_TOKEN` is not a secret and must not be treated as production credentialing.
 
 PsychGame is an assessment-support tool. Its behavioral observations should be interpreted by a qualified professional and must not be presented as an automated clinical diagnosis.
