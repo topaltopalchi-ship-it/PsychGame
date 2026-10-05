@@ -25,6 +25,7 @@ import { Room17 } from "./rooms/Room17.js";
 import { Room18 } from "./rooms/Room18.js";
 import { Room19 } from "./rooms/Room19.js";
 import { Room20 } from "./rooms/Room20.js";
+import { getTrainingRoomForTarget } from "./training/TrainingTargets.js";
 
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
@@ -163,19 +164,9 @@ const targetLabels = {
   TRUTH_CORE: "هسته — بررسی کن", TRUTH_EXIT: "در خروج — پایان"
 };
 const targetNames = {
-  RED_BUTTON: "دکمه قرمز",
-  EXIT_DOOR: "در",
-  HALF_OPEN_DRAWER: "کشو",
-  KEY_FROM_DRAWER: "کلید طلایی",
-  CLOSED_BOX: "جعبه",
-  OLD_DESK: "میز قدیمی",
-  BROKEN_CLOCK: "ساعت خراب",
-  OLD_PAINTING: "تابلو",
-  PATH_LEFT: "مسیر چپ", PATH_CENTER: "مسیر وسط", PATH_RIGHT: "مسیر راست", PATH_CLUE: "تابلو",
-  MIRROR_LEFT: "آینه چپ", MIRROR_CENTER: "آینه وسط", MIRROR_RIGHT: "آینه راست", MIRROR_EXIT: "در خروج",
-  REC_FAMILIAR: "صدای آشنا", REC_UNKNOWN: "صدای ناشناس", REC_STATIC: "نویز", REC_EXIT: "در خروج",
-  FOLLOW_COMPANION: "اعتماد به همراه", GO_ALONE: "تنهایی", COMP_EXIT: "در خروج",
-  TRUTH_CORE: "هسته", TRUTH_EXIT: "در خروج"
+  RED_BUTTON: "دکمه قرمز", EXIT_DOOR: "در", HALF_OPEN_DRAWER: "کشو", KEY_FROM_DRAWER: "کلید طلایی", CLOSED_BOX: "جعبه", OLD_DESK: "میز قدیمی", BROKEN_CLOCK: "ساعت خراب", OLD_PAINTING: "تابلو",
+  PATH_LEFT: "مسیر چپ", PATH_CENTER: "مسیر وسط", PATH_RIGHT: "مسیر راست", PATH_CLUE: "تابلو", MIRROR_LEFT: "آینه چپ", MIRROR_CENTER: "آینه وسط", MIRROR_RIGHT: "آینه راست", MIRROR_EXIT: "در خروج",
+  REC_FAMILIAR: "صدای آشنا", REC_UNKNOWN: "صدای ناشناس", REC_STATIC: "نویز", REC_EXIT: "در خروج", FOLLOW_COMPANION: "اعتماد به همراه", GO_ALONE: "تنهایی", COMP_EXIT: "در خروج", TRUTH_CORE: "هسته", TRUTH_EXIT: "در خروج"
 };
 
 window.addEventListener("psychgame-target", (event) => {
@@ -195,404 +186,112 @@ function clearRoomGeometry() {
   activeRoom?.destroy?.();
   scene.children.slice().forEach((child) => {
     if (child === ambientLight || child === mainLight || child === rimLight) return;
-
     child.traverse?.((node) => {
       if (!node.isMesh) return;
       node.geometry?.dispose?.();
       const materials = Array.isArray(node.material) ? node.material : [node.material];
       materials.forEach((material) => material?.dispose?.());
     });
-
     scene.remove(child);
   });
 }
 
 function setRoomMovementBounds(roomNumber) {
   const bounds = {
-    1:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
-    2:{minX:-5.0,maxX:5.0,minZ:-4.8,maxZ:4.8},
-    3:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
-    4:{minX:-1.45,maxX:1.45,minZ:-27.0,maxZ:6.5},
-    5:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
-    6:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
-    7:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
-    8:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}
+    1:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}, 2:{minX:-5.0,maxX:5.0,minZ:-4.8,maxZ:4.8}, 3:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
+    4:{minX:-1.45,maxX:1.45,minZ:-27.0,maxZ:6.5}, 5:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}, 6:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}, 7:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}, 8:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}
   };
   player.setBounds?.(bounds[roomNumber] || bounds[1]);
 }
 
 function startRoom02(previousPath = "ROOM_01") {
   if (activeRoom !== room01 || !room01.completed) return;
-  clearRoomGeometry();
-  interaction.clearTargets?.();
-  activeRoom = new Room02(scene, tracker);
-  activeRoom.start({ previousPath });
-  interaction.setRoom(activeRoom, 2);
-  audioManager.setRoom(2);
-  camera.position.set(0, 1.7, 3.5);
-  camera.rotation.set(0, 0, 0);
-  player.rotation.set(0, 0, 0);
-  setRoomMovementBounds(2);
-  mainLight.intensity = 24;
-  companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense");
-  document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
+  clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room02(scene, tracker); activeRoom.start({ previousPath }); interaction.setRoom(activeRoom, 2); audioManager.setRoom(2); camera.position.set(0, 1.7, 3.5); camera.rotation.set(0, 0, 0); player.rotation.set(0, 0, 0); setRoomMovementBounds(2); mainLight.intensity = 24; companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
 }
-window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_01") scheduleRoomTransition(() => startRoom02("ROOM_01"));
-});
+window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId === "ROOM_01") scheduleRoomTransition(() => startRoom02("ROOM_01")); });
 
-function startRoom03(context = { previousPath: "ROOM_02" }) {
-  if (activeRoom?.constructor?.name !== "Room02" || !activeRoom.completed) return;
-  clearRoomGeometry();
-  interaction.clearTargets?.();
-  activeRoom = new Room03(scene, tracker);
-  activeRoom.start(context);
-  interaction.setRoom(activeRoom, 3);
-  audioManager.setRoom(3);
-  camera.position.set(0, 1.7, 3.5);
-  player.rotation.set(0, 0, 0);
-  camera.rotation.copy(player.rotation);
-  setRoomMovementBounds(3);
-  mainLight.intensity = 22;
-  companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm");
-  document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار";
-}
-window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_02") scheduleRoomTransition(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion }));
-});
+function startRoom03(context = { previousPath: "ROOM_02" }) { if (activeRoom?.constructor?.name !== "Room02" || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room03(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 3); audioManager.setRoom(3); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); setRoomMovementBounds(3); mainLight.intensity = 22; companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار"; }
+window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId === "ROOM_02") scheduleRoomTransition(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion })); });
 
-function startRoom04(context = { previousRoom: "ROOM_03" }) {
-  if (activeRoom?.constructor?.name !== "Room03" || !activeRoom.completed) return;
-  clearRoomGeometry();
-  interaction.clearTargets?.();
-  activeRoom = new Room04(scene, tracker);
-  activeRoom.start(context);
-  interaction.setRoom(activeRoom, 4);
-  audioManager.setRoom(4);
-  camera.position.set(0,1.7,3.5);
-  player.rotation.set(0,0,0);
-  camera.rotation.copy(player.rotation);
-  setRoomMovementBounds(4);
-  mainLight.intensity=18;
-  companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense");
-  document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها";
-}
-window.addEventListener("psychgame-room-complete", (event) => {
-  if (event.detail?.roomId === "ROOM_03") scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion }));
-});
+function startRoom04(context = { previousRoom: "ROOM_03" }) { if (activeRoom?.constructor?.name !== "Room03" || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room04(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 4); audioManager.setRoom(4); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); setRoomMovementBounds(4); mainLight.intensity=18; companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense"); document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها"; }
+window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId === "ROOM_03") scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion })); });
 
-window.psychGame = {
-  interact: () => interaction.interact(),
-  interactAt: (x, y) => interaction.interactAt(x, y),
-  getPlayerCode: () => session.getPlayerCode()
-};
+window.psychGame = { interact: () => interaction.interact(), interactAt: (x, y) => interaction.interactAt(x, y), getPlayerCode: () => session.getPlayerCode() };
 
 const clock = new THREE.Clock();
-function startRoom05(context={previousRoom:"ROOM_04"}) {
-  if (gameFinished) return;
-  if (activeRoom?.constructor?.name !== "Room04" || !activeRoom.completed) return;
-  clearRoomGeometry();
-  interaction.clearTargets?.();
-  activeRoom = new Room05(scene, tracker);
-  activeRoom.start({...context, companion});
-  interaction.setRoom(activeRoom,5);
-  audioManager.setRoom(5);
-  setRoomMovementBounds(5);
-  companion?.say("اتاق پنجمه... اینجا به چیزی که می‌بینی زود اعتماد نکن.", 0, "tense");
-}
+function startRoom05(context={previousRoom:"ROOM_04"}) { if (gameFinished || activeRoom?.constructor?.name !== "Room04" || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room05(scene, tracker); activeRoom.start({...context, companion}); interaction.setRoom(activeRoom,5); audioManager.setRoom(5); setRoomMovementBounds(5); companion?.say("اتاق پنجمه... اینجا به چیزی که می‌بینی زود اعتماد نکن.", 0, "tense"); }
+function startRoom06(context={previousRoom:"ROOM_05"}) { if (gameFinished || activeRoom?.constructor?.name !== "Room05" || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion}); interaction.setRoom(activeRoom,6); audioManager.setRoom(6); setRoomMovementBounds(6); companion?.say("اتاق ششمه... بعضی صداها آشنا به نظر می‌رسن؛ ولی زود به این حس اعتماد نکن.", 0, "tense"); }
+function startRoom07(context={previousRoom:"ROOM_06"}) { if (gameFinished || activeRoom?.constructor?.name !== "Room06" || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion}); interaction.setRoom(activeRoom,7); audioManager.setRoom(7); setRoomMovementBounds(7); companion?.say("اتاق هفتمه... اینجا باید تصمیم بگیری به کی اعتماد کنی.", 0, "tense"); }
+function startRoom08(context={previousRoom:"ROOM_07"}) { if (gameFinished || activeRoom?.constructor?.name !== "Room07" || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion}); interaction.setRoom(activeRoom,8); audioManager.setRoom(8); setRoomMovementBounds(8); companion?.say("اتاق آخره... اینجا انتخاب‌هات دوباره برمی‌گردن سراغت.", 0, "tense"); }
 
-
-function startRoom06(context={previousRoom:"ROOM_05"}) {
-  if (gameFinished) return;
-  if (activeRoom?.constructor?.name !== "Room05" || !activeRoom.completed) return;
-  clearRoomGeometry(); interaction.clearTargets?.();
-  activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion});
-  interaction.setRoom(activeRoom,6);
-  audioManager.setRoom(6);
-  setRoomMovementBounds(6);
-  companion?.say("اتاق ششمه... بعضی صداها آشنا به نظر می‌رسن؛ ولی زود به این حس اعتماد نکن.", 0, "tense");
-}
-
-function startRoom07(context={previousRoom:"ROOM_06"}) {
-  if (gameFinished) return;
-  if (activeRoom?.constructor?.name !== "Room06" || !activeRoom.completed) return;
-  clearRoomGeometry(); interaction.clearTargets?.();
-  activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion});
-  interaction.setRoom(activeRoom,7);
-  audioManager.setRoom(7);
-  setRoomMovementBounds(7);
-  companion?.say("اتاق هفتمه... اینجا باید تصمیم بگیری به کی اعتماد کنی.", 0, "tense");
-}
-
-function startRoom08(context={previousRoom:"ROOM_07"}) {
-  if (gameFinished) return;
-  if (activeRoom?.constructor?.name !== "Room07" || !activeRoom.completed) return;
-  clearRoomGeometry(); interaction.clearTargets?.();
-  activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion});
-  interaction.setRoom(activeRoom,8);
-  audioManager.setRoom(8);
-  setRoomMovementBounds(8);
-  companion?.say("اتاق آخره... اینجا انتخاب‌هات دوباره برمی‌گردن سراغت.", 0, "tense");
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  const delta = clock.getDelta();
-  if (!gameFinished) {
-    player.update(delta);
-    activeRoom?.update?.(delta, player);
-  }
-  interaction.update();
-  renderer.render(scene, camera);
-}
+function animate() { requestAnimationFrame(animate); const delta = clock.getDelta(); if (!gameFinished) { player.update(delta); activeRoom?.update?.(delta, player); } interaction.update(); renderer.render(scene, camera); }
 animate();
+window.addEventListener("resize", () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-function loadTrainingPlan() {
-  try {
-    const key = `psychgame_training_${session.getPlayerCode()}`;
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
+function loadTrainingPlan() { try { const key = `psychgame_training_${session.getPlayerCode()}`; const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; } }
 
 function getTrainingRouteTarget(plan) {
   const assignments = Array.isArray(plan?.assignments) ? plan.assignments : [];
-  const runtime = (() => {
-    try {
-      const raw = sessionStorage.getItem(`psychgame_training_runtime_${session.getPlayerCode()}`);
-      return raw ? JSON.parse(raw) : null;
-    } catch (_) { return null; }
-  })();
-
+  const runtime = (() => { try { const raw = sessionStorage.getItem(`psychgame_training_runtime_${session.getPlayerCode()}`); return raw ? JSON.parse(raw) : null; } catch (_) { return null; } })();
   const compatibleRuntime = !runtime || !plan?.planId || !runtime.planId || runtime.planId === plan.planId;
   const states = new Map((compatibleRuntime ? (runtime?.assignments || []) : []).map(item => [item.targetId, item]));
-  return assignments.find(item => {
-    const state = states.get(item.targetId);
-    return !state || (!state.completed && !state.aborted && !state.exhausted);
-  }) || null;
-}
-
-function trainingRoomForTarget(targetId) {
-  const map = {
-    RESPONSE_INHIBITION: 15,
-    GRADUAL_APPROACH: 16,
-    WAIT_TOLERANCE: 17,
-    ATTENTION_SUSTAIN: 18,
-    EMOTIONAL_PAUSE: 18,
-    DECISION_COMMITMENT: 19,
-    REPETITION_REDUCTION: 19,
-    UNCERTAINTY_TOLERANCE: 19
-  };
-  return map[targetId] || null;
+  return assignments.find(item => { const state = states.get(item.targetId); return !state || (!state.completed && !state.aborted && !state.exhausted); }) || null;
 }
 
 function startTrainingRoom(roomNumber, plan, previousRoom = null) {
-  clearRoomGeometry();
-  interaction.clearTargets?.();
-
-  const constructors = {
-    15: Room15, 16: Room16, 17: Room17, 18: Room18, 19: Room19, 20: Room20
-  };
-  const RoomClass = constructors[roomNumber];
-  if (!RoomClass) return false;
-
+  clearRoomGeometry(); interaction.clearTargets?.();
+  const constructors = { 15: Room15, 16: Room16, 17: Room17, 18: Room18, 19: Room19, 20: Room20 };
+  const safeRoomNumber = Number(roomNumber);
+  const RoomClass = constructors[safeRoomNumber];
+  if (!RoomClass || safeRoomNumber < 15 || safeRoomNumber > 20) return false;
   activeRoom = new RoomClass(scene, tracker, plan, companion);
-  activeRoom.start({ previousRoom });
-  interaction.setRoom(activeRoom, roomNumber);
-  audioManager.setRoom(roomNumber);
-  camera.position.set(0, 1.7, 3.5);
-  player.rotation.set(0, 0, 0);
-  camera.rotation.copy(player.rotation);
-  mainLight.intensity = 20;
-  document.getElementById("pg-title").textContent = `YOL · مرحله تمرینی ${String(roomNumber - 14).padStart(2, "0")}`;
+  activeRoom.start({ previousRoom }); interaction.setRoom(activeRoom, safeRoomNumber); audioManager.setRoom(safeRoomNumber); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); mainLight.intensity = 20;
+  document.getElementById("pg-title").textContent = `YOL · مرحله تمرینی ${String(safeRoomNumber - 14).padStart(2, "0")}`;
   return true;
 }
 
 function continueTraining(previousRoom = null) {
   if (gameFinished || trainingFinished) return;
   const plan = loadTrainingPlan();
-
-  if (!plan?.assignments?.length) {
-    trainingFinished = true;
-    finishGameWithoutTraining();
-    return;
-  }
-
+  if (!plan?.assignments?.length) { trainingFinished = true; finishGameWithoutTraining(); return; }
   const next = getTrainingRouteTarget(plan);
-  if (!next) {
-    startTrainingRoom(20, plan, previousRoom);
-    return;
-  }
-
-  const roomNumber = trainingRoomForTarget(next.targetId);
-  if (!roomNumber) {
-    trainingFinished = true;
-    finishGameWithoutTraining();
-    return;
-  }
-
-  startTrainingRoom(roomNumber, plan, previousRoom);
+  if (!next) { startTrainingRoom(20, plan, previousRoom); return; }
+  const roomNumber = getTrainingRoomForTarget(next.targetId);
+  if (!roomNumber || roomNumber < 15 || roomNumber > 20) { trainingFinished = true; finishGameWithoutTraining(); return; }
+  if (!startTrainingRoom(roomNumber, plan, previousRoom)) { trainingFinished = true; finishGameWithoutTraining(); return; }
   companion?.say("تمرین بعدی طبق برنامه‌ای که برات تعیین شده ادامه پیدا می‌کنه.", 0, "calm");
 }
-function startRoom09(context = { previousRoom: "ROOM_08" }) {
-  continueTraining(context.previousRoom || "ROOM_08");
-}
+function startRoom09(context = { previousRoom: "ROOM_08" }) { continueTraining(context.previousRoom || "ROOM_08"); }
 
-function loadTrainingRuntime() {
-  try {
-    const runtimeKey = `psychgame_training_runtime_${session.getPlayerCode()}`;
-    const recoveryKey = `psychgame_training_recovery_${session.getPlayerCode()}`;
-    const raw = sessionStorage.getItem(runtimeKey) || localStorage.getItem(recoveryKey);
-    return raw ? JSON.parse(raw) : null;
-  } catch (_) {
-    return null;
-  }
-}
-
+function loadTrainingRuntime() { try { const runtimeKey = `psychgame_training_runtime_${session.getPlayerCode()}`; const recoveryKey = `psychgame_training_recovery_${session.getPlayerCode()}`; const raw = sessionStorage.getItem(runtimeKey) || localStorage.getItem(recoveryKey); return raw ? JSON.parse(raw) : null; } catch (_) { return null; } }
 function resumeTrainingIfNeeded() {
   if (gameFinished || trainingFinished) return false;
-
-  const plan = loadTrainingPlan();
-  const runtime = loadTrainingRuntime();
-  const finalResult = session.getTrainingResult?.();
-
+  const plan = loadTrainingPlan(); const runtime = loadTrainingRuntime(); const finalResult = session.getTrainingResult?.();
   if (!plan?.assignments?.length || finalResult) return false;
   if (plan.planId && runtime?.planId && runtime.planId !== plan.planId) return false;
-
-  const roomNumber = Number(runtime?.roomId);
-  if (roomNumber < 15 || roomNumber > 20) return false;
-
-  gameFinished = false;
-  trainingFinished = false;
-
-  const activeTarget = getTrainingRouteTarget(plan);
-  const expectedRoom = activeTarget ? trainingRoomForTarget(activeTarget.targetId) : null;
-
-  if (!activeTarget) {
-    if (roomNumber !== 20) continueTraining(runtime?.roomId || null);
-    else startTrainingRoom(20, plan, runtime?.roomId || null);
-    companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm");
-    return true;
-  }
-
-  const resumeRoom = expectedRoom || roomNumber;
-  startTrainingRoom(resumeRoom, plan, runtime?.roomId || null);
-  companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm");
-  return true;
+  const roomNumber = Number(runtime?.roomId); if (roomNumber < 15 || roomNumber > 20) return false;
+  gameFinished = false; trainingFinished = false;
+  const activeTarget = getTrainingRouteTarget(plan); const expectedRoom = activeTarget ? getTrainingRoomForTarget(activeTarget.targetId) : null;
+  if (!activeTarget) { if (roomNumber !== 20) continueTraining(runtime?.roomId || null); else startTrainingRoom(20, plan, runtime?.roomId || null); companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm"); return true; }
+  const resumeRoom = expectedRoom || roomNumber; startTrainingRoom(resumeRoom, plan, runtime?.roomId || null); companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm"); return true;
 }
-
 setTimeout(resumeTrainingIfNeeded, 0);
-
 
 function finishGameWithoutTraining() {
   if (gameFinished) return;
-  gameFinished = true;
-  session.saveSession({ completed: true });
-  session.uploadCompletedSession();
-  clearRoomTransitionTimers();
-  interaction.currentTarget = null;
-  interaction.finishLook();
-  const titleEl = document.getElementById("pg-title");
-  const hintEl = document.getElementById("pg-hint");
-  const targetEl = document.getElementById("pg-target");
-  const interactButton = document.getElementById("pg-touch-interact");
-  if (titleEl) titleEl.textContent = "YOL · پایان";
-  if (hintEl) hintEl.textContent = "سفر تمام شد.";
-  if (targetEl) targetEl.style.display = "none";
-  if (interactButton) interactButton.style.display = "none";
-  audioManager.playPulse("dark");
+  gameFinished = true; session.saveSession({ completed: true }); session.uploadCompletedSession(); clearRoomTransitionTimers(); interaction.currentTarget = null; interaction.finishLook();
+  const titleEl = document.getElementById("pg-title"); const hintEl = document.getElementById("pg-hint"); const targetEl = document.getElementById("pg-target"); const interactButton = document.getElementById("pg-touch-interact");
+  if (titleEl) titleEl.textContent = "YOL · پایان"; if (hintEl) hintEl.textContent = "سفر تمام شد."; if (targetEl) targetEl.style.display = "none"; if (interactButton) interactButton.style.display = "none"; audioManager.playPulse("dark");
 }
 
 window.addEventListener("psychgame-training-room-complete", (event) => {
-  const roomId = event.detail?.roomId;
-  if (!roomId || trainingFinished) return;
-
-  tracker.log("TRAINING_PHASE_ROOM_COMPLETED", {
-    roomId,
-    targetId: event.detail.targetId || null
-  });
-
+  const roomId = event.detail?.roomId; if (!roomId || trainingFinished) return;
+  tracker.log("TRAINING_PHASE_ROOM_COMPLETED", { roomId, targetId: event.detail.targetId || null });
   const completedRoomNumber = Number(String(roomId).replace("ROOM_", ""));
-  if (completedRoomNumber >= 15 && completedRoomNumber <= 19) {
-    scheduleRoomTransition(() => continueTraining(roomId), 500);
-    return;
-  }
-
-  if (roomId === "ROOM_20" && event.detail.final) {
-    trainingFinished = true;
-    gameFinished = true;
-    clearRoomTransitionTimers();
-    interaction.currentTarget = null;
-    interaction.finishLook();
-    const titleEl = document.getElementById("pg-title");
-    const hintEl = document.getElementById("pg-hint");
-    const targetEl = document.getElementById("pg-target");
-    const interactButton = document.getElementById("pg-touch-interact");
-    if (titleEl) titleEl.textContent = "YOL · پایان تمرین";
-    if (hintEl) hintEl.textContent = "مرحله تمرینی تمام شد.";
-    if (targetEl) targetEl.style.display = "none";
-    if (interactButton) interactButton.style.display = "none";
-    audioManager.playPulse("dark");
-  }
+  if (completedRoomNumber >= 15 && completedRoomNumber <= 19) { scheduleRoomTransition(() => continueTraining(roomId), 500); return; }
+  if (roomId === "ROOM_20" && event.detail.final) { trainingFinished = true; gameFinished = true; clearRoomTransitionTimers(); interaction.currentTarget = null; interaction.finishLook(); const titleEl = document.getElementById("pg-title"); const hintEl = document.getElementById("pg-hint"); const targetEl = document.getElementById("pg-target"); const interactButton = document.getElementById("pg-touch-interact"); if (titleEl) titleEl.textContent = "YOL · پایان تمرین"; if (hintEl) hintEl.textContent = "مرحله تمرینی تمام شد."; if (targetEl) targetEl.style.display = "none"; if (interactButton) interactButton.style.display = "none"; audioManager.playPulse("dark"); }
 });
 
-window.addEventListener("psychgame-game-complete",(event)=>{
-  if(event.detail?.roomId!=="ROOM_08" || gameFinished)return;
-  const trainingPlan = loadTrainingPlan();
-  if (trainingPlan?.assignments?.length) {
-    gameFinished = false;
-    interaction.currentTarget = null;
-    interaction.finishLook();
-    continueTraining("ROOM_08");
-    return;
-  }
-  gameFinished = true;
-  session.saveSession({ completed: true });
-  session.uploadCompletedSession();
-  clearRoomTransitionTimers();
-  interaction.currentTarget = null;
-  interaction.finishLook();
-  const titleEl=document.getElementById("pg-title");
-  const hintEl=document.getElementById("pg-hint");
-  const targetEl=document.getElementById("pg-target");
-  const interactButton=document.getElementById("pg-touch-interact");
-  if(titleEl)titleEl.textContent="YOL · پایان";
-  if(hintEl)hintEl.textContent="سفر تمام شد.";
-  if(targetEl)targetEl.style.display="none";
-  if(interactButton)interactButton.style.display="none";
-  audioManager.playPulse("dark");
-});
-
-window.addEventListener("psychgame-audio-pulse",(event)=>{
-  audioManager.playPulse(event.detail?.type || "dark");
-});
-
-window.addEventListener("psychgame-room-complete",(event)=>{
-  if (gameFinished) return;
-  audioManager.playPulse("dark");
-  const d=event.detail||{};
-  if(d.roomId==="ROOM_04"){
-    behavioralHistory.hallBehavior=d.behavior||{};
-    startRoom05?.({previousRoom:"ROOM_04",companion});
-  }
-  if(d.roomId==="ROOM_05"){
-    behavioralHistory.mirrorBehavior=d.behavior||{};
-    startRoom06?.({previousRoom:"ROOM_05",companion});
-  }
-  if(d.roomId==="ROOM_06"){
-    behavioralHistory.recordingBehavior=d.behavior||{};
-    startRoom07?.({previousRoom:"ROOM_06",companion});
-  }
-  if(d.roomId==="ROOM_07"){
-    behavioralHistory.trustBehavior=d.trustBehavior||{};
-    startRoom08?.({previousRoom:"ROOM_07",companion});
-  }
-});
+window.addEventListener("psychgame-game-complete",(event)=>{ if(event.detail?.roomId!=="ROOM_08" || gameFinished)return; const trainingPlan = loadTrainingPlan(); if (trainingPlan?.assignments?.length) { gameFinished = false; interaction.currentTarget = null; interaction.finishLook(); continueTraining("ROOM_08"); return; } gameFinished = true; session.saveSession({ completed: true }); session.uploadCompletedSession(); clearRoomTransitionTimers(); interaction.currentTarget = null; interaction.finishLook(); const titleEl=document.getElementById("pg-title"); const hintEl=document.getElementById("pg-hint"); const targetEl=document.getElementById("pg-target"); const interactButton=document.getElementById("pg-touch-interact"); if(titleEl)titleEl.textContent="YOL · پایان"; if(hintEl)hintEl.textContent="سفر تمام شد."; if(targetEl)targetEl.style.display="none"; if(interactButton)interactButton.style.display="none"; audioManager.playPulse("dark"); });
+window.addEventListener("psychgame-audio-pulse",(event)=>{ audioManager.playPulse(event.detail?.type || "dark"); });
+window.addEventListener("psychgame-room-complete",(event)=>{ if (gameFinished) return; audioManager.playPulse("dark"); const d=event.detail||{}; if(d.roomId==="ROOM_04"){ behavioralHistory.hallBehavior=d.behavior||{}; startRoom05?.({previousRoom:"ROOM_04",companion}); } if(d.roomId==="ROOM_05"){ behavioralHistory.mirrorBehavior=d.behavior||{}; startRoom06?.({previousRoom:"ROOM_05",companion}); } if(d.roomId==="ROOM_06"){ behavioralHistory.recordingBehavior=d.behavior||{}; startRoom07?.({previousRoom:"ROOM_06",companion}); } if(d.roomId==="ROOM_07"){ behavioralHistory.trustBehavior=d.trustBehavior||{}; startRoom08?.({previousRoom:"ROOM_07",companion}); } });
