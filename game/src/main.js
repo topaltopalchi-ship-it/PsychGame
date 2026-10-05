@@ -253,14 +253,14 @@ function getTrainingRouteTarget(plan) {
   }) || null;
 }
 
-function startTrainingRoom(roomNumber, plan, previousRoom = null) {
+function startTrainingRoom(roomNumber, plan, previousRoom = null, targetId = null) {
   clearRoomGeometry(); interaction.clearTargets?.();
   const constructors = { 15: Room15, 16: Room16, 17: Room17, 18: Room18, 19: Room19, 20: Room20 };
   const safeRoomNumber = Number(roomNumber);
   const RoomClass = constructors[safeRoomNumber];
   if (!RoomClass || safeRoomNumber < 15 || safeRoomNumber > 20) return false;
   activeRoom = new RoomClass(scene, tracker, plan, companion);
-  const selectedAssignment = plan?.assignments?.find(item => getTrainingRoomForTarget(item.targetId) === safeRoomNumber && !item.completed && !item.aborted && !item.exhausted) || null; activeRoom.start({ previousRoom, targetId: selectedAssignment?.targetId || null }); interaction.setRoom(activeRoom, safeRoomNumber); audioManager.setRoom(safeRoomNumber); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); mainLight.intensity = 20;
+  const selectedTargetId = targetId || getTrainingRouteTarget(plan)?.targetId || null; activeRoom.start({ previousRoom, targetId: selectedTargetId }); interaction.setRoom(activeRoom, safeRoomNumber); audioManager.setRoom(safeRoomNumber); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); mainLight.intensity = 20;
   document.getElementById("pg-title").textContent = `YOL · مرحله تمرینی ${String(safeRoomNumber - 14).padStart(2, "0")}`;
   return true;
 }
@@ -270,10 +270,10 @@ function continueTraining(previousRoom = null) {
   const plan = loadTrainingPlan();
   if (!plan?.assignments?.length) { trainingFinished = true; finishGameWithoutTraining(); return; }
   const next = getTrainingRouteTarget(plan);
-  if (!next) { startTrainingRoom(20, plan, previousRoom); return; }
+  if (!next) { startTrainingRoom(20, plan, previousRoom, null); return; }
   const roomNumber = getTrainingRoomForTarget(next.targetId);
   if (!roomNumber || roomNumber < 15 || roomNumber > 20) { trainingFinished = true; finishGameWithoutTraining(); return; }
-  if (!startTrainingRoom(roomNumber, plan, previousRoom)) { trainingFinished = true; finishGameWithoutTraining(); return; }
+  if (!startTrainingRoom(roomNumber, plan, previousRoom, next.targetId)) { trainingFinished = true; finishGameWithoutTraining(); return; }
   companion?.say("تمرین بعدی طبق برنامه‌ای که برات تعیین شده ادامه پیدا می‌کنه.", 0, "calm");
 }
 function startRoom09(context = { previousRoom: "ROOM_08" }) { continueTraining(context.previousRoom || "ROOM_08"); }
@@ -287,8 +287,8 @@ function resumeTrainingIfNeeded() {
   const roomNumber = Number(runtime?.roomId); if (roomNumber < 15 || roomNumber > 20) return false;
   gameFinished = false; trainingFinished = false;
   const activeTarget = getTrainingRouteTarget(plan); const expectedRoom = activeTarget ? getTrainingRoomForTarget(activeTarget.targetId) : null;
-  if (!activeTarget) { if (roomNumber !== 20) continueTraining(runtime?.roomId || null); else startTrainingRoom(20, plan, runtime?.roomId || null); companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm"); return true; }
-  const resumeRoom = expectedRoom || roomNumber; startTrainingRoom(resumeRoom, plan, runtime?.roomId || null); companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm"); return true;
+  if (!activeTarget) { if (roomNumber !== 20) continueTraining(runtime?.roomId || null); else startTrainingRoom(20, plan, runtime?.roomId || null, null); companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm"); return true; }
+  const resumeRoom = expectedRoom || roomNumber; startTrainingRoom(resumeRoom, plan, runtime?.roomId || null, activeTarget.targetId); companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm"); return true;
 }
 setTimeout(resumeTrainingIfNeeded, 0);
 
