@@ -59,7 +59,9 @@ export function setTrainingAssignmentLevel(plan, targetId, level) {
     : current.level;
   next.assignments[index] = {
     ...current,
-    level: Math.min(safeLevel, Number(current.maxLevel) || target.progression.length)
+    level: Math.min(safeLevel, Number(current.maxLevel) || target.progression.length),
+    levelChangedAt: new Date().toISOString(),
+    levelChangedBy: "specialist"
   };
   return next;
 }
