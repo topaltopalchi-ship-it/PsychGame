@@ -301,4 +301,24 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
 
 window.addEventListener("psychgame-game-complete",(event)=>{ if(event.detail?.roomId!=="ROOM_08" || gameFinished)return; const trainingPlan = loadTrainingPlan(); if (trainingPlan?.assignments?.length) { gameFinished = false; interaction.currentTarget = null; interaction.finishLook(); continueTraining("ROOM_08"); return; } gameFinished = true; session.saveSession({ completed: true }); session.uploadCompletedSession(); clearRoomTransitionTimers(); interaction.currentTarget = null; interaction.finishLook(); const titleEl=document.getElementById("pg-title"); const hintEl=document.getElementById("pg-hint"); const targetEl=document.getElementById("pg-target"); const interactButton=document.getElementById("pg-touch-interact"); if(titleEl)titleEl.textContent="YOL · پایان"; if(hintEl)hintEl.textContent="سفر تمام شد."; if(targetEl)targetEl.style.display="none"; if(interactButton)interactButton.style.display="none"; audioManager.playPulse("dark"); });
 window.addEventListener("psychgame-audio-pulse",(event)=>{ audioManager.playPulse(event.detail?.type || "dark"); });
-window.addEventListener("psychgame-room-complete",(event)=>{ if (gameFinished) return; audioManager.playPulse("dark"); const d=event.detail||{}; if(d.roomId==="ROOM_04"){ behavioralHistory.hallBehavior=d.behavior||{}; startRoom05?.({previousRoom:"ROOM_04",companion}); } if(d.roomId==="ROOM_05"){ behavioralHistory.mirrorBehavior=d.behavior||{}; startRoom06?.({previousRoom:"ROOM_05",companion}); } if(d.roomId==="ROOM_06"){ behavioralHistory.recordingBehavior=d.behavior||{}; startRoom07?.({previousRoom:"ROOM_06",companion}); } if(d.roomId==="ROOM_07"){ behavioralHistory.trustBehavior=d.trustBehavior||{}; startRoom08?.({previousRoom:"ROOM_07",companion}); } });
+window.addEventListener("psychgame-room-complete",(event)=>{
+  if (gameFinished) return;
+  audioManager.playPulse("dark");
+  const d=event.detail||{};
+  if(d.roomId==="ROOM_04"){
+    behavioralHistory.hallBehavior=d.behavior||{};
+    scheduleRoomTransition(()=>startRoom05?.({previousRoom:"ROOM_04",companion}));
+  }
+  if(d.roomId==="ROOM_05"){
+    behavioralHistory.mirrorBehavior=d.behavior||{};
+    scheduleRoomTransition(()=>startRoom06?.({previousRoom:"ROOM_05",companion}));
+  }
+  if(d.roomId==="ROOM_06"){
+    behavioralHistory.recordingBehavior=d.behavior||{};
+    scheduleRoomTransition(()=>startRoom07?.({previousRoom:"ROOM_06",companion}));
+  }
+  if(d.roomId==="ROOM_07"){
+    behavioralHistory.trustBehavior=d.trustBehavior||{};
+    scheduleRoomTransition(()=>startRoom08?.({previousRoom:"ROOM_07",companion}));
+  }
+});
