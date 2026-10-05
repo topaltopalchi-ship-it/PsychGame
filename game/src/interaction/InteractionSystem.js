@@ -321,6 +321,7 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
 
 
 InteractionSystem.prototype.handleRoom4 = function(objectId) {
+  if (this.completed) return;
   if (objectId === "HALL_MARK") {
     this.room?.reactToMark?.();
     this.companion?.say("این علامت رو قبلاً دیدی؟ یا فقط فکر می‌کنی دیدیش؟");
