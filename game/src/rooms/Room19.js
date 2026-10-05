@@ -24,6 +24,9 @@ export class Room19 {
   }
 
   start(context = {}) {
+    const targetId = context.targetId || null;
+    this.assignment = this.engine.getAssignments().find(item => item.targetId === targetId && !item.completed && !item.aborted && !item.exhausted) || this.assignment;
+    this.target = this.assignment ? getTrainingTargetLevel(this.assignment) : null;
     if (!this.assignment) { this.skip(); return; }
     this.create();
     this.tracker.log("ROOM_ENTER", {
