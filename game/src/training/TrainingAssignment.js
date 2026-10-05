@@ -77,14 +77,15 @@ export function recordTrainingAttempt(session, targetId, successful) {
       const successes = item.successes + (successful ? 1 : 0);
       const failures = item.failures + (successful ? 0 : 1);
       const maxAttempts = item.safeguards?.maxAttemptsPerSession ?? 30;
+      const completed = successes >= 2;
 
       return {
         ...item,
         attempts,
         successes,
         failures,
-        completed: successes >= 2,
-        exhausted: attempts >= maxAttempts
+        completed,
+        exhausted: !completed && attempts >= maxAttempts
       };
     })
   };
