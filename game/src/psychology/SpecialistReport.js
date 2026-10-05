@@ -118,7 +118,10 @@ export class SpecialistReport {
 
 
     const specialistReportFa = {
+      schemaVersion: 1,
+      language: "fa-IR",
       title: "گزارش رفتاری بازی برای متخصص",
+      scope: "توصیف رفتارهای مشاهده‌شده در بازی برای استفاده متخصص؛ بدون تشخیص بالینی.",
       methodology: "این گزارش بر پایه شاخص‌های رفتاری ثبت‌شده در روند بازی تهیه شده است و تشخیص بالینی یا نتیجه‌گیری قطعی درباره وضعیت روان‌شناختی بازیکن نیست.",
       session: {
         playerCode: sessionData?.playerCode ?? null,
