@@ -103,16 +103,22 @@ export function createTrainingAssignment({
   const target = TRAINING_TARGETS[targetId];
   if (!target) throw new Error("Unknown training target: " + targetId);
 
-  const safeLevel = Math.max(1, Math.min(level, target.progression.length));
+  const requestedLevel = Number(level);
+  const safeLevel = Number.isFinite(requestedLevel)
+    ? Math.max(1, Math.min(Math.trunc(requestedLevel), target.progression.length))
+    : 1;
+
+  const requestedMaxLevel = maxLevel == null ? target.progression.length : Number(maxLevel);
+  const safeMaxLevel = Number.isFinite(requestedMaxLevel)
+    ? Math.max(safeLevel, Math.min(Math.trunc(requestedMaxLevel), target.progression.length))
+    : target.progression.length;
 
   return {
     targetId,
     level: safeLevel,
     assignedBy,
     assignedAt: new Date().toISOString(),
-    maxLevel: maxLevel == null
-      ? target.progression.length
-      : Math.max(1, Math.min(maxLevel, target.progression.length)),
+    maxLevel: safeMaxLevel,
     safeguards: {
       maxAttemptsPerSession: 30,
       allowAbort: true,
