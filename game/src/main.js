@@ -232,7 +232,7 @@ function startRoom02(previousPath = "ROOM_01") {
   player.rotation.set(0, 0, 0);
   setRoomMovementBounds(2);
   mainLight.intensity = 24;
-  companion?.say("اتاق دوم؛ سه مسیر پیش روت هست. انتخاب کن و نتیجه‌اش رو ببین.");
+  companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense");
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
@@ -252,7 +252,7 @@ function startRoom03(context = { previousPath: "ROOM_02" }) {
   camera.rotation.copy(player.rotation);
   setRoomMovementBounds(3);
   mainLight.intensity = 22;
-  companion?.say("اتاق سوم؛ اینجا عجله نکردن خودش یک انتخابه.");
+  companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm");
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
@@ -272,7 +272,7 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) {
   camera.rotation.copy(player.rotation);
   setRoomMovementBounds(4);
   mainLight.intensity=18;
-  companion?.say("اتاق چهارم؛ اگر راهرو تکرار شد، به حافظه‌ات اعتماد نکن.");
+  companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense");
   document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها";
 }
 window.addEventListener("psychgame-room-complete", (event) => {
@@ -296,7 +296,7 @@ function startRoom05(context={previousRoom:"ROOM_04"}) {
   interaction.setRoom(activeRoom,5);
   audioManager.setRoom(5);
   setRoomMovementBounds(5);
-  companion?.say("اتاق پنجم... اینجا به چیزی که می‌بینی زود اعتماد نکن.");
+  companion?.say("اتاق پنجمه... اینجا به چیزی که می‌بینی زود اعتماد نکن.", 0, "tense");
 }
 
 
@@ -308,7 +308,7 @@ function startRoom06(context={previousRoom:"ROOM_05"}) {
   interaction.setRoom(activeRoom,6);
   audioManager.setRoom(6);
   setRoomMovementBounds(6);
-  companion?.say("اتاق ششم... بعضی صداها آشنا به نظر می‌رسن، ولی به این حس زود اعتماد نکن.");
+  companion?.say("اتاق ششمه... بعضی صداها آشنا به نظر می‌رسن؛ ولی زود به این حس اعتماد نکن.", 0, "tense");
 }
 
 function startRoom07(context={previousRoom:"ROOM_06"}) {
@@ -319,7 +319,7 @@ function startRoom07(context={previousRoom:"ROOM_06"}) {
   interaction.setRoom(activeRoom,7);
   audioManager.setRoom(7);
   setRoomMovementBounds(7);
-  companion?.say("اتاق هفتم... اینجا باید تصمیم بگیری به چه کسی اعتماد کنی.");
+  companion?.say("اتاق هفتمه... اینجا باید تصمیم بگیری به کی اعتماد کنی.", 0, "tense");
 }
 
 function startRoom08(context={previousRoom:"ROOM_07"}) {
@@ -330,7 +330,7 @@ function startRoom08(context={previousRoom:"ROOM_07"}) {
   interaction.setRoom(activeRoom,8);
   audioManager.setRoom(8);
   setRoomMovementBounds(8);
-  companion?.say("اتاق آخر... اینجا فقط انتخاب‌هایی که کردی بهت برمی‌گردن.");
+  companion?.say("اتاق آخره... اینجا انتخاب‌هات دوباره برمی‌گردن سراغت.", 0, "tense");
 }
 
 function animate() {
@@ -438,7 +438,7 @@ function continueTraining(previousRoom = null) {
   }
 
   startTrainingRoom(roomNumber, plan, previousRoom);
-  companion?.say("تمرین بعدی بر اساس برنامه متخصص ادامه پیدا می‌کند.");
+  companion?.say("تمرین بعدی طبق برنامه‌ای که برات تعیین شده ادامه پیدا می‌کنه.", 0, "calm");
 }
 function startRoom09(context = { previousRoom: "ROOM_08" }) {
   continueTraining(context.previousRoom || "ROOM_08");
@@ -477,7 +477,7 @@ function resumeTrainingIfNeeded() {
   if (!activeTarget) {
     if (roomNumber !== 20) continueTraining(runtime?.roomId || null);
     else startTrainingRoom(20, plan, runtime?.roomId || null);
-    companion?.say("وضعیت تمرین قبلی بازیابی شد و از همان مرحله ادامه پیدا می‌کند.");
+    companion?.say("تمرین قبلی برگشته... از همون مرحله ادامه می‌دیم.", 0, "calm");
     return true;
   }
 
