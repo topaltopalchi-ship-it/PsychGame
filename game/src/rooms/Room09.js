@@ -13,6 +13,7 @@ export class Room09 {
     this.activeAssignment = null;
     this.waitStarted = false;
     this.waitCompleted = false;
+    this.taskMode = "WAIT";
   }
 
   start(context = {}) {
@@ -88,7 +89,17 @@ export class Room09 {
     this.waitStarted = true;
 
     const config = this.activeAssignment.target?.config || {};
-    const targetMs = Number(config.targetMs || config.requiredPauseMs || 5000);
+    const targetId = this.activeAssignment.targetId;
+    if (targetId === "ATTENTION_SUSTAIN") this.taskMode = "ATTENTION";
+    else if (targetId === "RESPONSE_INHIBITION" || targetId === "EMOTIONAL_PAUSE") this.taskMode = "PAUSE";
+    else this.taskMode = "WAIT";
+
+    const targetMs = Number(
+      config.targetMs ||
+      config.requiredPauseMs ||
+      config.durationMs ||
+      5000
+    );
 
     this.waitTargetMs = Math.max(1000, targetMs);
     this.waitStartTime = performance.now();
@@ -97,7 +108,8 @@ export class Room09 {
       roomId: "ROOM_09",
       targetId: this.activeAssignment.targetId,
       level: this.activeAssignment.level,
-      targetMs: this.waitTargetMs
+      targetMs: this.waitTargetMs,
+      mode: this.taskMode
     });
   }
 
@@ -110,7 +122,8 @@ export class Room09 {
     this.waitCompleted = true;
     this.engine.recordAttempt(this.activeAssignment.targetId, true, {
       elapsedMs: Math.round(elapsedMs),
-      targetMs: this.waitTargetMs
+      targetMs: this.waitTargetMs,
+      mode: this.taskMode
     });
 
     this.tracker.log("TRAINING_TASK_COMPLETED", {
