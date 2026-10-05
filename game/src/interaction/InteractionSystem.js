@@ -267,6 +267,7 @@ export class InteractionSystem {
 
 // Room 2: choices are intentionally recoverable after a wrong path.
 InteractionSystem.prototype.handleRoom2 = function(objectId) {
+  if (this.completed) return;
   if (objectId === "PATH_CLUE") {
     this.tracker.log("CLUE_INSPECTED", { roomId: "ROOM_02" });
     this.companion?.say("سه مسیر داری. انتخابت مهمه؛ اگر اشتباه کنی، می‌تونی دوباره تصمیم بگیری.");
