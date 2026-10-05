@@ -148,6 +148,7 @@ const targetNames = {
 };
 
 window.addEventListener("psychgame-target", (event) => {
+  if (gameFinished) return;
   const objectId = event.detail?.objectId;
   const label = targetLabels[objectId];
   targetPrompt.textContent = label || "برای تعامل، به یک شیء نگاه کنید";
