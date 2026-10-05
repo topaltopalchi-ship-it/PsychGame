@@ -448,12 +448,17 @@ function resumeTrainingIfNeeded() {
   trainingFinished = false;
 
   const activeTarget = getTrainingRouteTarget(plan);
-  if (!activeTarget && roomNumber !== 20) {
-    continueTraining(runtime?.roomId || null);
+  const expectedRoom = activeTarget ? trainingRoomForTarget(activeTarget.targetId) : null;
+
+  if (!activeTarget) {
+    if (roomNumber !== 20) continueTraining(runtime?.roomId || null);
+    else startTrainingRoom(20, plan, runtime?.roomId || null);
+    companion?.say("وضعیت تمرین قبلی بازیابی شد و از همان مرحله ادامه پیدا می‌کند.");
     return true;
   }
 
-  startTrainingRoom(roomNumber, plan, runtime?.roomId || null);
+  const resumeRoom = expectedRoom || roomNumber;
+  startTrainingRoom(resumeRoom, plan, runtime?.roomId || null);
   companion?.say("وضعیت تمرین قبلی بازیابی شد و از همان مرحله ادامه پیدا می‌کند.");
   return true;
 }
