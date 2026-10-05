@@ -65,6 +65,19 @@ try {
   const unauthorized = await request("/api/sessions");
   assert.equal(unauthorized.status, 401);
 
+  const preflight = await request("/api/sessions", {
+    method: "OPTIONS",
+    headers: {
+      Origin: "http://test.local",
+      "Access-Control-Request-Method": "POST",
+      "Access-Control-Request-Headers": "content-type, authorization"
+    }
+  });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get("access-control-allow-origin"), "http://test.local");
+  assert.match(preflight.headers.get("access-control-allow-methods") || "", /POST/);
+  assert.match(preflight.headers.get("access-control-allow-headers") || "", /Authorization/);
+
   const report = {
     sessionId: "smoke-session",
     playerCode: "PLAYER-SMOKE",
@@ -113,6 +126,17 @@ try {
   });
   assert.equal(progressAfterCompletion.status, 200);
   assert.equal((await progressAfterCompletion.json()).preservedCompleted, true);
+
+  const listed = await request("/api/sessions", {
+    headers: { Authorization: "Bearer test-token" }
+  });
+  assert.equal(listed.status, 200);
+  const listedSessions = await listed.json();
+  assert.equal(Array.isArray(listedSessions), true);
+  const listedSmoke = listedSessions.find((item) => item.id === "smoke-session");
+  assert.ok(listedSmoke);
+  assert.equal("events" in listedSmoke, false);
+  assert.equal("analysis" in listedSmoke, false);
 
   const oversized = await request("/api/sessions", {
     method: "POST",
