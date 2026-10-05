@@ -3,6 +3,15 @@ export class SpecialistReport {
     const events = Array.isArray(sessionData?.events) ? sessionData.events : [];
     const byType = {};
     const rooms = {};
+    const path = [];
+    const roomEntries = {};
+    const roomExits = {};
+
+    const inferRoomId = (event) => {
+      if (event?.roomId) return event.roomId;
+      const match = String(event?.type || "").match(/^ROOM_(\\d{2})(?:_|$)/);
+      return match ? `ROOM_${match[1]}` : null;
+    };
 
     const ensureRoom = (roomId) => {
       if (!rooms[roomId]) {
@@ -15,36 +24,66 @@ export class SpecialistReport {
           inspections: 0,
           switches: 0,
           firstChoice: null,
-          lastChoice: null
+          lastChoice: null,
+          durationMs: null
         };
       }
       return rooms[roomId];
     };
 
     for (const event of events) {
-      byType[event.type] = (byType[event.type] || 0) + 1;
-      const roomId = event.roomId;
+      const type = event?.type || "UNKNOWN";
+      byType[type] = (byType[type] || 0) + 1;
+
+      const roomId = inferRoomId(event);
       if (!roomId) continue;
 
       const room = ensureRoom(roomId);
       room.events++;
 
-      if (event.type === "ROOM_COMPLETED") room.completed++;
-      if (event.type === "OBJECT_INTERACTION") room.interactions++;
-      if (event.type === "FAILURE") room.failures++;
+      if (type === "ROOM_ENTER") {
+        if (!roomEntries[roomId]) roomEntries[roomId] = event.elapsedMs ?? null;
+        if (!path.includes(roomId)) path.push(roomId);
+      }
 
-      if (event.type.includes("CHOICE") || event.type.includes("EXIT_CHECKED")) {
+      if (type === "ROOM_COMPLETED") {
+        room.completed++;
+        roomExits[roomId] = event.elapsedMs ?? null;
+      }
+
+      if (type === "OBJECT_INTERACTION") room.interactions++;
+      if (type === "FAILURE") room.failures++;
+
+      if (type.includes("CHOICE") || type.includes("EXIT_CHECKED")) {
         room.decisions++;
         room.lastChoice = event.choice ?? event.firstChoice ?? event.lastChoice ?? room.lastChoice;
         if (!room.firstChoice && event.firstChoice) room.firstChoice = event.firstChoice;
       }
 
-      if (event.type.includes("INSPECTED") || event.type.includes("CHECKED")) {
+      if (type.includes("INSPECTED") || type.includes("CHECKED")) {
         room.inspections++;
       }
 
       room.switches += Number(event.choiceSwitches || 0) + Number(event.switchCount || 0);
     }
+
+    for (const roomId of Object.keys(rooms)) {
+      const start = roomEntries[roomId];
+      const end = roomExits[roomId];
+      if (Number.isFinite(start) && Number.isFinite(end) && end >= start) {
+        rooms[roomId].durationMs = end - start;
+      }
+    }
+
+    const decisionEvents = events.filter((event) =>
+      String(event?.type || "").includes("CHOICE") ||
+      String(event?.type || "").includes("EXIT_CHECKED")
+    );
+
+    const firstDecision = decisionEvents[0];
+    const lastEvent = events[events.length - 1];
+    const sessionDurationMs =
+      Number.isFinite(lastEvent?.elapsedMs) ? lastEvent.elapsedMs : null;
 
     return {
       generatedAt: new Date().toISOString(),
@@ -52,6 +91,12 @@ export class SpecialistReport {
       sessionId: sessionData?.sessionId ?? null,
       sessionStart: sessionData?.sessionStart ?? null,
       eventCount: events.length,
+      sessionDurationMs,
+      decisionCount: decisionEvents.length,
+      timeToFirstDecisionMs: Number.isFinite(firstDecision?.elapsedMs)
+        ? firstDecision.elapsedMs
+        : null,
+      path,
       eventTypes: byType,
       rooms,
       roomDetails: {
