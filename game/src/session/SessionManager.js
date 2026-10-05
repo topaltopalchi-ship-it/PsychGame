@@ -6,7 +6,7 @@ import { SessionUploader } from "./SessionUploader.js";
 export class SessionManager {
   constructor() {
     this.tracker = new BehaviorTracker();
-    this.tracker.setEnabled(true);
+    this.tracker.setEnabled(false);
     this.analyzer = new BehaviorAnalyzer();
     this.playerCode = this.generatePlayerCode();
     this.sessionStart = new Date().toISOString();
