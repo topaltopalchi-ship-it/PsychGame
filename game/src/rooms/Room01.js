@@ -42,6 +42,7 @@ export class Room01 {
   completeRoom() {
     if (this.completed) return;
     this.completed = true;
+    this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_01"});
   }
 
   destroy() {
