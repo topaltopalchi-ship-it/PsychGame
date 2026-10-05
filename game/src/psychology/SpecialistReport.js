@@ -108,6 +108,14 @@ export class SpecialistReport {
     const completedRooms = Object.entries(rooms).filter(([, room]) => room.completed > 0).map(([id]) => id);
     const lastEvent = events[events.length - 1];
     const firstDecision = decisionEvents[0];
+    const latestEventOfType = (type, roomId) => {
+      for (let i = events.length - 1; i >= 0; i--) {
+        const event = events[i];
+        if (event?.type === type && (!roomId || inferRoomId(event) === roomId)) return event;
+      }
+      return null;
+    };
+
 
     const specialistReportFa = {
       title: "گزارش رفتاری بازی برای متخصص",
@@ -125,37 +133,58 @@ export class SpecialistReport {
       خلاصه_اتاق‌ها: {
         ROOM_04: {
           عنوان: "اتاق ۰۴",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_04?.durationMs ?? null,
           رویدادهای_حرکتی: byType.ROOM_04_MOVEMENT || 0,
           بررسی_نشانه: byType.ROOM_04_MARK_INSPECTED || 0,
           جابه‌جایی_حافظه: byType.ROOM_04_MEMORY_SHIFT || 0,
-          اختلال_حلقه: byType.ROOM_04_LOOP_GLITCH || 0
+          اختلال_حلقه: byType.ROOM_04_LOOP_GLITCH || 0,
+          تعداد_عقب‌نشینی: latestEventOfType("ROOM_04_MEMORY_SHIFT", "ROOM_04")?.retreatCount ?? null,
+          بیشترین_عمق_ثبت‌شده: latestEventOfType("ROOM_04_MARK_INSPECTED", "ROOM_04")?.maxDepth ?? null,
+          اکتشاف_فراتر_از_عمق_۶: latestEventOfType("ROOM_04_MARK_INSPECTED", "ROOM_04")?.explored ?? null
         },
         ROOM_05: {
           عنوان: "اتاق ۰۵",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_05?.durationMs ?? null,
           بررسی_آینه: byType.ROOM_05_MIRROR_INSPECTED || 0,
           اختلال_بازتاب: byType.ROOM_05_REFLECTION_GLITCH || 0,
-          تصمیم: byType.ROOM_05_CHOICE || 0
+          تصمیم: byType.ROOM_05_CHOICE || 0,
+          انتخاب_اولیه: latestEventOfType("ROOM_05_CHOICE", "ROOM_05")?.firstMirror ?? null,
+          بررسی_تکراری_آینه: latestEventOfType("ROOM_05_CHOICE", "ROOM_05")?.repeatedMirrorChecks ?? null,
+          تعداد_اختلال: latestEventOfType("ROOM_05_CHOICE", "ROOM_05")?.glitchCount ?? null
         },
         ROOM_06: {
           عنوان: "اتاق ۰۶",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_06?.durationMs ?? null,
           بررسی_ضبط: byType.ROOM_06_RECORDING_CHECKED || 0,
           رویداد_نجوا: byType.ROOM_06_WHISPER_EVENT || 0,
           اعوجاج_سیگنال: byType.ROOM_06_SIGNAL_DISTORTION || 0,
-          پروفایل_اعتماد: byType.ROOM_06_TRUST_PROFILE || 0
+          پروفایل_اعتماد: byType.ROOM_06_TRUST_PROFILE || 0,
+          انتخاب_اولیه: latestEventOfType("ROOM_06_EXIT_CHECKED", "ROOM_06")?.firstChoice ?? null,
+          انتخاب_نهایی: latestEventOfType("ROOM_06_EXIT_CHECKED", "ROOM_06")?.lastChoice ?? null,
+          تغییر_انتخاب: latestEventOfType("ROOM_06_EXIT_CHECKED", "ROOM_06")?.switchCount ?? null,
+          تعداد_بررسی: latestEventOfType("ROOM_06_EXIT_CHECKED", "ROOM_06")?.totalChecks ?? null
         },
         ROOM_07: {
           عنوان: "اتاق ۰۷",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_07?.durationMs ?? null,
           انتخاب_اعتماد: byType.ROOM_07_TRUST_CHOICE || 0,
           درخواست_همراه: byType.ROOM_07_COMPANION_PROMPT || 0,
-          پروفایل_اعتماد: byType.ROOM_07_TRUST_PROFILE || 0
+          پروفایل_اعتماد: byType.ROOM_07_TRUST_PROFILE || 0,
+          انتخاب_اولیه: latestEventOfType("ROOM_07_EXIT_CHECKED", "ROOM_07")?.firstChoice ?? null,
+          انتخاب_نهایی: latestEventOfType("ROOM_07_EXIT_CHECKED", "ROOM_07")?.lastChoice ?? null,
+          دفعات_پیروی: latestEventOfType("ROOM_07_EXIT_CHECKED", "ROOM_07")?.followCount ?? null,
+          دفعات_نادیده_گرفتن: latestEventOfType("ROOM_07_EXIT_CHECKED", "ROOM_07")?.ignoreCount ?? null,
+          تغییر_انتخاب: latestEventOfType("ROOM_07_EXIT_CHECKED", "ROOM_07")?.choiceSwitches ?? null
         },
         ROOM_08: {
           عنوان: "اتاق ۰۸",
+          مدت_حضور_میلی_ثانیه: rooms.ROOM_08?.durationMs ?? null,
           پروفایل_رفتاری: byType.ROOM_08_BEHAVIORAL_PROFILE || 0,
           زمینه_رفتاری: byType.ROOM_08_BEHAVIOR_CONTEXT || 0,
           پاسخ_هسته: byType.ROOM_08_CORE_RESPONSE || 0,
           بررسی_خروج: byType.ROOM_08_EXIT_CHECKED || 0,
-          توالی_پایانی: byType.ROOM_08_FINAL_SEQUENCE || 0
+          توالی_پایانی: byType.ROOM_08_FINAL_SEQUENCE || 0,
+          تأخیر_تا_هسته_میلی_ثانیه: latestEventOfType("ROOM_08_CORE_RESPONSE", "ROOM_08")?.firstCoreDelayMs ?? null
         }
       },
       شاخص‌های_رفتاری: sessionData?.analysis ? {
