@@ -47,6 +47,23 @@ export function addTrainingAssignment(plan, assignment) {
   return next;
 }
 
+export function setTrainingAssignmentLevel(plan, targetId, level) {
+  const next = { ...plan, assignments: Array.isArray(plan?.assignments) ? plan.assignments.map(item => ({ ...item })) : [] };
+  const index = next.assignments.findIndex(item => item.targetId === targetId);
+  if (index < 0) return next;
+  const current = next.assignments[index];
+  const target = TRAINING_TARGETS[targetId];
+  const requestedLevel = Number(level);
+  const safeLevel = Number.isFinite(requestedLevel)
+    ? Math.max(1, Math.min(Math.trunc(requestedLevel), target.progression.length))
+    : current.level;
+  next.assignments[index] = {
+    ...current,
+    level: Math.min(safeLevel, Number(current.maxLevel) || target.progression.length)
+  };
+  return next;
+}
+
 export function getActiveAssignments(plan) {
   return (plan?.assignments || []).filter((assignment) => {
     const target = TRAINING_TARGETS[assignment.targetId];
