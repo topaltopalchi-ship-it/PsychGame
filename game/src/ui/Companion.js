@@ -51,6 +51,10 @@ export class Companion {
   }
 
   say(message, delay = 0, mood = "calm") {
+    if (delay === 0 && this.sayTimers.size) {
+      for (const timer of this.sayTimers) clearTimeout(timer);
+      this.sayTimers.clear();
+    }
     const timer = setTimeout(() => {
       this.sayTimers.delete(timer);
       this.text.textContent = message;
