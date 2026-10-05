@@ -348,7 +348,8 @@ function getTrainingRouteTarget(plan) {
     } catch (_) { return null; }
   })();
 
-  const states = new Map((runtime?.assignments || []).map(item => [item.targetId, item]));
+  const compatibleRuntime = !runtime || !plan?.planId || !runtime.planId || runtime.planId === plan.planId;
+  const states = new Map((compatibleRuntime ? (runtime?.assignments || []) : []).map(item => [item.targetId, item]));
   return assignments.find(item => {
     const state = states.get(item.targetId);
     return !state || (!state.completed && !state.aborted && !state.exhausted);
@@ -440,6 +441,7 @@ function resumeTrainingIfNeeded() {
   const finalResult = session.getTrainingResult?.();
 
   if (!plan?.assignments?.length || finalResult) return false;
+  if (plan.planId && runtime?.planId && runtime.planId !== plan.planId) return false;
 
   const roomNumber = Number(runtime?.roomId);
   if (roomNumber < 15 || roomNumber > 20) return false;
