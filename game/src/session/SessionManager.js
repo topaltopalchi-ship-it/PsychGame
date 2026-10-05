@@ -154,6 +154,11 @@ export class SessionManager {
     }
   }
 
+  resetTrainingUploadState() {
+    this.completedUploadStarted = false;
+    this.lastRemoteUpload = 0;
+  }
+
   uploadCompletedSession() {
     if (this.completedUploadStarted) return Promise.resolve({ skipped: true, reason: "already-started" });
     this.completedUploadStarted = true;
