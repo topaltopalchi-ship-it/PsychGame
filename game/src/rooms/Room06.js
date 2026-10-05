@@ -14,18 +14,18 @@ export class Room06 {
     const speaker=this.mesh(new THREE.BoxGeometry(3.4,2.2,.25),this.mat(0x181b20,.8),[0,2.5,-5.7]);this.objects.REC_SPEAKER=speaker;
     for(const x of [-5.4,-3.6,3.6,5.4]){
       const panel=this.mesh(new THREE.BoxGeometry(1.2,2.2,.12),this.mat(0x1c2027,.78,.12),[x,2.1,-5.78]);
-      panel.userData.objectId="REC_SPEAKER";
+      
       for(let y=1.35;y<3.1;y+=.45)this.mesh(new THREE.BoxGeometry(.75,.035,.04),this.mat(0x5e6878,.5,.2),[x,y,-5.69]);
     }
     for(const x of [-5.5,-2.75,0,2.75,5.5]){
       const lamp=this.mesh(new THREE.BoxGeometry(1.4,.05,.12),this.mat(0x707c94,.4,.3,0x3c4b68),[x,3.55,-1.2]);
-      lamp.userData.objectId="REC_SPEAKER";
+      
       const p=new THREE.PointLight(0x6577a1,.55,4);p.position.set(x,3.25,-1.2);this.scene.add(p);
     }
     this.mesh(new THREE.BoxGeometry(7,.12,1.6),this.mat(0x20242a,.6,.35),[0,1.25,-2.2]);
     for(const x of [-2.4,0,2.4]){
       const knob=this.mesh(new THREE.CylinderGeometry(.12,.12,.06,20),this.mat(0x8b6d4c,.3,.6),[x,1.35,-2.2],[Math.PI/2,0,0]);
-      knob.userData.objectId="REC_SPEAKER";
+      
     }
     const signal=this.mesh(new THREE.BoxGeometry(5.5,.06,.06),new THREE.MeshBasicMaterial({color:0x6d7890}),[0,2.0,-5.52]);this.add("REC_SIGNAL",signal);
     const light=new THREE.PointLight(0x60709a,1.3,14);light.position.set(0,3.3,0);this.scene.add(light);this.objects.REC_LIGHT=light;
