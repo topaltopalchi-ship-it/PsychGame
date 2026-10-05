@@ -69,7 +69,7 @@ export function recordTrainingAttempt(session, targetId, successful) {
   const next = {
     ...session,
     assignments: (session.assignments || []).map((item) => {
-      if (item.targetId !== targetId || item.completed || item.aborted) {
+      if (item.targetId !== targetId || item.completed || item.aborted || item.exhausted) {
         return item;
       }
 
