@@ -15,7 +15,7 @@ export class TrainingEngine {
     this.roomId = roomId;
     this.onEvent = onEvent;
     this.session = createTrainingSession(plan, roomId);
-    this.completedTargets = new Set();
+    this.completedTargets = new Set(this.session.assignments.filter(x => x.completed).map(x => x.targetId));
   }
 
   getSession() {
@@ -55,6 +55,8 @@ export class TrainingEngine {
       targetId,
       Boolean(successful)
     );
+    const updated = this.getAssignment(targetId);
+    if (updated?.completed) this.completedTargets.add(targetId);
 
     this.emit("TRAINING_ATTEMPT", {
       roomId: this.roomId,
@@ -67,7 +69,11 @@ export class TrainingEngine {
     return this.getSession();
   }
 
-  isCompleted(targetId) {\n    return this.completedTargets.has(targetId) || Boolean(this.getAssignment(targetId)?.completed);\n  }\n\n  isExhausted(targetId) {\n    return Boolean(this.getAssignment(targetId)?.exhausted);\n  }\n\n  abort(targetId, reason = "manual_abort") {
+  isCompleted(targetId) {\n    return this.completedTargets.has(targetId) || Boolean(this.getAssignment(targetId)?.completed);\n  }\n\n  isExhausted(targetId) {\n    return Boolean(this.getAssignment(targetId)?.exhausted);\n  }\n\n  isTargetCompleted(targetId) {
+    return this.completedTargets.has(targetId) || Boolean(this.getAssignment(targetId)?.completed);
+  }
+
+  abort(targetId, reason = "manual_abort") {
     const assignment = this.getAssignment(targetId);
     if (!assignment || assignment.aborted || assignment.completed) {
       return this.getSession();
