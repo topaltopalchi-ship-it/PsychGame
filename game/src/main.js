@@ -61,7 +61,6 @@ room01.start();
 interaction.setRoom(room01, 1);
 audioManager.setRoom(1);
 interaction.setCompanion(companion);
-room01.getInteractableObjects().forEach((object) => interaction.register(object, object.userData.objectId));
 tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
 
 let audioUnlocked = false;
