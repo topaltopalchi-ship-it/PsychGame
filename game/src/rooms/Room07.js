@@ -10,7 +10,7 @@ export class Room07 {
     this.context=context||{};this.companion=context.companion||null;this.startedAt=performance.now();
     this.scene.fog=new THREE.FogExp2(0x08090d,.026);
     this.createRoom();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_07",roomName:"COMPANION_ROOM",previousRoom:context.previousRoom||"ROOM_06"});
-    this.promptTimer=setTimeout(()=>this.promptCompanion(),5000);
+    this.promptTimer=setTimeout(()=>{if(this.completed)return;this.promptCompanion();},5000);
   }
   mat(color,r=.5,m=.1){return new THREE.MeshStandardMaterial({color,roughness:r,metalness:m});}
   mesh(g,m,p=[0,0,0]){const o=new THREE.Mesh(g,m);o.position.set(...p);this.scene.add(o);return o;}
