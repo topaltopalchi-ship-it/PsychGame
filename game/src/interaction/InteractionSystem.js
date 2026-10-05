@@ -19,6 +19,7 @@ export class InteractionSystem {
     this.roomNumber = 1;
     this.keyFound = false;
     this.completed = false;
+    this.room8CompletionTimer = null;
     this.lastLookedObject = null;
     this.lookStartTime = null;
     this.interactionCounts = {};
@@ -30,7 +31,7 @@ export class InteractionSystem {
   setCompanion(companion) { this.companion = companion; }
   setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
 
-  clearTargets() { this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
+  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); this.room8CompletionTimer = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
 
   register(object, objectId) {
     object.userData.interactable = true;
@@ -376,10 +377,12 @@ InteractionSystem.prototype.handleRoom8 = function(objectId) {
   if (objectId === "TRUTH_EXIT") {
     if (this.completed) return;
     this.completed=true;
-    this.room?.startEnding?.();
+    const endingRoom = this.room;
+    endingRoom?.startEnding?.();
     this.tracker.log("ROOM_08_EXIT_CHECKED",{roomId:"ROOM_08"});
-    setTimeout(()=>{
-      this.room?.completeRoom?.();
+    this.room8CompletionTimer = setTimeout(()=>{
+      this.room8CompletionTimer = null;
+      endingRoom?.completeRoom?.();
       window.dispatchEvent(new CustomEvent("psychgame-game-complete",{detail:{roomId:"ROOM_08"}}));
     },1800);
   }
