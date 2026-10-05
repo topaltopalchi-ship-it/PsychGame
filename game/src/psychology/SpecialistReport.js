@@ -127,6 +127,7 @@ export class SpecialistReport {
       eventTypes: byType,
       rooms,
       trainingResult: sessionData?.trainingResult ?? null,
+      trainingProgress: sessionData?.trainingProgress ?? null,
       roomDetails: {
         ROOM_04: { movementEvents: byType.ROOM_04_MOVEMENT || 0, markInspections: byType.ROOM_04_MARK_INSPECTED || 0, memoryShifts: byType.ROOM_04_MEMORY_SHIFT || 0, loopGlitches: byType.ROOM_04_LOOP_GLITCH || 0 },
         ROOM_05: { mirrorInspections: byType.ROOM_05_MIRROR_INSPECTED || 0, reflectionGlitches: byType.ROOM_05_REFLECTION_GLITCH || 0, choices: byType.ROOM_05_CHOICE || 0 },
