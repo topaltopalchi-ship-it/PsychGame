@@ -338,6 +338,7 @@ window.addEventListener("psychgame-audio-pulse",(event)=>{
 });
 
 window.addEventListener("psychgame-room-complete",(event)=>{
+  if (gameFinished) return;
   audioManager.playPulse("dark");
   const d=event.detail||{};
   if(d.roomId==="ROOM_04"){
