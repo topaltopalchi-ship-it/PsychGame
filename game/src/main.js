@@ -88,6 +88,7 @@ function clearRoomTransitionTimers() {
 }
 
 room01.start();
+setRoomMovementBounds(1);
 interaction.setRoom(room01, 1);
 audioManager.setRoom(1);
 interaction.setCompanion(companion);
@@ -204,6 +205,20 @@ function clearRoomGeometry() {
   });
 }
 
+function setRoomMovementBounds(roomNumber) {
+  const bounds = {
+    1:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
+    2:{minX:-5.0,maxX:5.0,minZ:-4.8,maxZ:4.8},
+    3:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
+    4:{minX:-1.45,maxX:1.45,minZ:-27.0,maxZ:6.5},
+    5:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
+    6:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
+    7:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
+    8:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}
+  };
+  player.setBounds?.(bounds[roomNumber] || bounds[1]);
+}
+
 function startRoom02(previousPath = "ROOM_01") {
   if (activeRoom !== room01 || !room01.completed) return;
   clearRoomGeometry();
@@ -215,6 +230,7 @@ function startRoom02(previousPath = "ROOM_01") {
   camera.position.set(0, 1.7, 3.5);
   camera.rotation.set(0, 0, 0);
   player.rotation.set(0, 0, 0);
+  setRoomMovementBounds(2);
   mainLight.intensity = 24;
   companion?.say("اتاق دوم؛ سه مسیر پیش روت هست. انتخاب کن و نتیجه‌اش رو ببین.");
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
@@ -234,6 +250,7 @@ function startRoom03(context = { previousPath: "ROOM_02" }) {
   camera.position.set(0, 1.7, 3.5);
   player.rotation.set(0, 0, 0);
   camera.rotation.copy(player.rotation);
+  setRoomMovementBounds(3);
   mainLight.intensity = 22;
   companion?.say("اتاق سوم؛ اینجا عجله نکردن خودش یک انتخابه.");
   document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار";
@@ -253,6 +270,7 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) {
   camera.position.set(0,1.7,3.5);
   player.rotation.set(0,0,0);
   camera.rotation.copy(player.rotation);
+  setRoomMovementBounds(4);
   mainLight.intensity=18;
   companion?.say("اتاق چهارم؛ اگر راهرو تکرار شد، به حافظه‌ات اعتماد نکن.");
   document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها";
@@ -277,6 +295,7 @@ function startRoom05(context={previousRoom:"ROOM_04"}) {
   activeRoom.start({...context, companion});
   interaction.setRoom(activeRoom,5);
   audioManager.setRoom(5);
+  setRoomMovementBounds(5);
   companion?.say("اتاق پنجم... اینجا به چیزی که می‌بینی زود اعتماد نکن.");
 }
 
@@ -288,6 +307,7 @@ function startRoom06(context={previousRoom:"ROOM_05"}) {
   activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion});
   interaction.setRoom(activeRoom,6);
   audioManager.setRoom(6);
+  setRoomMovementBounds(6);
   companion?.say("اتاق ششم... بعضی صداها آشنا به نظر می‌رسن، ولی به این حس زود اعتماد نکن.");
 }
 
@@ -298,6 +318,7 @@ function startRoom07(context={previousRoom:"ROOM_06"}) {
   activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion});
   interaction.setRoom(activeRoom,7);
   audioManager.setRoom(7);
+  setRoomMovementBounds(7);
   companion?.say("اتاق هفتم... اینجا باید تصمیم بگیری به چه کسی اعتماد کنی.");
 }
 
@@ -308,6 +329,7 @@ function startRoom08(context={previousRoom:"ROOM_07"}) {
   activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion});
   interaction.setRoom(activeRoom,8);
   audioManager.setRoom(8);
+  setRoomMovementBounds(8);
   companion?.say("اتاق آخر... اینجا فقط انتخاب‌هایی که کردی بهت برمی‌گردن.");
 }
 
