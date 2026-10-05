@@ -1,0 +1,1 @@
+export class Room19 { constructor(scene,tracker,plan,companion=null){this.scene=scene;this.tracker=tracker;this.plan=plan;this.companion=companion;this.completed=false;this.objects={};} start(){this.tracker.log("ROOM_ENTER",{roomId:"ROOM_19"})} skip(){this.completed=true} getInteractableObjects(){return []} destroy(){this.objects={}} }
