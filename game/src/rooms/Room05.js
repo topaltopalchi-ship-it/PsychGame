@@ -44,7 +44,7 @@ export class Room05 {
     this.add("MIRROR_EXIT",exit);
   }
   createAtmosphere(){
-    const ceiling=this.mesh(new THREE.BoxGeometry(15,.12,1.2),this.mat(0x252832,.45,.5),[0,3.7,-1.2]);
+    this.mesh(new THREE.BoxGeometry(15,.12,1.2),this.mat(0x252832,.45,.5),[0,3.7,-1.2]);
     for(const x of [-5.4,0,5.4]){
       const lamp=this.mesh(new THREE.SphereGeometry(.14,16,12),new THREE.MeshStandardMaterial({color:0x9ba8d0,emissive:0x55658f,emissiveIntensity:1.8}),[x,3.45,-1.2]);
       const point=new THREE.PointLight(0x7889c4,.9,5); point.position.set(x,3.3,-1.2); this.scene.add(point);
