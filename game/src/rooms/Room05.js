@@ -82,5 +82,5 @@ export class Room05 {
       this.objects.MIRROR_LIGHT.intensity=base+(this.glitchCount>0?Math.sin(now*.006)*.08:0);
     }
   }
-  destroy(){for(const timer of this.glitchTimers)clearTimeout(timer);this.glitchTimers=[];this.objects={};}
+  destroy(){this.completed=true;for(const timer of this.glitchTimers)clearTimeout(timer);this.glitchTimers=[];this.objects={};}
 }
