@@ -30,10 +30,9 @@ export class InteractionSystem {
       if (event.code === "KeyE") this.interact();
     });
     window.addEventListener("psychgame-game-complete", () => {
-      // Freeze interaction immediately after the final room emits completion.
-      // Main.js decides whether to end the game or enter training; setRoom()
-      // explicitly re-enables interaction when a new room is created.
-      this.gameFinished = true;
+      // Main.js is the authoritative owner of the final-game state.
+      // Do not set this.gameFinished here: when a Training Plan exists,
+      // Main.js must be able to receive this event and enter Training.
       this.currentTarget = null;
       this.finishLook();
       window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId: null } }));
