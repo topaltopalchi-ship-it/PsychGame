@@ -165,7 +165,7 @@ const targetLabels = {
 };
 const targetNames = {
   RED_BUTTON: "دکمه قرمز", EXIT_DOOR: "در", HALF_OPEN_DRAWER: "کشو", KEY_FROM_DRAWER: "کلید طلایی", CLOSED_BOX: "جعبه", OLD_DESK: "میز قدیمی", BROKEN_CLOCK: "ساعت خراب", OLD_PAINTING: "تابلو",
-  PATH_LEFT: "مسیر چپ", PATH_CENTER: "مسیر وسط", PATH_RIGHT: "مسیر راست", PATH_CLUE: "تابلو", MIRROR_LEFT: "آینه چپ", MIRROR_CENTER: "آینه وسط", MIRROR_RIGHT: "آینه راست", MIRROR_EXIT: "در خروج",
+  PATH_LEFT: "مسیر چپ", PATH_CENTER: "مسیر وسط", PATH_RIGHT: "مسیر راست", PATH_CLUE: "تابلو", WAIT_CLOCK: "ساعت", WAIT_SEAT: "صندلی", WAIT_EXIT: "در خروج", HALL_MARK: "علامت راهرو", HALL_EXIT: "در انتهای راهرو", MIRROR_LEFT: "آینه چپ", MIRROR_CENTER: "آینه وسط", MIRROR_RIGHT: "آینه راست", MIRROR_EXIT: "در خروج",
   REC_FAMILIAR: "صدای آشنا", REC_UNKNOWN: "صدای ناشناس", REC_STATIC: "نویز", REC_EXIT: "در خروج", FOLLOW_COMPANION: "اعتماد به همراه", GO_ALONE: "تنهایی", COMP_EXIT: "در خروج", TRUTH_CORE: "هسته", TRUTH_EXIT: "در خروج"
 };
 
