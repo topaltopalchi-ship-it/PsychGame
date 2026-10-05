@@ -361,3 +361,55 @@ test("Session upload queue retains only failed payloads during partial flush", a
   expect(result.calls).toBe(2);
   expect(result.remaining).toEqual(["flush-fail"]);
 });
+
+
+test("Concurrent session uploads are serialized without duplicate queue entries", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+
+  const result = await page.evaluate(async () => {
+    const { SessionUploader } = await import("/PsychGame/src/session/SessionUploader.js");
+    const uploader = new SessionUploader({ endpoint: "http://upload.test" });
+    const queueKey = "psychgame_upload_queue_v1";
+    localStorage.removeItem(queueKey);
+
+    const calls = [];
+    const originalFetch = window.fetch;
+    window.fetch = async (_url, options) => {
+      const payload = JSON.parse(options.body);
+      calls.push(payload.report.sessionId);
+      await new Promise(resolve => setTimeout(resolve, 5));
+      throw new Error("simulated outage");
+    };
+
+    try {
+      const first = {
+        sessionId: "concurrent-a",
+        playerCode: "PLAYER-CONCURRENT",
+        events: []
+      };
+      const second = {
+        sessionId: "concurrent-b",
+        playerCode: "PLAYER-CONCURRENT",
+        events: []
+      };
+
+      const results = await Promise.all([
+        uploader.upload(first),
+        uploader.upload(second)
+      ]);
+
+      return {
+        results,
+        calls,
+        queue: uploader.readQueue().map(item => item.report.sessionId)
+      };
+    } finally {
+      window.fetch = originalFetch;
+      localStorage.removeItem(queueKey);
+    }
+  });
+
+  expect(result.calls).toEqual(["concurrent-a", "concurrent-b"]);
+  expect(result.queue).toEqual(["concurrent-a", "concurrent-b"]);
+  expect(result.results.every(item => item.queued === true)).toBe(true);
+});
