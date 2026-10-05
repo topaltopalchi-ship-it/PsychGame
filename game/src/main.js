@@ -72,10 +72,14 @@ const behavioralHistory = { hallBehavior:{}, mirrorBehavior:{}, recordingBehavio
 let gameFinished = false;
 let trainingFinished = false;
 const roomTransitionTimers = new Set();
+let roomTransitionPending = false;
 
 function scheduleRoomTransition(callback, delay = 900) {
+  if (roomTransitionPending) return null;
+  roomTransitionPending = true;
   const timer = setTimeout(() => {
     roomTransitionTimers.delete(timer);
+    roomTransitionPending = false;
     if (gameFinished) return;
     callback();
   }, delay);
@@ -86,6 +90,7 @@ function scheduleRoomTransition(callback, delay = 900) {
 function clearRoomTransitionTimers() {
   roomTransitionTimers.forEach((timer) => clearTimeout(timer));
   roomTransitionTimers.clear();
+  roomTransitionPending = false;
 }
 
 room01.start();
