@@ -125,6 +125,7 @@ export class SpecialistPanel {
       sessionStorage.removeItem(runtimeKey);
       localStorage.removeItem(recoveryKey);
       localStorage.removeItem(resultKey);
+      this.session.resetTrainingUploadState?.();
 
       this.trainingPlan = createTrainingPlan({
         playerCode,
