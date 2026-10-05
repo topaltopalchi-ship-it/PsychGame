@@ -14,8 +14,22 @@ export class Room03 {
   mat(color,rough=.8,metal=0,em=null){const o={color,roughness:rough,metalness:metal};if(em){o.emissive=em;o.emissiveIntensity=.6;}return new THREE.MeshStandardMaterial(o);}
   createFloor(){this.mesh(new THREE.BoxGeometry(12,.2,12),this.mat(0x24262b,.95),[0,-.1,0]);}
   createWalls(){const w=this.mat(0x1d2127,.95);this.mesh(new THREE.BoxGeometry(12,4,.22),w,[0,2,-5.9]);this.mesh(new THREE.BoxGeometry(12,4,.22),w,[0,2,5.9]);this.mesh(new THREE.BoxGeometry(.22,4,12),w,[-5.9,2,0]);this.mesh(new THREE.BoxGeometry(.22,4,12),w,[5.9,2,0]);}
-  createClock(){const c=this.mesh(new THREE.CylinderGeometry(.7,.7,.12,32),this.mat(0xddd8c8,.45,.1),[0,2.7,-5.72],[Math.PI/2,0,0]);c.userData.objectId="WAIT_CLOCK";this.objects.clock=c;}
-  createSeat(){const s=this.mesh(new THREE.BoxGeometry(3,.35,.75),this.mat(0x493728,.75),[0,.7,1]);s.userData.objectId="WAIT_SEAT";this.objects.seat=s;}
+  createClock(){
+    const c=this.mesh(new THREE.CylinderGeometry(.7,.7,.12,32),this.mat(0xddd8c8,.45,.1),[0,2.7,-5.72],[Math.PI/2,0,0]);c.userData.objectId="WAIT_CLOCK";this.objects.clock=c;
+    const handMat=this.mat(0x25262a,.5,.15);
+    const h1=this.mesh(new THREE.BoxGeometry(.045,.38,.035),handMat,[0,2.86,-5.64]);
+    const h2=this.mesh(new THREE.BoxGeometry(.04,.25,.035),handMat,[.11,2.55,-5.64],[0,0,-.65]);
+    h1.userData.objectId="WAIT_CLOCK";h2.userData.objectId="WAIT_CLOCK";
+    for(const angle of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
+      const tick=this.mesh(new THREE.BoxGeometry(.035,.13,.03),this.mat(0x68635b,.5),[Math.sin(angle)*.53,2.7+Math.cos(angle)*.53,-5.63],[0,0,-angle]);
+      tick.userData.objectId="WAIT_CLOCK";
+    }
+  }
+  createSeat(){
+    const s=this.mesh(new THREE.BoxGeometry(3,.35,.75),this.mat(0x493728,.75),[0,.7,1]);s.userData.objectId="WAIT_SEAT";this.objects.seat=s;
+    for(const x of [-1.15,0,1.15]) this.mesh(new THREE.BoxGeometry(.05,.55,.68),this.mat(0x6a4b39,.72),[x,1.0,1.0]);
+    this.mesh(new THREE.BoxGeometry(3.2,.08,.9),this.mat(0x332a29,.6,.08),[0,1.0,1.0]);
+  }
   createAtmosphere(){
     const wood=this.mat(0x5b4436,.7,.08);
     const brass=this.mat(0xb09562,.3,.7);
