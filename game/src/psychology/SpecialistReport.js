@@ -133,7 +133,7 @@ export class SpecialistReport {
         ROOM_05: { mirrorInspections: byType.ROOM_05_MIRROR_INSPECTED || 0, reflectionGlitches: byType.ROOM_05_REFLECTION_GLITCH || 0, choices: byType.ROOM_05_CHOICE || 0 },
         ROOM_06: { recordingChecks: byType.ROOM_06_RECORDING_CHECKED || 0, whisperEvents: byType.ROOM_06_WHISPER_EVENT || 0, signalDistortions: byType.ROOM_06_SIGNAL_DISTORTION || 0, trustProfiles: byType.ROOM_06_TRUST_PROFILE || 0 },
         ROOM_07: { trustChoices: byType.ROOM_07_TRUST_CHOICE || 0, companionPrompts: byType.ROOM_07_COMPANION_PROMPT || 0, trustProfiles: byType.ROOM_07_TRUST_PROFILE || 0 },
-        ROOM_08: { behavioralProfiles: byType.ROOM_08_BEHAVIORAL_PROFILE || 0, coreResponses: byType.ROOM_08_CORE_RESPONSE || 0, exitChecks: byType.ROOM_08_EXIT_CHECKED || 0, finalSequences: byType.ROOM_08_FINAL_SEQUENCE || 0 }
+        ROOM_08: { behavioralProfiles: byType.ROOM_08_BEHAVIORAL_PROFILE || 0, behaviorContexts: byType.ROOM_08_BEHAVIOR_CONTEXT || 0, coreResponses: byType.ROOM_08_CORE_RESPONSE || 0, exitChecks: byType.ROOM_08_EXIT_CHECKED || 0, finalSequences: byType.ROOM_08_FINAL_SEQUENCE || 0 }
       },
       analysis: sessionData?.analysis ?? null
     };
