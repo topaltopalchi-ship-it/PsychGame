@@ -158,7 +158,7 @@ export class Room02 {
     }
   }
 
-  destroy(){for(const t of this.observationTimers){clearTimeout(t);}this.observationTimers=[];if(this.scareTimer)clearTimeout(this.scareTimer);if(this.idleTimer)clearTimeout(this.idleTimer);if(this.psychTimer)clearTimeout(this.psychTimer);this.objects={};this.scareFigure=null;this.pathLights=[];}
+  destroy(){this.completed=true;for(const t of this.observationTimers){clearTimeout(t);}this.observationTimers=[];if(this.scareTimer)clearTimeout(this.scareTimer);if(this.idleTimer)clearTimeout(this.idleTimer);if(this.psychTimer)clearTimeout(this.psychTimer);this.objects={};this.scareFigure=null;this.pathLights=[];}
 
   createBench(){const wood=this.mat(0x493728,.75);const seat=this.mesh(new THREE.BoxGeometry(3,.16,.65),wood,[0,.85,1.1]);seat.userData.objectId="BENCH";this.objects.bench=seat;this.mesh(new THREE.BoxGeometry(2.7,.85,.12),wood,[0,1.25,1.35]);for(const x of [-1.25,1.25])this.mesh(new THREE.BoxGeometry(.12,.75,.12),wood,[x,.42,1.1]);}
 }
