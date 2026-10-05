@@ -62,7 +62,8 @@ export class Room05 {
     const light=this.objects.MIRROR_LIGHT; if(light)light.intensity=2.8;
     this.tracker.log("ROOM_05_REFLECTION_GLITCH",{mirror:id,count:this.glitchCount});
     this.companion?.say?.(id==="MIRROR_CENTER"?"این یکی... چرا شبیه آینه‌های دیگه نیست؟":"دیدیش؟ فقط چند لحظه بود.");
-    const timer=setTimeout(()=>{if(shadow)shadow.visible=false;if(light)light.intensity=1.2;if(glass.material)glass.material.color.set(0x243044);this.glitchTimers=this.glitchTimers.filter(t=>t!==timer);},700);\n    this.glitchTimers.push(timer);
+    const timer=setTimeout(()=>{if(shadow)shadow.visible=false;if(light)light.intensity=1.2;if(glass.material)glass.material.color.set(0x243044);this.glitchTimers=this.glitchTimers.filter(t=>t!==timer);},700);
+    this.glitchTimers.push(timer);
   }
   chooseExit(){
     if(this.choiceLocked)return; this.choiceLocked=true;
