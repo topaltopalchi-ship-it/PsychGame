@@ -2,19 +2,12 @@ import * as THREE from "three";
 
 export class PlayerController {
   constructor(camera) {
-    this.camera = camera;
-    this.speed = 1.55;
-    this.lookSpeed = 0.002;
+    this.camera = camera; this.speed = 1.55; this.lookSpeed = 0.002;
     this.keys = { forward:false, backward:false, left:false, right:false };
-    this.touchMove = { x:0, y:0 };
-    this.rotation = new THREE.Euler(0,0,0,"YXZ");
-    this.direction = new THREE.Vector3();
-    this.bounds = { minX:-4.2, maxX:4.2, minZ:-4.2, maxZ:4.2 };
-    this.setupKeyboard();
-    this.setupMouse();
-    this.setupTouch();
+    this.touchMove = { x:0, y:0 }; this.rotation = new THREE.Euler(0,0,0,"YXZ");
+    this.direction = new THREE.Vector3(); this.bounds = { minX:-4.2, maxX:4.2, minZ:-4.2, maxZ:4.2 };
+    this.setupKeyboard(); this.setupMouse(); this.setupTouch();
   }
-
   setupKeyboard() {
     window.addEventListener("keydown", e => {
       if(e.code==="KeyW"||e.code==="ArrowUp") this.keys.forward=true;
@@ -25,103 +18,44 @@ export class PlayerController {
     window.addEventListener("keyup", e => {
       if(e.code==="KeyW"||e.code==="ArrowUp") this.keys.forward=false;
       if(e.code==="KeyS"||e.code==="ArrowDown") this.keys.backward=false;
-      if(e.code==="KeyA"||e.code==="ArrowRight") this.keys.right=false;
-      if(e.code==="KeyD"||e.code==="ArrowLeft") this.keys.left=false;
+      if(e.code==="KeyA"||e.code==="ArrowLeft") this.keys.left=false;
+      if(e.code==="KeyD"||e.code==="ArrowRight") this.keys.right=false;
     });
   }
-
   setupMouse() {
-    window.addEventListener("click", () => {
-      if (window.matchMedia("(pointer:fine)").matches) document.body.requestPointerLock?.();
-    });
-    document.addEventListener("mousemove", e => {
-      if(document.pointerLockElement !== document.body) return;
-      this.look(e.movementX,e.movementY);
-    });
+    window.addEventListener("click", () => { if (window.matchMedia("(pointer:fine)").matches) document.body.requestPointerLock?.(); });
+    document.addEventListener("mousemove", e => { if(document.pointerLockElement !== document.body) return; this.look(e.movementX,e.movementY); });
   }
-
   setupTouch() {
-    const pad = document.createElement("div");
-    pad.id="pg-joystick";
-    pad.innerHTML='<div id="pg-stick"></div>';
-    Object.assign(pad.style,{position:"fixed",left:"22px",bottom:"22px",transform:"none",width:"104px",height:"104px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none",boxSizing:"border-box",backdropFilter:"blur(4px)"});
-    const stick=pad.firstElementChild;
-    Object.assign(stick.style,{position:"absolute",left:"34px",top:"34px",width:"36px",height:"36px",borderRadius:"50%",background:"rgba(255,255,255,.28)",boxShadow:"0 2px 8px rgba(0,0,0,.25)"});
-    document.body.appendChild(pad);
-    let active=false;
-    const move=e=>{
-      if(!active)return;
-      const r=pad.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
-      let dx=e.clientX-cx, dy=e.clientY-cy, len=Math.hypot(dx,dy), max=34;
-      if(len>max){dx=dx/len*max;dy=dy/len*max;}
-      stick.style.transform=`translate(${dx}px,${dy}px)`;
-      this.touchMove.x=(dx/max)*0.34; this.touchMove.y=(dy/max)*0.34;
-    };
+    const pad=document.createElement("div"); pad.id="pg-joystick"; pad.innerHTML='<div id="pg-stick"></div>';
+    Object.assign(pad.style,{position:"fixed",left:"22px",bottom:"22px",width:"104px",height:"104px",borderRadius:"50%",background:"rgba(255,255,255,.12)",border:"2px solid rgba(255,255,255,.3)",zIndex:"9000",touchAction:"none",display:"none",boxSizing:"border-box",backdropFilter:"blur(4px)"});
+    const stick=pad.firstElementChild; Object.assign(stick.style,{position:"absolute",left:"34px",top:"34px",width:"36px",height:"36px",borderRadius:"50%",background:"rgba(255,255,255,.28)",boxShadow:"0 2px 8px rgba(0,0,0,.25)"});
+    document.body.appendChild(pad); let active=false;
+    const move=e=>{if(!active)return;const r=pad.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,len=Math.hypot(dx,dy),max=34;if(len>max){dx=dx/len*max;dy=dy/len*max;}stick.style.transform=`translate(${dx}px,${dy}px)`;this.touchMove.x=(dx/max)*.34;this.touchMove.y=(dy/max)*.34;};
     const end=()=>{active=false;this.touchMove.x=0;this.touchMove.y=0;stick.style.transform="translate(0,0)";};
-    pad.addEventListener("pointerdown",e=>{active=true;pad.setPointerCapture(e.pointerId);move(e);});
-    pad.addEventListener("pointermove",move); pad.addEventListener("pointerup",end); pad.addEventListener("pointercancel",end);
-
-    const look=document.createElement("div");
-    look.id="pg-touch-look";
-    Object.assign(look.style,{position:"fixed",right:"0",top:"0",width:"100%",height:"100%",zIndex:"6500",touchAction:"none",display:"none"});
-    document.body.appendChild(look);
+    pad.addEventListener("pointerdown",e=>{active=true;pad.setPointerCapture(e.pointerId);move(e);}); pad.addEventListener("pointermove",move); pad.addEventListener("pointerup",end); pad.addEventListener("pointercancel",end);
+    const look=document.createElement("div"); look.id="pg-touch-look"; Object.assign(look.style,{position:"fixed",right:"0",top:"0",width:"100%",height:"100%",zIndex:"6500",touchAction:"none",display:"none"}); document.body.appendChild(look);
     let lastX=0,lastY=0,startX=0,startY=0,lookActive=false,moved=false;
     look.addEventListener("pointerdown",e=>{lookActive=true;moved=false;startX=lastX=e.clientX;startY=lastY=e.clientY;look.setPointerCapture(e.pointerId);e.preventDefault();},{passive:false});
     look.addEventListener("pointermove",e=>{if(!lookActive)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;if(Math.hypot(e.clientX-startX,e.clientY-startY)>10)moved=true;this.look(dx,dy);lastX=e.clientX;lastY=e.clientY;e.preventDefault();},{passive:false});
-    const lookEnd=(e)=>{if(!lookActive)return;lookActive=false;if(!moved && window.psychGame?.interactAt) window.psychGame.interactAt(e.clientX,e.clientY);};
-    look.addEventListener("pointerup",lookEnd);look.addEventListener("pointercancel",()=>{lookActive=false;});
-
-    const interact=document.createElement("button");
-    interact.id="pg-touch-interact"; interact.textContent="تعامل";
+    const lookEnd=e=>{if(!lookActive)return;lookActive=false;if(!moved&&window.psychGame?.interactAt)window.psychGame.interactAt(e.clientX,e.clientY);};
+    look.addEventListener("pointerup",lookEnd); look.addEventListener("pointercancel",()=>{lookActive=false;});
+    const interact=document.createElement("button"); interact.id="pg-touch-interact"; interact.textContent="تعامل";
     Object.assign(interact.style,{position:"fixed",right:"22px",bottom:"22px",minWidth:"108px",height:"58px",padding:"0 14px",borderRadius:"18px",border:"2px solid rgba(255,255,255,.35)",background:"rgba(120,30,25,.96)",color:"#fff",fontSize:"16px",fontWeight:"700",zIndex:"10000",display:"none",boxShadow:"0 6px 22px rgba(0,0,0,.45)",touchAction:"manipulation",backdropFilter:"blur(6px)"});
-    interact.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();window.psychGame?.interact?.();},{passive:false});
-    interact.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();},{passive:false});
-    document.body.appendChild(interact);
-
-    const isTouch = window.matchMedia("(pointer:coarse)").matches || navigator.maxTouchPoints > 0;
-    if(isTouch){pad.style.display="block";look.style.display="block";interact.style.display="block";}
-    window.addEventListener("resize",()=>{
-      const touch = window.matchMedia("(pointer:coarse)").matches || navigator.maxTouchPoints > 0;
-      pad.style.display=touch?"block":"none";
-      look.style.display=touch?"block":"none";
-      interact.style.display=touch?"block":"none";
-    });
+    interact.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();window.psychGame?.interact?.();},{passive:false}); interact.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();},{passive:false}); document.body.appendChild(interact);
+    const syncTouchUI=()=>{const touch=window.matchMedia("(pointer:coarse)").matches||navigator.maxTouchPoints>0;pad.style.display=touch?"block":"none";look.style.display=touch?"block":"none";interact.style.display=touch?"block":"none";};
+    syncTouchUI(); window.addEventListener("resize",syncTouchUI);
   }
-
-  setBounds(bounds = {}) {
-    this.bounds = {
-      minX: Number.isFinite(bounds.minX) ? bounds.minX : -4.2,
-      maxX: Number.isFinite(bounds.maxX) ? bounds.maxX : 4.2,
-      minZ: Number.isFinite(bounds.minZ) ? bounds.minZ : -4.2,
-      maxZ: Number.isFinite(bounds.maxZ) ? bounds.maxZ : 4.2
-    };
-    this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, this.bounds.minX, this.bounds.maxX);
-    this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, this.bounds.minZ, this.bounds.maxZ);
+  setBounds(bounds={}) {
+    this.bounds={minX:Number.isFinite(bounds.minX)?bounds.minX:-4.2,maxX:Number.isFinite(bounds.maxX)?bounds.maxX:4.2,minZ:Number.isFinite(bounds.minZ)?bounds.minZ:-4.2,maxZ:Number.isFinite(bounds.maxZ)?bounds.maxZ:4.2};
+    this.camera.position.x=THREE.MathUtils.clamp(this.camera.position.x,this.bounds.minX,this.bounds.maxX); this.camera.position.z=THREE.MathUtils.clamp(this.camera.position.z,this.bounds.minZ,this.bounds.maxZ);
   }
-
-  look(dx,dy){
-    this.rotation.y-=dx*this.lookSpeed;
-    this.rotation.x-=dy*this.lookSpeed;
-    const max=Math.PI/2-.05;
-    this.rotation.x=Math.max(-max,Math.min(max,this.rotation.x));
-    this.camera.rotation.copy(this.rotation);
-  }
-
+  look(dx,dy){this.rotation.y-=dx*this.lookSpeed;this.rotation.x-=dy*this.lookSpeed;const max=Math.PI/2-.05;this.rotation.x=Math.max(-max,Math.min(max,this.rotation.x));this.camera.rotation.copy(this.rotation);}
   update(delta) {
-    this.direction.set(0,0,0);
-    const keyboardX = (this.keys.right ? 1 : 0) - (this.keys.left ? 1 : 0);
-    const keyboardZ = (this.keys.backward ? 1 : 0) - (this.keys.forward ? 1 : 0);
-    const hasKeyboard = keyboardX !== 0 || keyboardZ !== 0;
-    this.direction.x = keyboardX + this.touchMove.x;
-    this.direction.z = keyboardZ + this.touchMove.y;
-    const length = this.direction.length();
-    if(length === 0)return;
-    if (hasKeyboard) this.direction.normalize();
-    else this.direction.multiplyScalar(Math.min(length, 1) / length);
-    const movement=this.direction.clone().applyEuler(new THREE.Euler(0,this.camera.rotation.y,0));
-    this.camera.position.add(movement.multiplyScalar(this.speed*delta));
-    this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, this.bounds.minX, this.bounds.maxX);
-    this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, this.bounds.minZ, this.bounds.maxZ);
-    this.camera.position.y = 1.7;
+    this.direction.set(0,0,0); const keyboardX=(this.keys.right?1:0)-(this.keys.left?1:0); const keyboardZ=(this.keys.backward?1:0)-(this.keys.forward?1:0); const hasKeyboard=keyboardX!==0||keyboardZ!==0;
+    this.direction.x=keyboardX+this.touchMove.x; this.direction.z=keyboardZ+this.touchMove.y; const length=this.direction.length(); if(length===0)return;
+    if(hasKeyboard)this.direction.normalize(); else this.direction.multiplyScalar(Math.min(length,1)/length);
+    const movement=this.direction.clone().applyEuler(new THREE.Euler(0,this.camera.rotation.y,0)); this.camera.position.add(movement.multiplyScalar(this.speed*delta));
+    this.camera.position.x=THREE.MathUtils.clamp(this.camera.position.x,this.bounds.minX,this.bounds.maxX); this.camera.position.z=THREE.MathUtils.clamp(this.camera.position.z,this.bounds.minZ,this.bounds.maxZ); this.camera.position.y=1.7;
   }
 }
