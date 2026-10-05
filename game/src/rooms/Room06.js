@@ -11,7 +11,7 @@ export class Room06 {
     const wall=this.mat(0x0f1115,.95);this.mesh(new THREE.BoxGeometry(16,4,.3),wall,[0,2,-6]);this.mesh(new THREE.BoxGeometry(16,4,.3),wall,[0,2,6]);this.mesh(new THREE.BoxGeometry(.3,4,12),wall,[-8,2,0]);this.mesh(new THREE.BoxGeometry(.3,4,12),wall,[8,2,0]);
     [-3,0,3].forEach((x,i)=>{const box=this.mesh(new THREE.BoxGeometry(2.2,1.5,.8),this.mat(0x24272d,.55,.4),[x,1,-3.8]);this.add(["REC_FAMILIAR","REC_UNKNOWN","REC_STATIC"][i],box);const led=this.mesh(new THREE.SphereGeometry(.1,10,10),new THREE.MeshBasicMaterial({color:0x9b2020}),[x-.8,1.45,-3.35]);led.userData.ledFor=box.userData.objectId;});
     const exit=this.mesh(new THREE.BoxGeometry(2.5,2.8,.3),this.mat(0x2b171c,.7),[0,1.6,5.7]);this.add("REC_EXIT",exit);
-    const speaker=this.mesh(new THREE.BoxGeometry(3.4,2.2,.25),this.mat(0x181b20,.8),[0,2.5,-5.7]);this.add("REC_SPEAKER",speaker);
+    const speaker=this.mesh(new THREE.BoxGeometry(3.4,2.2,.25),this.mat(0x181b20,.8),[0,2.5,-5.7]);this.objects.REC_SPEAKER=speaker;
     for(const x of [-5.4,-3.6,3.6,5.4]){
       const panel=this.mesh(new THREE.BoxGeometry(1.2,2.2,.12),this.mat(0x1c2027,.78,.12),[x,2.1,-5.78]);
       panel.userData.objectId="REC_SPEAKER";
