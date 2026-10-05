@@ -77,7 +77,7 @@ export class InteractionSystem {
       this.finishLook();
       this.lastLookedObject = objectId;
       this.lookStartTime = performance.now();
-      this.tracker.log("OBJECT_LOOK_START", { objectId });
+      this.tracker.log("OBJECT_LOOK_START", { objectId, roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}` });
     }
 
     this.currentTarget = resolved;
