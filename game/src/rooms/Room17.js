@@ -1,1 +1,9 @@
-export class Room17 { constructor(scene,tracker,plan,companion=null){this.scene=scene;this.tracker=tracker;this.plan=plan;this.companion=companion;this.completed=false;this.objects={};} start(){this.tracker.log("ROOM_ENTER",{roomId:"ROOM_17"})} skip(){this.completed=true} getInteractableObjects(){return []} destroy(){this.objects={}} }
+import * as THREE from "three";
+export class Room17{
+ constructor(scene,tracker,plan,companion=null){this.scene=scene;this.tracker=tracker;this.plan=plan;this.companion=companion;this.objects={};this.completed=false;this.started=0;}
+ start(context={}){this.create();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_17",trainingTarget:"WAIT_TOLERANCE",previousRoom:context.previousRoom||null});}
+ create(){const f=new THREE.Mesh(new THREE.PlaneGeometry(18,16),new THREE.MeshStandardMaterial({color:0x121820}));f.rotation.x=-Math.PI/2;this.scene.add(f);const r=new THREE.Mesh(new THREE.BoxGeometry(2.5,2.5,.3),new THREE.MeshStandardMaterial({color:0x7a5a28}));r.position.set(0,1.3,-1);r.userData.objectId="WAIT_REWARD";this.objects.WAIT_REWARD=r;this.scene.add(r);const e=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.8,.3),new THREE.MeshStandardMaterial({color:0x25252a}));e.position.set(0,1.5,6.7);e.userData.objectId="TRAINING_EXIT";this.objects.TRAINING_EXIT=e;this.scene.add(e);}
+ choose(id){if(id==="WAIT_REWARD"&&!this.started)this.started=performance.now();}
+ finish(){if(!this.started||performance.now()-this.started<3000)return;this.completed=true;this.tracker.log("WAIT_SUCCESS",{roomId:"ROOM_17",waitedMs:Math.round(performance.now()-this.started)});window.dispatchEvent(new CustomEvent("psychgame-training-room-complete",{detail:{roomId:"ROOM_17",targetId:"WAIT_TOLERANCE"}}));}
+ getInteractableObjects(){return Object.values(this.objects)} destroy(){this.objects={}}
+}
