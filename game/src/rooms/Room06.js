@@ -51,6 +51,6 @@ export class Room06 {
   chooseExit(){const familiar=this.observations.REC_FAMILIAR||0,unknown=this.observations.REC_UNKNOWN||0,stat=this.observations.REC_STATIC||0;this.tracker.log("ROOM_06_TRUST_PROFILE",{firstChoice:this.firstChoice,lastChoice:this.lastChoice,familiar,unknown,static:stat,totalChecks:this.playCount,switchCount:this.switchCount});this.companion?.say?.("فکر کنم دیگه وقتشه از این اتاق بریم.");}
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_06",firstChoice:this.firstChoice,totalChecks:this.playCount});}
-  update(delta){if(this.objects.REC_SPEAKER)this.objects.REC_SPEAKER.rotation.y=Math.sin(performance.now()*.001)*.015;}
+  update(delta){if(this.completed)return;if(this.objects.REC_SPEAKER)this.objects.REC_SPEAKER.rotation.y=Math.sin(performance.now()*.001)*.015;}
   destroy(){if(this.whisperTimer)clearTimeout(this.whisperTimer);if(this.pulseTimer)clearTimeout(this.pulseTimer);if(this.signalTimer)clearTimeout(this.signalTimer);if(this.signalRestoreTimer)clearTimeout(this.signalRestoreTimer);this.objects={};}
 }
