@@ -142,6 +142,7 @@ export class InteractionSystem {
     if (this.roomNumber === 8) { this.handleRoom8(objectId); return; }
     if (this.roomNumber === 9) { this.handleRoom9(objectId); return; }
     if (this.roomNumber === 10) { this.handleRoom10(objectId); return; }
+    if (this.roomNumber === 11) { this.handleRoom11(objectId); return; }
 
     switch (objectId) {
       case "RED_BUTTON": this.handleRedButton(); break;
@@ -436,6 +437,20 @@ InteractionSystem.prototype.handleRoom10 = function(objectId) {
 
   if (objectId === "TRAINING_EXIT") {
     this.room?.finish?.();
+    if (this.room?.completed) this.completed = true;
+  }
+};
+
+InteractionSystem.prototype.handleRoom11 = function(objectId) {
+  if (this.completed) return;
+
+  if (objectId === "ATTENTION_FOCUS") {
+    this.room?.choose?.(objectId);
+    return;
+  }
+
+  if (objectId === "TRAINING_EXIT") {
+    this.room?.choose?.(objectId);
     if (this.room?.completed) this.completed = true;
   }
 };
