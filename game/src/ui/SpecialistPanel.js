@@ -1,5 +1,4 @@
 import { SpecialistReport } from "../psychology/SpecialistReport.js";
-import { buildTrainingRecommendations } from "../training/TrainingRecommendations.js";
 import { createTrainingPlan, addTrainingAssignment, setTrainingAssignmentLevel } from "../training/TrainingAssignment.js";
 import { TRAINING_TARGETS } from "../training/TrainingTargets.js";
 
@@ -13,7 +12,7 @@ export class SpecialistPanel {
   open() {
     if (this.root) return;
     const report = SpecialistReport.build(this.session.getSessionData());
-    const recommendations = buildTrainingRecommendations(report);
+    const recommendations = this.session.getTrainingRecommendations();
     const root = document.createElement("div");
     root.id = "pg-specialist-panel";
     Object.assign(root.style, {
