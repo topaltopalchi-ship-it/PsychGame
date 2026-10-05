@@ -196,6 +196,22 @@ export class SpecialistReport {
         کمک‌خواهی: sessionData.analysis.helpSeeking === "OBSERVED" ? "مشاهده شد" : "مشاهده نشد",
         رفتار_اتاق‌ها: sessionData.analysis.roomBehavior ?? {}
       } : null,
+      برداشت_متخصص: (() => {
+        const a = sessionData?.analysis || {};
+        const observations = [];
+        if (a.exploration === "HIGH") observations.push("تعامل با طیف گسترده‌ای از عناصر بازی مشاهده شده است.");
+        else if (a.exploration === "MODERATE") observations.push("میزان تعامل با عناصر بازی در محدوده متوسط مشاهده شده است.");
+        else if (a.exploration === "LOW") observations.push("تعامل ثبت‌شده با عناصر بازی محدود بوده است.");
+        if (a.persistence === "HIGH") observations.push("چندین تلاش مجدد پس از شکست ثبت شده است.");
+        else if (a.persistence === "MODERATE") observations.push("حداقل یک تلاش مجدد پس از شکست ثبت شده است.");
+        if (a.strategyChange === "OBSERVED") observations.push("پس از یک رویداد شکست، تغییر در الگوی تعامل مشاهده شده است.");
+        if (a.helpSeeking === "OBSERVED") observations.push("درخواست کمک در جریان بازی ثبت شده است.");
+        if (a.decisionLatency === "SHORT") observations.push("برای نخستین تصمیم دارای زمان واکنش، تأخیر کوتاهی ثبت شده است.");
+        else if (a.decisionLatency === "MODERATE") observations.push("برای نخستین تصمیم دارای زمان واکنش، تأخیر متوسط ثبت شده است.");
+        else if (a.decisionLatency === "LONG") observations.push("برای نخستین تصمیم دارای زمان واکنش، تأخیر طولانی ثبت شده است.");
+        if (!observations.length) observations.push("برای تولید برداشت توصیفی کافی، شاخص رفتاری قابل اتکایی در داده‌های فعلی ثبت نشده است.");
+        return observations;
+      })(),
       پروفایل_مرحله_اول: sessionData?.analysis?.phase1Profile ?? null,
       تحلیل_ثبت‌شده: sessionData?.analysis ?? null
     };
