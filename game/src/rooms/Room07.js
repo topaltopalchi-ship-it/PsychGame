@@ -4,7 +4,7 @@ export class Room07 {
   constructor(scene, tracker){
     this.scene=scene;this.tracker=tracker;this.objects={};this.completed=false;
     this.companion=null;this.context={};this.startedAt=0;this.followCount=0;this.ignoreCount=0;
-    this.firstChoice=null;this.lastChoice=null;this.choiceSwitches=0;this.promptActive=false;this.promptTimer=null;this.lightTimer=null;this.beaconPulseTimer=null;this.choiceCount=0;
+    this.firstChoice=null;this.lastChoice=null;this.choiceSwitches=0;this.choiceVisualScale=1;this.promptActive=false;this.promptTimer=null;this.lightTimer=null;this.beaconPulseTimer=null;this.choiceCount=0;
   }
   start(context={}){
     this.context=context||{};this.companion=context.companion||null;this.startedAt=performance.now();
@@ -40,7 +40,7 @@ export class Room07 {
     if(id==="FOLLOW_COMPANION")this.companion?.say?.("پس این بار به من اعتماد کردی. فقط یادت باشه... من همیشه درست نمی‌گم.");
     else this.companion?.say?.("باشه. این یکی رو خودت انتخاب کردی. من فقط دنبالت میام.");
     const l=this.objects.COMP_LIGHT;if(l){l.intensity=id==="FOLLOW_COMPANION"?3.1:1.9;if(this.lightTimer)clearTimeout(this.lightTimer);this.lightTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.25;},600);}
-    const glow=this.objects.COMP_BEACON_GLOW;if(glow){glow.scale.setScalar(id==="FOLLOW_COMPANION"?1.35:.8);if(this.beaconPulseTimer)clearTimeout(this.beaconPulseTimer);this.beaconPulseTimer=setTimeout(()=>{if(!this.completed)glow.scale.setScalar(1);},600);}
+    const glow=this.objects.COMP_BEACON_GLOW;if(glow){this.choiceVisualScale=id==="FOLLOW_COMPANION"?1.35:.8;glow.scale.setScalar(this.choiceVisualScale);if(this.beaconPulseTimer)clearTimeout(this.beaconPulseTimer);this.beaconPulseTimer=setTimeout(()=>{if(!this.completed)glow.scale.setScalar(1);},600);}
   }
   chooseExit(){
     if(this.completed)return;
@@ -49,6 +49,6 @@ export class Room07 {
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_07",firstChoice:this.firstChoice,followCount:this.followCount,ignoreCount:this.ignoreCount});}
-  update(delta){const glow=this.objects.COMP_BEACON_GLOW;if(glow){const pulse=1+Math.sin(performance.now()*.004)*.08;glow.scale.setScalar(pulse);}}
+  update(delta){const glow=this.objects.COMP_BEACON_GLOW;if(glow){const pulse=this.choiceVisualScale*(1+Math.sin(performance.now()*.004)*.08);glow.scale.setScalar(pulse);}}
   destroy(){if(this.promptTimer)clearTimeout(this.promptTimer);if(this.lightTimer)clearTimeout(this.lightTimer);if(this.beaconPulseTimer)clearTimeout(this.beaconPulseTimer);this.objects={};}
 }
