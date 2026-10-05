@@ -36,9 +36,9 @@ export class Room06 {
     if(!this.firstChoice)this.firstChoice=id;
     this.lastChoice=id;
     this.tracker.log("ROOM_06_RECORDING_CHECKED",{recording:id,count:this.observations[id],firstChoice:this.firstChoice,switchCount:this.switchCount,secondsSinceEntry:Math.round((now-this.startedAt)/100)/10});
-    if(id==="REC_STATIC"){this.companion?.say?.("این صدا رو بهتره زیاد گوش ندی... انگار فقط نویز نیست.");this.sequenceDone=true;}
-    else if(id==="REC_FAMILIAR"){this.companion?.say?.(this.observations[id]>1?"دوباره صدای آشنا رو انتخاب کردی. چرا؟":"صدای آشناست... ولی مطمئنی خودش بود؟");}
-    else {this.companion?.say?.(this.observations[id]>1?"باز هم به صدای ناشناس برگشتی.":"این صدا رو نمی‌شناسی... هنوز می‌خوای گوش بدی؟");}
+    if(id==="REC_STATIC"){this.companion?.say?.("این صدا رو بهتره زیاد گوش ندی... انگار فقط نویز نیست.", 0, "fear");this.sequenceDone=true;}
+    else if(id==="REC_FAMILIAR"){this.companion?.say?.(this.observations[id]>1?"دوباره صدای آشنا رو انتخاب کردی. چرا؟":"صدای آشناست... ولی مطمئنی خودش بود؟", 0, "stress");}
+    else {this.companion?.say?.(this.observations[id]>1?"باز هم به صدای ناشناس برگشتی.":"این صدا رو نمی‌شناسی... هنوز می‌خوای گوش بدی؟", 0, "stress");}
     this.pulse();
   }
   triggerSignalDistortion(){
@@ -53,14 +53,14 @@ export class Room06 {
       this.signalRestoreTimer=setTimeout(()=>{if(!this.completed){signal.scale.x=1;signal.rotation.z=0;}},650);
     }
     if(light){light.intensity=.45;if(this.pulseTimer)clearTimeout(this.pulseTimer); this.pulseTimer=setTimeout(()=>{if(!this.completed)light.intensity=1.3;},650);}
-    this.companion?.say?.("اون خط صدا... چرا قطع و وصل شد؟ چیزی داشت از داخلش رد می‌شد.");
+    this.companion?.say?.("اون خط صدا... چرا قطع و وصل شد؟ چیزی داشت از داخلش رد می‌شد.", 0, "fear");
   }
   triggerWhisper(){
     if(this.whisperTriggered||this.completed)return;
     this.whisperTriggered=true;
     this.tracker.log("ROOM_06_WHISPER_EVENT",{firstChoice:this.firstChoice,playCount:this.playCount});
     const l=this.objects.REC_LIGHT;if(l){l.intensity=.25;if(this.pulseTimer)clearTimeout(this.pulseTimer); this.pulseTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.3;},900);}
-    this.companion?.say?.("صبر کن... صدایی شنیدی؟ این یکی از دستگاه‌ها نبود.");
+    this.companion?.say?.("صبر کن... صدایی شنیدی؟ این یکی از دستگاه‌ها نبود.", 0, "fear");
   }
   pulse(){const l=this.objects.REC_LIGHT;if(!l)return;l.intensity=2.6;if(this.pulseTimer)clearTimeout(this.pulseTimer);this.pulseTimer=setTimeout(()=>{if(!this.completed)l.intensity=1.3;},500);}
   chooseExit(){const familiar=this.observations.REC_FAMILIAR||0,unknown=this.observations.REC_UNKNOWN||0,stat=this.observations.REC_STATIC||0;this.tracker.log("ROOM_06_TRUST_PROFILE",{firstChoice:this.firstChoice,lastChoice:this.lastChoice,familiar,unknown,static:stat,totalChecks:this.playCount,switchCount:this.switchCount});this.companion?.say?.("فکر کنم دیگه وقتشه از این اتاق بریم.");}
