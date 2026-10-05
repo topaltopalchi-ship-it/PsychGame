@@ -44,7 +44,7 @@ export class Room04 {
       lamp.userData.objectId="HALL_MARK"; this.objects.hallMarks.push(lamp);
       const point=new THREE.PointLight(0x9aa8c4,1.6,4); point.position.set(0,3.1,z); this.scene.add(point);
     }
-    const exit=this.mesh(new THREE.BoxGeometry(1.7,3.1,.16),this.mat(0x4b535b,.65),[0,1.55,-27.7]);
+    const exit=this.mesh(new THREE.BoxGeometry(1.7,3.1,.16),this.mat(0x4b535b,.65),[0,1.55,-26.45]);
     exit.userData.objectId="HALL_EXIT"; this.objects.exit=exit;
     const lamp=new THREE.PointLight(0xc5d4ff,4,7); lamp.position.set(0,3.1,-3); this.scene.add(lamp); this.objects.lamp=lamp;
     const endLight=new THREE.PointLight(0x6b2028,2.2,5); endLight.position.set(0,2.8,-25); this.scene.add(endLight); this.objects.endLight=endLight;
