@@ -256,6 +256,7 @@ window.psychGame = {
 
 const clock = new THREE.Clock();
 function startRoom05(context={previousRoom:"ROOM_04"}) {
+  if (gameFinished) return;
   if (activeRoom?.constructor?.name !== "Room04" || !activeRoom.completed) return;
   clearRoomGeometry();
   interaction.clearTargets?.();
@@ -268,6 +269,7 @@ function startRoom05(context={previousRoom:"ROOM_04"}) {
 
 
 function startRoom06(context={previousRoom:"ROOM_05"}) {
+  if (gameFinished) return;
   if (activeRoom?.constructor?.name !== "Room05" || !activeRoom.completed) return;
   clearRoomGeometry(); interaction.clearTargets?.();
   activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion});
@@ -277,6 +279,7 @@ function startRoom06(context={previousRoom:"ROOM_05"}) {
 }
 
 function startRoom07(context={previousRoom:"ROOM_06"}) {
+  if (gameFinished) return;
   if (activeRoom?.constructor?.name !== "Room06" || !activeRoom.completed) return;
   clearRoomGeometry(); interaction.clearTargets?.();
   activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion});
@@ -286,6 +289,7 @@ function startRoom07(context={previousRoom:"ROOM_06"}) {
 }
 
 function startRoom08(context={previousRoom:"ROOM_07"}) {
+  if (gameFinished) return;
   if (activeRoom?.constructor?.name !== "Room07" || !activeRoom.completed) return;
   clearRoomGeometry(); interaction.clearTargets?.();
   activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion});
