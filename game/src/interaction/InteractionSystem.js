@@ -403,7 +403,7 @@ InteractionSystem.prototype.handleRoom8 = function(objectId) {
       this.room8CompletionTimer = null;
       if (this.room !== endingRoom || !this.completed || this.gameFinished) return;
       endingRoom?.completeRoom?.();
-      window.dispatchEvent(new CustomEvent("psychgame-game-complete",{detail:{roomId:"ROOM_08"}});
+      window.dispatchEvent(new CustomEvent("psychgame-game-complete",{detail:{roomId:"ROOM_08"}}));
     },1800);
   }
 };
