@@ -17,11 +17,22 @@ export class Room08 {
   createRoom(){
     this.mesh(new THREE.PlaneGeometry(18,16),this.mat(0x14151a,.92),[0,0,0]).rotation.x=-Math.PI/2;
     const w=this.mat(0x0d0f13,.96);this.mesh(new THREE.BoxGeometry(18,4,.3),w,[0,2,-7]);this.mesh(new THREE.BoxGeometry(18,4,.3),w,[0,2,7]);this.mesh(new THREE.BoxGeometry(.3,4,14),w,[-9,2,0]);this.mesh(new THREE.BoxGeometry(.3,4,14),w,[9,2,0]);
+    this.mesh(new THREE.CylinderGeometry(3.4,3.4,.08,64),this.mat(0x202532,.45,.45),[0,.08,0]);
+    for(const x of [-5.8,5.8]){
+      const pillar=this.mesh(new THREE.CylinderGeometry(.32,.4,3.5,24),this.mat(0x252a35,.55,.35),[x,1.75,-1.8]);
+      pillar.userData.objectId="TRUTH_CORE";
+      this.mesh(new THREE.SphereGeometry(.16,16,12),new THREE.MeshStandardMaterial({color:0x8a95bc,emissive:0x46527c,emissiveIntensity:1.4}),[x,3.35,-1.8]);
+    }
     const core=this.mesh(new THREE.IcosahedronGeometry(.75,1),this.mat(0x343b50,.3,.65),[0,2.2,0]);this.add("TRUTH_CORE",core);
     const exit=this.mesh(new THREE.BoxGeometry(2.6,2.8,.35),this.mat(0x30171d,.7),[0,1.6,6.7]);this.add("TRUTH_EXIT",exit);
     const light=new THREE.PointLight(0x7788bb,1.5,16);light.position.set(0,3.5,0);this.scene.add(light);this.objects.TRUTH_LIGHT=light;
     this.endLight=new THREE.PointLight(0x5b1720,.35,9);this.endLight.position.set(0,2.4,6.1);this.scene.add(this.endLight);
     const ring=this.mesh(new THREE.TorusGeometry(1.35,.035,8,48),new THREE.MeshBasicMaterial({color:0x7180aa,transparent:true,opacity:.32}),[0,.08,0]);ring.rotation.x=Math.PI/2;this.add("TRUTH_RING",ring);
+    const ceiling=this.mesh(new THREE.BoxGeometry(10,.1,1.3),this.mat(0x222630,.45,.5),[0,3.72,-1]);
+    for(const x of [-3.5,0,3.5]){
+      const p=this.mesh(new THREE.SphereGeometry(.13,14,10),new THREE.MeshStandardMaterial({color:0x9aa6d0,emissive:0x56658e,emissiveIntensity:1.8}),[x,3.4,-1]);
+      p.userData.objectId="TRUTH_CORE";
+    }
   }
   calculateProfile(){
     const hall=this.context.hallBehavior||{};
