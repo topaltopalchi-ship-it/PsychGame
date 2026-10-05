@@ -12,6 +12,7 @@ export class Companion {
       exploredBeforeFailure: false
     };
     this.voiceEnabled = true;
+    this.showText = false;
     this.voiceUnlocked = false;
     this.pendingVoice = null;
     this.voiceReady = false;
@@ -48,6 +49,7 @@ export class Companion {
       this.text.textContent = message;
       this.pendingVoice = message;
       this.speak(message);
+      if (!this.showText) return;
       this.panel.style.opacity = "1";
       this.panel.querySelector("#pg-companion-avatar").style.animation = "pgCompanionPulse .9s ease-out";
       this.panel.style.transform = "translate(-50%,0)";
@@ -89,7 +91,8 @@ export class Companion {
   }
 
   speak(message) {
-    if (!this.voiceEnabled || !this.voiceUnlocked || !("speechSynthesis" in window)) return;
+    if (!this.voiceEnabled || !("speechSynthesis" in window)) return;
+    if (!this.voiceUnlocked) { this.pendingVoice = message; return; }
 
     this.pendingVoice = message;
     try {
@@ -121,8 +124,7 @@ export class Companion {
         this.pendingVoice = null;
       };
 
-      // Mobile Chrome may ignore a queued utterance immediately after resume;
-      // give the speech engine a short moment to become active.
+      // Mobile browsers often need a short delay after the first gesture.
       setTimeout(() => {
         if (!this.voiceUnlocked) return;
         synth.resume();
