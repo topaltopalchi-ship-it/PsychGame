@@ -67,7 +67,7 @@ export class TrainingEngine {
     return this.getSession();
   }
 
-  abort(targetId, reason = "manual_abort") {
+  isCompleted(targetId) {\n    return this.completedTargets.has(targetId) || Boolean(this.getAssignment(targetId)?.completed);\n  }\n\n  isExhausted(targetId) {\n    return Boolean(this.getAssignment(targetId)?.exhausted);\n  }\n\n  abort(targetId, reason = "manual_abort") {
     const assignment = this.getAssignment(targetId);
     if (!assignment || assignment.aborted || assignment.completed) {
       return this.getSession();
