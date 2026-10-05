@@ -1,1 +1,9 @@
-export class Room16 { constructor(scene,tracker,plan,companion=null){this.scene=scene;this.tracker=tracker;this.plan=plan;this.companion=companion;this.completed=false;this.objects={};} start(){this.tracker.log("ROOM_ENTER",{roomId:"ROOM_16"})} skip(){this.completed=true} getInteractableObjects(){return []} destroy(){this.objects={}} }
+import * as THREE from "three";
+export class Room16{
+ constructor(scene,tracker,plan,companion=null){this.scene=scene;this.tracker=tracker;this.plan=plan;this.companion=companion;this.objects={};this.completed=false;this.steps=0;}
+ start(context={}){this.create();this.tracker.log("ROOM_ENTER",{roomId:"ROOM_16",trainingTarget:"GRADUAL_APPROACH",previousRoom:context.previousRoom||null});}
+ create(){const f=new THREE.Mesh(new THREE.PlaneGeometry(18,16),new THREE.MeshStandardMaterial({color:0x151a20}));f.rotation.x=-Math.PI/2;this.scene.add(f);for(let i=1;i<=3;i++){const o=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.8,.25),new THREE.MeshStandardMaterial({color:0x40566c}));o.position.set(-2+i*2,1.1,-1);o.userData.objectId="APPROACH_"+i;this.objects[o.userData.objectId]=o;this.scene.add(o);}const e=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.8,.3),new THREE.MeshStandardMaterial({color:0x25252a}));e.position.set(0,1.5,6.7);e.userData.objectId="TRAINING_EXIT";this.objects.TRAINING_EXIT=e;this.scene.add(e);}
+ choose(id){if(id.startsWith("APPROACH_")){this.steps=Math.max(this.steps,Number(id.split("_")[1]));this.tracker.log("GRADUAL_APPROACH_STEP",{roomId:"ROOM_16",step:this.steps});}}
+ finish(){if(this.steps<1)return;this.completed=true;window.dispatchEvent(new CustomEvent("psychgame-training-room-complete",{detail:{roomId:"ROOM_16",targetId:"GRADUAL_APPROACH"}}));}
+ getInteractableObjects(){return Object.values(this.objects)} destroy(){this.objects={}}
+}
