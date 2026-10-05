@@ -81,7 +81,11 @@ function scheduleRoomTransition(callback, delay = 900) {
     roomTransitionTimers.delete(timer);
     roomTransitionPending = false;
     if (gameFinished) return;
-    callback();
+    try {
+      callback();
+    } catch (error) {
+      console.error("[PsychGame] room transition failed", error);
+    }
   }, delay);
   roomTransitionTimers.add(timer);
   return timer;
