@@ -311,3 +311,53 @@ test("Session upload queue preserves completed sessions and deduplicates progres
   expect(result.afterCompleted).toEqual([true]);
   expect(result.afterLateProgress).toEqual([true]);
 });
+
+
+test("Session upload queue retains only failed payloads during partial flush", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+
+  const result = await page.evaluate(async () => {
+    const { SessionUploader } = await import("/PsychGame/src/session/SessionUploader.js");
+    const uploader = new SessionUploader({ endpoint: "http://upload.test" });
+    const queueKey = "psychgame_upload_queue_v1";
+    localStorage.removeItem(queueKey);
+
+    uploader.queue({
+      version: 1,
+      completed: false,
+      uploadedAt: "2026-01-01T00:00:00.000Z",
+      report: { sessionId: "flush-success", playerCode: "PLAYER-FLUSH", events: [] }
+    });
+    uploader.queue({
+      version: 1,
+      completed: false,
+      uploadedAt: "2026-01-01T00:00:01.000Z",
+      report: { sessionId: "flush-fail", playerCode: "PLAYER-FLUSH", events: [] }
+    });
+
+    let calls = 0;
+    const originalFetch = window.fetch;
+    window.fetch = async (_url, options) => {
+      calls += 1;
+      const payload = JSON.parse(options.body);
+      if (payload.report.sessionId === "flush-fail") {
+        return new Response(JSON.stringify({ error: "temporary" }), { status: 503 });
+      }
+      return new Response(JSON.stringify({ ok: true }), { status: 201 });
+    };
+
+    try {
+      await uploader.flushQueue();
+      return {
+        calls,
+        remaining: uploader.readQueue().map(item => item.report.sessionId)
+      };
+    } finally {
+      window.fetch = originalFetch;
+      localStorage.removeItem(queueKey);
+    }
+  });
+
+  expect(result.calls).toBe(2);
+  expect(result.remaining).toEqual(["flush-fail"]);
+});
