@@ -108,7 +108,8 @@ export class Room03 {
     this.tracker.log("ROOM_03_FINAL_BEAT",{remembered:!!this.memoryContext?.wrongPaths?.length});
     this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.055:.035;
     if(this.memoryLight)this.memoryLight.intensity=1.2;
-    setTimeout(()=>{
+    this.finalRestoreTimer=setTimeout(()=>{
+      if(this.completed)return;
       if(this.memoryLight)this.memoryLight.intensity=3;
       this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.08:.025;
     },900);
@@ -131,7 +132,8 @@ export class Room03 {
     this.scene.fog.density=.09;
     if(this.memoryLight)this.memoryLight.intensity=.4;
     this.companion?.say?.(this.memoryContext?.wrongPaths?.length ? "باشه... این بار خودت انتخاب کردی. برو." : "خوبه. اینجا تمومش می‌کنیم.");
-    setTimeout(()=>{
+    this.confirmRestoreTimer=setTimeout(()=>{
+      if(this.completed)return;
       this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.08:.025;
       if(this.memoryLight)this.memoryLight.intensity=3;
     },1200);
