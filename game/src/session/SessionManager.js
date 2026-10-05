@@ -52,6 +52,33 @@ export class SessionManager {
     }
   }
 
+  getTrainingProgress() {
+    try {
+      const raw = sessionStorage.getItem(`psychgame_training_runtime_${this.playerCode}`);
+      if (!raw) return null;
+      const runtime = JSON.parse(raw);
+      return {
+        sessionId: runtime?.sessionId ?? null,
+        startedAt: runtime?.startedAt ?? null,
+        roomId: runtime?.roomId ?? null,
+        assignments: Array.isArray(runtime?.assignments)
+          ? runtime.assignments.map(item => ({
+              targetId: item.targetId,
+              level: item.level,
+              attempts: item.attempts || 0,
+              successes: item.successes || 0,
+              failures: item.failures || 0,
+              completed: Boolean(item.completed),
+              exhausted: Boolean(item.exhausted),
+              aborted: Boolean(item.aborted)
+            }))
+          : []
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
   getSessionData() {
     return {
       playerCode: this.playerCode,
@@ -60,7 +87,8 @@ export class SessionManager {
       consent: true,
       events: this.tracker.getEvents(),
       analysis: this.getAnalysis(),
-      trainingResult: this.getTrainingResult()
+      trainingResult: this.getTrainingResult(),
+      trainingProgress: this.getTrainingProgress()
     };
   }
 
