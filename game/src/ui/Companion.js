@@ -101,7 +101,7 @@ export class Companion {
 
   speak(message, mood = "calm") {
     if (!this.voiceEnabled || !("speechSynthesis" in window)) return;
-    if (!this.voiceUnlocked) { this.pendingVoice = message; return; }
+    if (!this.voiceUnlocked) { this.pendingVoice = { message, mood }; return; }
 
     this.pendingVoice = { message, mood };
     try {
