@@ -23,7 +23,16 @@ export class SessionManager {
   }
 
   generatePlayerCode() {
-    return `PLAYER-${Math.floor(10000 + Math.random() * 90000)}`;
+    const key = "psychgame_player_code_v1";
+    try {
+      const existing = localStorage.getItem(key);
+      if (existing) return existing;
+      const code = `PLAYER-${Math.floor(10000 + Math.random() * 90000)}`;
+      localStorage.setItem(key, code);
+      return code;
+    } catch (_) {
+      return `PLAYER-${Math.floor(10000 + Math.random() * 90000)}`;
+    }
   }
 
   setConsent(value = true) {
@@ -55,7 +64,9 @@ export class SessionManager {
 
   getTrainingProgress() {
     try {
-      const raw = sessionStorage.getItem(`psychgame_training_runtime_${this.playerCode}`);
+      const runtimeKey = `psychgame_training_runtime_${this.playerCode}`;
+      const recoveryKey = `psychgame_training_recovery_${this.playerCode}`;
+      const raw = sessionStorage.getItem(runtimeKey) || localStorage.getItem(recoveryKey);
       if (!raw) return null;
       const runtime = JSON.parse(raw);
       return {
