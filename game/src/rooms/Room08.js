@@ -81,7 +81,7 @@ export class Room08 {
   chooseExit(){
     this.triggerCoreResponse();this.tracker.log("ROOM_08_EXIT_CHECKED",{roomId:"ROOM_08"});
     if(this.endLight)this.endLight.intensity=.08;
-    this.companion?.say?.("در بازه... ولی فکر نکن اینجا چیزی بهت جواب می‌ده.");
+    this.companion?.say?.("در بازه... ولی فکر نکن اینجا چیزی بهت جواب می‌ده.", 0, "tense");
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_08"});}
