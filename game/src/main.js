@@ -388,7 +388,7 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
     if (hasDecisionTraining) {
       clearRoomGeometry();
       interaction.clearTargets?.();
-      activeRoom = new Room10(scene, tracker, plan);
+      activeRoom = new Room10(scene, tracker, plan, companion);
       activeRoom.start({ previousRoom: "ROOM_09", companion });
       interaction.setRoom(activeRoom, 10);
       audioManager.setRoom(10);
