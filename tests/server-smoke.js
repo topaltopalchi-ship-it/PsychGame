@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { SpecialistReport } from "../game/src/psychology/SpecialistReport.js";
 
 const port = 8899;
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "psychgame-api-"));
@@ -40,6 +41,18 @@ async function request(url, options = {}) {
 }
 
 try {
+  const qualityReport = SpecialistReport.build({
+    sessionId: "quality-smoke",
+    playerCode: "PLAYER-QUALITY",
+    events: [
+      { eventIndex: 0, type: "ROOM_ENTER", roomId: "ROOM_01", elapsedMs: 100 },
+      { eventIndex: 1, type: "RED_BUTTON_PRESS", roomId: "ROOM_01", elapsedMs: 1200 }
+    ],
+    analysis: { exploration: "LOW", riskTaking: "MODERATE", persistence: "LOW", strategyChange: "NOT_OBSERVED", decisionLatency: "NOT_OBSERVED", helpSeeking: "NOT_OBSERVED", roomBehavior: {} }
+  });
+  assert.equal(qualityReport.dataQuality.hasDecisionLatency, false);
+  assert.equal(qualityReport.dataQuality.observedRooms.length, 1);
+
   await waitForServer();
 
   const health = await request("/api/health");
