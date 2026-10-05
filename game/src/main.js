@@ -450,7 +450,8 @@ window.addEventListener("psychgame-training-room-complete", (event) => {
     targetId: event.detail.targetId || null
   });
 
-  if (roomId >= "ROOM_15" && roomId <= "ROOM_19") {
+  const completedRoomNumber = Number(String(roomId).replace("ROOM_", ""));
+  if (completedRoomNumber >= 15 && completedRoomNumber <= 19) {
     scheduleRoomTransition(() => continueTraining(roomId), 500);
     return;
   }
