@@ -50,8 +50,8 @@ export class Room05 {
       const point=new THREE.PointLight(0x7889c4,.9,5); point.position.set(x,3.3,-1.2); this.scene.add(point);
     }
     const l=new THREE.PointLight(0x6875a8,1.2,14);l.position.set(0,3.2,-2);this.scene.add(l);this.objects.MIRROR_LIGHT=l;
-    const glow=this.mesh(new THREE.SphereGeometry(.16,12,12),new THREE.MeshBasicMaterial({color:0x8899ff}),[0,3.1,-3]);this.add("MIRROR_GLOW",glow);
-    const ceiling=this.mesh(new THREE.BoxGeometry(14,.08,1.8),new THREE.MeshStandardMaterial({color:0x222630,roughness:.55,metalness:.35}),[0,3.75,-.8]); this.add("MIRROR_CEILING",ceiling);
+    const glow=this.mesh(new THREE.SphereGeometry(.16,12,12),new THREE.MeshBasicMaterial({color:0x8899ff}),[0,3.1,-3]);this.objects.MIRROR_GLOW=glow;
+    const ceiling=this.mesh(new THREE.BoxGeometry(14,.08,1.8),new THREE.MeshStandardMaterial({color:0x222630,roughness:.55,metalness:.35}),[0,3.75,-.8]); this.objects.MIRROR_CEILING=ceiling;
   }
   reactToMirror(id){
     if(this.choiceLocked)return;
