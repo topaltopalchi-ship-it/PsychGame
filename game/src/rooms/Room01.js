@@ -6,7 +6,7 @@ export class Room01 {
     this.tracker = tracker;
     this.objects = {};
     this.dynamic = { clueVisible: false, redGlow: null, deskLight: null, roomLights: [], baseLightIntensity: new Map() };
-    this.completed = false;
+    this.completed = false; this.buttonPulseTimer = null;
   }
 
   start() {
@@ -27,7 +27,7 @@ export class Room01 {
     button.material.emissive = new THREE.Color(0xff1b1b);
     button.material.emissiveIntensity = 4;
     if (this.dynamic.redGlow) this.dynamic.redGlow.intensity = 5.5;
-    setTimeout(() => {
+    this.buttonPulseTimer = setTimeout(() => { if (this.completed) return;
       button.position.y = 1.8;
       button.material.emissiveIntensity = 2.2;
       if (this.dynamic.redGlow) this.dynamic.redGlow.intensity = 2.0;
@@ -39,6 +39,7 @@ export class Room01 {
   }
 
   completeRoom() {
+    if (this.completed) return;
     this.completed = true;
   }
 
