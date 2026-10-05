@@ -74,6 +74,7 @@ export class Room05 {
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_05",firstMirror:this.firstMirror,glitchCount:this.glitchCount});}
   update(delta){
+    if(this.completed)return;
     const now=performance.now();
     if(this.objects.MIRROR_GLOW)this.objects.MIRROR_GLOW.scale.setScalar(1+Math.sin(now*.004)*.08);
     if(this.objects.MIRROR_LIGHT){
