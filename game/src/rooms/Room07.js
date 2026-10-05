@@ -49,6 +49,6 @@ export class Room07 {
   }
   getInteractableObjects(){return Object.values(this.objects).filter(o=>o?.userData?.objectId);}
   completeRoom(){if(this.completed)return;this.completed=true;this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_07",firstChoice:this.firstChoice,followCount:this.followCount,ignoreCount:this.ignoreCount});}
-  update(delta){const glow=this.objects.COMP_BEACON_GLOW;if(glow){const pulse=this.choiceVisualScale*(1+Math.sin(performance.now()*.004)*.08);glow.scale.setScalar(pulse);}}
+  update(delta){if(this.completed)return;const glow=this.objects.COMP_BEACON_GLOW;if(glow){const pulse=this.choiceVisualScale*(1+Math.sin(performance.now()*.004)*.08);glow.scale.setScalar(pulse);}}
   destroy(){if(this.promptTimer)clearTimeout(this.promptTimer);if(this.lightTimer)clearTimeout(this.lightTimer);if(this.beaconPulseTimer)clearTimeout(this.beaconPulseTimer);this.objects={};}
 }
