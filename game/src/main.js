@@ -98,7 +98,7 @@ document.head.appendChild(style);
 let authorTapCount = 0;
 let authorTapTimer = null;
 const hiddenAuthorZone = document.createElement("div");
-Object.assign(hiddenAuthorZone.style, { position:"fixed", top:"0", left:"0", width:"90px", height:"90px", zIndex:"10000", background:"transparent" });
+Object.assign(hiddenAuthorZone.style, { position:"fixed", top:"0", left:"0", width:"48px", height:"48px", zIndex:"10000", background:"transparent", pointerEvents:"auto" });
 document.body.appendChild(hiddenAuthorZone);
 
 function openAuthor() {
@@ -111,7 +111,6 @@ hiddenAuthorZone.addEventListener("click", () => {
   authorTapTimer = setTimeout(() => { authorTapCount = 0; }, 1500);
   if (authorTapCount >= 5) { authorTapCount = 0; openAuthor(); }
 });
-window.openAuthorPanel = openAuthor;
 
 const targetLabels = {
   RED_BUTTON: "دکمه قرمز — فشار بده",
