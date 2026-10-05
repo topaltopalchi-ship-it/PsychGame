@@ -158,6 +158,16 @@ export class SpecialistReport {
           توالی_پایانی: byType.ROOM_08_FINAL_SEQUENCE || 0
         }
       },
+      شاخص‌های_رفتاری: sessionData?.analysis ? {
+        اکتشاف: sessionData.analysis.exploration === "HIGH" ? "بالا" : sessionData.analysis.exploration === "MODERATE" ? "متوسط" : sessionData.analysis.exploration === "LOW" ? "پایین" : "مشاهده‌نشده",
+        ریسک‌پذیری: sessionData.analysis.riskTaking === "HIGH" ? "بالا" : sessionData.analysis.riskTaking === "MODERATE" ? "متوسط" : sessionData.analysis.riskTaking === "LOW" ? "پایین" : "مشاهده‌نشده",
+        پشتکار: sessionData.analysis.persistence === "HIGH" ? "بالا" : sessionData.analysis.persistence === "MODERATE" ? "متوسط" : sessionData.analysis.persistence === "LOW" ? "پایین" : "مشاهده‌نشده",
+        تغییر_راهبرد: sessionData.analysis.strategyChange === "OBSERVED" ? "مشاهده شد" : "مشاهده نشد",
+        زمان_تصمیم‌گیری: sessionData.analysis.decisionLatency === "SHORT" ? "کوتاه" : sessionData.analysis.decisionLatency === "MODERATE" ? "متوسط" : sessionData.analysis.decisionLatency === "LONG" ? "طولانی" : "مشاهده‌نشد",
+        کمک‌خواهی: sessionData.analysis.helpSeeking === "OBSERVED" ? "مشاهده شد" : "مشاهده نشد",
+        رفتار_اتاق‌ها: sessionData.analysis.roomBehavior ?? {}
+      } : null,
+      پروفایل_مرحله_اول: sessionData?.analysis?.phase1Profile ?? null,
       تحلیل_ثبت‌شده: sessionData?.analysis ?? null
     };
 
