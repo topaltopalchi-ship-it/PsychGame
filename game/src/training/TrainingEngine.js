@@ -11,7 +11,10 @@ export class TrainingEngine {
     this.roomId = roomId;
     this.onEvent = onEvent;
     this.storageKey = plan?.playerCode ? `psychgame_training_runtime_${plan.playerCode}` : null;
-    this.session = this.loadPersistedSession() || createTrainingSession(plan, roomId);
+    const persisted = this.loadPersistedSession();
+    this.session = persisted
+      ? this.syncAssignments(persisted, plan)
+      : createTrainingSession(plan, roomId);
     this.session.roomId = roomId;
     this.completedTargets = new Set(this.session.assignments.filter(x => x.completed).map(x => x.targetId));
     this.persist();
@@ -77,6 +80,27 @@ export class TrainingEngine {
       const raw = sessionStorage.getItem(this.storageKey);
       return raw ? JSON.parse(raw) : null;
     } catch (_) { return null; }
+  }
+
+  syncAssignments(session, plan) {
+    const activeAssignments = Array.isArray(plan?.assignments) ? plan.assignments : [];
+    const existingIds = new Set((session.assignments || []).map(item => item.targetId));
+    const additions = activeAssignments
+      .filter(item => item?.targetId && !existingIds.has(item.targetId))
+      .map(item => ({
+        ...item,
+        target: getTrainingTargetLevel(item),
+        attempts: 0,
+        successes: 0,
+        failures: 0,
+        aborted: false,
+        completed: false,
+        exhausted: false
+      }));
+
+    return additions.length
+      ? { ...session, assignments: [...(session.assignments || []), ...additions] }
+      : session;
   }
 
   persist() {
