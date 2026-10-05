@@ -3,18 +3,19 @@ import { BehaviorAnalyzer } from "../psychology/BehaviorAnalyzer.js";
 import { SpecialistReport } from "../psychology/SpecialistReport.js";
 import { SessionUploader } from "./SessionUploader.js";
 import { buildTrainingRecommendations } from "../training/TrainingRecommendations.js";
+import { PsychGameConfig } from "../config/PsychGameConfig.js";
 
 export class SessionManager {
   constructor() {
     this.tracker = new BehaviorTracker();
-    this.tracker.setEnabled(true);
+    this.tracker.setEnabled(PsychGameConfig.dataCollectionEnabled);
     this.analyzer = new BehaviorAnalyzer();
     this.playerCode = this.generatePlayerCode();
     this.sessionStart = new Date().toISOString();
-    this.playerConsent = true;
+    this.playerConsent = PsychGameConfig.dataCollectionEnabled;
     this.storageKey = `psychgame_${this.playerCode}`;
     this.trainingPlanKey = `psychgame_training_${this.playerCode}`;
-    this.uploader = new SessionUploader({ endpoint: import.meta.env.VITE_API_URL || "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
+    this.uploader = new SessionUploader({ endpoint: PsychGameConfig.dataUploadEnabled ? (import.meta.env.VITE_API_URL || "") : "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
     this.lastRemoteUpload = 0;
     this.completedUploadStarted = false;
     this.tracker.onEvent = () => this.saveSession();
@@ -38,7 +39,7 @@ export class SessionManager {
     }
   }
 
-  setConsent(value = true) { this.playerConsent = true; this.tracker.setEnabled(true); this.saveSession(); }
+  setConsent(value = true) { this.playerConsent = Boolean(value) && PsychGameConfig.dataCollectionEnabled; this.tracker.setEnabled(this.playerConsent); if (this.playerConsent) this.saveSession(); }
   hasConsent() { return this.playerConsent; }
   getConsentPromise() { return Promise.resolve(this.playerConsent); }
   getPlayerCode() { return this.playerCode; }
@@ -110,8 +111,8 @@ export class SessionManager {
   }
 
   getReport(){return SpecialistReport.build(this.getSessionData());}
-  saveSession({completed=false}={}){try{const data=this.getSessionData();localStorage.setItem(this.storageKey,JSON.stringify(data));const now=Date.now();if(completed){if(this.completedUploadStarted)return;this.completedUploadStarted=true;this.lastRemoteUpload=now;this.uploader.upload(this.getReport(),{completed:true});return;}if(now-this.lastRemoteUpload>15000){this.lastRemoteUpload=now;this.uploader.upload(this.getReport(),{completed:false});}}catch(error){console.warn("PsychGame session save failed",error);}}
+  saveSession({completed=false}={}){if(!PsychGameConfig.dataCollectionEnabled)return;try{const data=this.getSessionData();localStorage.setItem(this.storageKey,JSON.stringify(data));const now=Date.now();if(completed){if(this.completedUploadStarted)return;this.completedUploadStarted=true;this.lastRemoteUpload=now;this.uploader.upload(this.getReport(),{completed:true});return;}if(now-this.lastRemoteUpload>15000){this.lastRemoteUpload=now;this.uploader.upload(this.getReport(),{completed:false});}}catch(error){console.warn("PsychGame session save failed",error);}}
   resetTrainingUploadState(){this.completedUploadStarted=false;this.lastRemoteUpload=0;}
-  uploadCompletedSession(){if(this.completedUploadStarted)return Promise.resolve({skipped:true,reason:"already-started"});this.completedUploadStarted=true;return this.uploader.upload(this.getReport(),{completed:true});}
+  uploadCompletedSession(){if(!PsychGameConfig.dataUploadEnabled)return Promise.resolve({skipped:true,reason:"upload-disabled"});if(this.completedUploadStarted)return Promise.resolve({skipped:true,reason:"already-started"});this.completedUploadStarted=true;return this.uploader.upload(this.getReport(),{completed:true});}
   exportSession(){return JSON.stringify(this.getReport(),null,2);}
 }
