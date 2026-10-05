@@ -7,7 +7,7 @@ export class Room03 {
     if(this.memoryContext.wrongPaths?.length){
       this.tracker.log("ROOM_03_MEMORY_RESPONSE",{wrongPaths:this.memoryContext.wrongPaths});
     }
-    this.createFloor();this.createWalls();this.createClock();this.createMemoryMark();this.createSeat();this.createExit();this.createAtmosphere();if(this.memoryContext.wrongPaths?.length){this.memoryResponseTimer=setTimeout(()=>this.triggerMemoryResponse(),2600);}
+    this.createFloor();this.createWalls();this.createClock();this.createMemoryMark();this.createSeat();this.createExit();this.createAtmosphere();if(this.memoryContext.wrongPaths?.length){this.memoryResponseTimer=setTimeout(()=>{if(this.completed)return;this.triggerMemoryResponse();},2600);}
     this.tracker.log("ROOM_ENTER",{roomId:"ROOM_03",roomName:"WAITING_ROOM",previousPath:context.previousPath||"ROOM_02"});
   }
   mesh(g,mat,pos){const m=new THREE.Mesh(g,mat);m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;this.scene.add(m);return m;}
@@ -103,7 +103,7 @@ export class Room03 {
   getInteractableObjects(){return Object.values(this.objects);}
   destroy(){for(const t of ["memoryResponseTimer","clockPulseTimer","memoryPulseTimer","exitGlitchTimer","finalBeatTimer","endingTimer","confirmTimer","finalRestoreTimer","confirmRestoreTimer","endingRestoreTimer"]){if(this[t])clearTimeout(this[t]);}this.objects={};}
   triggerFinalBeat(){
-    if(this.finalBeatDone)return;
+    if(this.completed||this.finalBeatDone)return;
     this.finalBeatDone=true;
     this.tracker.log("ROOM_03_FINAL_BEAT",{remembered:!!this.memoryContext?.wrongPaths?.length});
     this.scene.fog.density=this.memoryContext?.wrongPaths?.length?.055:.035;
@@ -117,7 +117,7 @@ export class Room03 {
   }
 
   startExitSequence(){
-    if(this.exitSequenceStarted)return;
+    if(this.completed||this.exitSequenceStarted)return;
     this.exitSequenceStarted=true;
     this.reactToExit();
     this.finalBeatTimer=setTimeout(()=>this.triggerFinalBeat(),900);
@@ -126,7 +126,7 @@ export class Room03 {
   }
 
   confirmExit(){
-    if(this.exitConfirmed)return;
+    if(this.completed||this.exitConfirmed)return;
     this.exitConfirmed=true;
     this.tracker.log("ROOM_03_EXIT_CONFIRMED",{remembered:!!this.memoryContext?.wrongPaths?.length});
     this.scene.fog.density=.09;
@@ -140,7 +140,7 @@ export class Room03 {
   }
 
   triggerEnding(){
-    if(this.endingTriggered)return;
+    if(this.completed||this.endingTriggered)return;
     this.endingTriggered=true;
     this.tracker.log("ROOM_03_ENDING_TRIGGERED",{remembered:!!this.memoryContext?.wrongPaths?.length});
     if(this.objects.exit){
