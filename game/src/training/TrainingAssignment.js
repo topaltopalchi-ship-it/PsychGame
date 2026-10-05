@@ -24,6 +24,7 @@ export function createTrainingPlan({
 
   return {
     version: 1,
+    planId: crypto.randomUUID(),
     playerCode,
     sourceSessionId,
     createdAt: new Date().toISOString(),
