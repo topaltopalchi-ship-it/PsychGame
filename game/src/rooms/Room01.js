@@ -18,7 +18,7 @@ export class Room01 {
     this.tracker.log("ROOM_ENTER", { roomId: "ROOM_01", roomName: "THE_RED_BUTTON" });
   }
 
-  getInteractableObjects() { return Object.values(this.objects); }
+  getInteractableObjects() { return Object.values(this.objects).filter(object => object?.visible !== false); }
 
   showButtonPressed() {
     const button = this.objects.redButton;
