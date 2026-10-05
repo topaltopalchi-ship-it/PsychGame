@@ -1,34 +1,137 @@
 # PsychGame
 
-PsychGame is an interactive behavioral game platform designed
-for professional psychological assessment support.
+PsychGame is an interactive behavioral game platform for professional psychological assessment support.
 
-## Vision
+The game observes natural gameplay behavior rather than presenting psychological questionnaires. Observations are intended for professional interpretation and **are not a clinical diagnosis**.
 
-The player does not answer psychological questionnaires.
+## Current release
 
-Instead, the game observes natural gameplay behavior such as:
+- **Rooms 01-08:** active observation phase.
+- **Rooms 09-20:** reserved for a future specialist-assigned training phase and are not part of the current release flow.
+- Player-facing gameplay does not display psychological interpretation or diagnostic conclusions.
 
-- decision making
-- reaction to failure
-- risk taking
-- exploration
-- persistence
-- help seeking
-- trust
-- emotional reactions
-- cognitive flexibility
+## What is observed
 
-The game provides behavioral observations for professional
-interpretation and does not independently diagnose mental disorders.
+Depending on the room and interaction, the system can record behavioral signals such as:
 
-## Project Structure
+- decision timing and choices
+- exploration and interaction patterns
+- responses to failure
+- persistence and retries
+- risk-related choices
+- help-seeking behavior
+- trust and choice switching
+- movement and approach/retreat behavior
+- repeated interactions
+- room completion and progression
 
-- game
-- behavior-engine
-- backend
-- clinician-dashboard
+These signals are stored as gameplay events and can be aggregated for specialist review.
 
-## Status
+## Project structure
 
-Early development.
+```text
+game/
+  src/
+    rooms/          # Room implementations
+    psychology/     # Behavioral tracking and analysis
+    session/        # Session persistence and upload
+    training/       # Future specialist-assigned training foundation
+    config/         # Runtime feature/config flags
+
+server/             # Small Node.js session ingestion API
+tests/              # Playwright browser smoke tests
+.github/workflows/  # CI workflows
+```
+
+## Local development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the game:
+
+```bash
+npm run dev
+```
+
+Build the production bundle:
+
+```bash
+npm run build
+```
+
+Preview the production build:
+
+```bash
+npm run preview
+```
+
+Run the session API:
+
+```npm
+npm run server
+```
+
+The API listens on port `8787` by default.
+
+## Configuration
+
+Client-side Vite variables:
+
+- `VITE_PSYCHGAME_MODE` — runtime mode; defaults to `specialist`.
+- `VITE_DATA_COLLECTION_ENABLED` — enables local behavioral event collection; defaults to `true`.
+- `VITE_DATA_UPLOAD_ENABLED` — enables remote session upload; defaults to `true`.
+- `VITE_API_URL` — API endpoint used by the session manager/uploader when configured.
+- `VITE_AUTHOR_TOKEN` — optional bearer token sent to the session API.
+
+Server variables:
+
+- `PORT` — API port; defaults to `8787`.
+- `AUTHOR_TOKEN` — optional bearer token required by session GET/POST endpoints.
+- `CORS_ORIGIN` — allowed CORS origin; defaults to `*`.
+
+If `AUTHOR_TOKEN` is enabled, the client must be configured with the matching token. Treat client-side tokens as non-secret because browser applications expose them to the user.
+
+## Session API
+
+The server exposes:
+
+- `GET /api/health` — public health check.
+- `POST /api/sessions` — stores a validated session report.
+- `GET /api/sessions` — returns session metadata.
+- `GET /api/sessions/:id` — returns a full stored session.
+
+Session uploads are limited to 2 MB and stored locally in `server/data/sessions.json`. The server keeps the most recent 5,000 session records.
+
+The ingestion endpoint validates the session identifier, player code, and event collection before persistence. Completed records are protected from being overwritten by later progress uploads.
+
+## Behavioral and training boundaries
+
+The observation phase and future training phase are intentionally separated:
+
+- Rooms 01-08 collect observations only.
+- Training targets and adaptive training state are designed for Rooms 09-20.
+- Training assignments require specialist control.
+- Training logic changes difficulty/state; it does not diagnose the player.
+- Specialist review remains required before training recommendations are treated as assignments.
+
+## Testing
+
+Browser smoke tests use Playwright and cover the core progression through the currently released rooms.
+
+Run them locally with:
+
+```bash
+npx playwright test
+```
+
+The CI workflow also builds the application and runs the browser smoke suite on pushes to `main` and on manual dispatch.
+
+## Privacy and interpretation
+
+Gameplay events may contain sensitive behavioral information. Production deployments should use appropriate access control, transport security, storage protection, retention policies, and consent procedures.
+
+PsychGame is an assessment-support tool. Its behavioral observations should be interpreted by a qualified professional and must not be presented as an automated clinical diagnosis.
