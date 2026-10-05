@@ -59,19 +59,27 @@ const server = http.createServer((req, res) => {
 
   if (req.url === "/api/sessions" && req.method === "POST") {
     if (!authorized(req)) return send(res, 401, { error: "Unauthorized" });
+    const MAX_BODY_BYTES = 2_000_000;
     const contentLength = Number(req.headers["content-length"] || 0);
-    if (Number.isFinite(contentLength) && contentLength > 2_000_000) {
+    if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+      req.resume();
       return send(res, 413, { error: "Payload too large" });
     }
+
     let raw = "";
+    let tooLarge = false;
     req.on("data", chunk => {
+      if (tooLarge) return;
       raw += chunk;
-      if (raw.length > 2_000_000) {
-        req.destroy();
-        return;
+      if (Buffer.byteLength(raw, "utf8") > MAX_BODY_BYTES) {
+        tooLarge = true;
+        raw = "";
+        req.resume();
+        send(res, 413, { error: "Payload too large" });
       }
     });
     req.on("end", () => {
+      if (tooLarge) return;
       try {
         const payload = JSON.parse(raw);
         if (!isValidSessionReport(payload?.report)) {
