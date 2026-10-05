@@ -18,7 +18,24 @@ function readSessions() {
 }
 
 function writeSessions(items) {
-  fs.writeFileSync(dataFile, JSON.stringify(items, null, 2), "utf8");
+  const tempFile = dataFile + ".tmp";
+  fs.writeFileSync(tempFile, JSON.stringify(items, null, 2), "utf8");
+  fs.renameSync(tempFile, dataFile);
+}
+
+function isValidSessionReport(report) {
+  return Boolean(
+    report &&
+    typeof report === "object" &&
+    typeof report.sessionId === "string" &&
+    report.sessionId.length > 0 &&
+    report.sessionId.length <= 128 &&
+    typeof report.playerCode === "string" &&
+    report.playerCode.length > 0 &&
+    report.playerCode.length <= 128 &&
+    Array.isArray(report.events) &&
+    report.events.length <= 10000
+  );
 }
 
 function authorized(req) {
@@ -57,7 +74,7 @@ const server = http.createServer((req, res) => {
     req.on("end", () => {
       try {
         const payload = JSON.parse(raw);
-        if (!payload?.report?.sessionId || !payload?.report?.playerCode) {
+        if (!isValidSessionReport(payload?.report)) {
           return send(res, 400, { error: "Invalid session report" });
         }
 
