@@ -38,6 +38,7 @@ export class Room04 {
     }
     for(const z of [5,-2,-9,-16,-23]){
       const panel=this.mesh(new THREE.BoxGeometry(3.55,2.8,.08),this.mat(0x20242c,.82,.08),[0,1.7,z]);
+      panel.userData.objectId="HALL_MARK";
       this.objects.hallMarks.push(panel);
       this.mesh(new THREE.BoxGeometry(3.1,.06,.06),this.mat(0x6b4c50,.5,.3),[0,3.05,z+.03]);
       const lamp=this.mesh(new THREE.BoxGeometry(.55,.08,.18),this.mat(0x9ca9bd,.3,.45,0x687a9a),[0,3.35,z]);
