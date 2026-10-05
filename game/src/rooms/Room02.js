@@ -74,7 +74,7 @@ export class Room02 {
     const count=this.observedPaths[path];
     this.tracker.log("BEHAVIOR_RESPONSE",{roomId:"ROOM_02",path,observations:count});
     if(count>=2){
-      this.objects.PATH_CLUE?.userData && (this.objects.PATH_CLUE.userData.hint = path === "PATH_LEFT" ? "رد پای قبلی را دنبال نکن." : path === "PATH_RIGHT" ? "این مسیر قبلاً دیده شده." : "چرا برگشتی؟");
+      this.objects.clue?.userData && (this.objects.clue.userData.hint = path === "PATH_LEFT" ? "رد پای قبلی را دنبال نکن." : path === "PATH_RIGHT" ? "این مسیر قبلاً دیده شده." : "چرا برگشتی؟");
       const target=this.pathLights[path==="PATH_LEFT"?0:path==="PATH_RIGHT"?2:1];
       if(target){
         const old=target.intensity;
