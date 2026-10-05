@@ -20,7 +20,7 @@ export class Companion {
     this.voiceTested = false;
     this.createUI();
     this.installVoiceUnlock();
-    this.say("خب... فکر کنم باید راه خروج رو پیدا کنیم.", 1000);
+    this.say("خب... بریم ببینیم راه خروج کجاست.", 1000, "calm");
     this.timer = setInterval(() => this.observe(), 350);
   }
 
@@ -178,42 +178,42 @@ export class Companion {
 
   react(event) {
     if (event.type === "RED_BUTTON_FIRST_SEEN" && !this.memory.pressedButton) {
-      this.say("اون رو دیدی؟ من جای تو بودم، دست بهش نمی‌زدم. 😏");
+      this.say("اون رو دیدی؟ من جای تو بودم... دست بهش نمی‌زدم.", 0, "tense");
       return;
     }
 
     if (event.type === "FAILURE") {
       if (this.memory.sawButton) {
-        this.say("خب... همون چیزی شد که ازش می‌ترسیدم. حالا عجله نکن؛ یه راه دیگه پیدا کنیم.");
+        this.say("خب... همون شد که ازش می‌ترسیدم. عجله نکن... یه راه دیگه پیدا کنیم.", 0, "fear");
       } else {
-        this.say("اوه... این یکی خوب پیش نرفت. باید یه راه دیگه پیدا کنیم.");
+        this.say("اوه... این یکی خوب پیش نرفت. بیا یه راه دیگه رو امتحان کنیم.", 0, "tense");
       }
       return;
     }
 
     if (event.type === "RETRY_AFTER_FAILURE") {
       if (this.memory.searchedDrawer) {
-        this.say("هنوز سرنخ کشو رو داریم. قبل از اینکه دوباره امتحانش کنیم، شاید بهتره اون رو دنبال کنیم.");
+        this.say("هنوز سرنخ کشو رو داریم. قبل از دوباره امتحان کردن، بیا همونو دنبال کنیم.", 0, "calm");
       } else {
-        this.say("دوباره می‌خوای امتحانش کنی؟ من ترجیح می‌دم اول اطراف رو بگردیم.");
+        this.say("باز می‌خوای امتحانش کنی؟ من ترجیح می‌دم اول یه دور اطراف رو بگردیم.", 0, "stress");
       }
       return;
     }
 
     if (event.type === "DRAWER_INSPECTED") {
       if (this.memory.failed) {
-        this.say("خوبه. بعد از اون اتفاق، رفتن سراغ سرنخ منطقی‌تره.");
+        this.say("خوبه... بعد از اون اتفاق، بهتره سرنخ رو دنبال کنیم.", 0, "calm");
       } else {
-        this.say("بالاخره یه سرنخ پیدا کردیم. شاید کلید به کارمون بیاد.");
+        this.say("بالاخره یه سرنخ پیدا شد. شاید همین کلید به کارمون بیاد.", 0, "calm");
       }
       return;
     }
 
     if (event.type === "DOOR_BLOCKED") {
       if (this.memory.retriedButton) {
-        this.say("در هنوز قفله. فکر کنم وقتشه روش قبلی رو کنار بذاریم.");
+        this.say("در هنوز قفله... فکر کنم وقتشه راه قبلی رو بی‌خیال بشیم.", 0, "tense");
       } else {
-        this.say("در قفل شده. بهتره اطراف رو دقیق‌تر بگردیم.");
+        this.say("در قفله. بیا یه کم دقیق‌تر اطراف رو بگردیم.", 0, "calm");
       }
     }
   }
