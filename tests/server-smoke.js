@@ -46,6 +46,9 @@ try {
   assert.equal(health.status, 200);
   assert.deepEqual(await health.json(), { ok: true });
 
+  const healthCors = health.headers.get("access-control-allow-origin");
+  assert.equal(healthCors, "http://test.local");
+
   const unauthorized = await request("/api/sessions");
   assert.equal(unauthorized.status, 401);
 
