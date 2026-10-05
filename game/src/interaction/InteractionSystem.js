@@ -21,6 +21,7 @@ export class InteractionSystem {
     this.completed = false;
     this.gameFinished = false;
     this.room8CompletionTimer = null;
+    this.room3CompletionTimer = null;
     this.lastLookedObject = null;
     this.lookStartTime = null;
     this.interactionCounts = {};
@@ -38,7 +39,7 @@ export class InteractionSystem {
   setCompanion(companion) { this.companion = companion; }
   setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
 
-  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); this.room8CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
+  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer); this.room8CompletionTimer = null; this.room3CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.interactionCounts = {}; }
 
   register(object, objectId) {
     object.userData.interactable = true;
@@ -317,7 +318,13 @@ InteractionSystem.prototype.handleRoom3 = function(objectId) {
     this.room?.completeRoom?.();
     this.tracker.log("ROOM_COMPLETED",{roomId:"ROOM_03"});
     this.companion?.say("انتخابت ثبت شد. اتاق بعدی آماده‌ست.");
-    setTimeout(()=>window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}})),3000);
+    if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer);
+    const completedRoom = this.room;
+    this.room3CompletionTimer = setTimeout(()=>{
+      this.room3CompletionTimer = null;
+      if (this.room !== completedRoom || !this.completed) return;
+      window.dispatchEvent(new CustomEvent("psychgame-room-complete",{detail:{roomId:"ROOM_03"}}));
+    },3000);
   }};
 
 
