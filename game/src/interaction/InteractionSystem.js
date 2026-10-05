@@ -111,32 +111,21 @@ export class InteractionSystem {
 
     if (target) {
       const objectId = target.userData.objectId;
-      const isNewTarget = this.lastLookedObject !== objectId;
 
-      // Touch/pointer interaction can happen before the next animation frame.
-      // Start the same look interval used by the center-ray path so reaction
-      // time stays comparable on desktop and mobile.
-      if (isNewTarget) {
-        this.finishLook();
-        this.lastLookedObject = objectId;
-        this.lookStartTime = performance.now();
-        this.tracker.log("OBJECT_LOOK_START", {
-          objectId,
-          roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
-          source: "POINTER"
-        });
-      }
-
+      // A tap is an explicit pointer action, not proof that the player had
+      // been looking at the target. Preserve an existing center-ray look
+      // interval when it is the same target; otherwise interaction timing
+      // stays null instead of being fabricated from the tap itself.
       this.currentTarget = target;
       window.dispatchEvent(new CustomEvent("psychgame-target", { detail: { objectId } }));
-      this.interact();
+      this.interact({ source: "POINTER" });
       return true;
     }
 
     return false;
   }
 
-  interact() {
+  interact(options = {}) {
     if (this.completed || this.gameFinished) return;
     const target = this.currentTarget;
     if (!target) return;
@@ -152,7 +141,8 @@ export class InteractionSystem {
       objectId,
       attempt: this.interactionCounts[objectId],
       reactionTimeMs,
-      roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`
+      roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
+      source: options.source || "KEYBOARD_OR_CENTER"
     });
 
     if (this.roomNumber === 2) { this.handleRoom2(objectId); return; }
