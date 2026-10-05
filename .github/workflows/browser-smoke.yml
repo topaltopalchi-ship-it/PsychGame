@@ -1,0 +1,39 @@
+name: Browser Smoke Tests
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build game
+        run: npm run build
+
+      - name: Start preview server
+        run: npm run preview -- --host 127.0.0.1 > /tmp/psychgame-preview.log 2>&1 &
+
+      - name: Run browser smoke tests
+        run: npx playwright test
+
+      - name: Upload preview log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psychgame-preview-log
+          path: /tmp/psychgame-preview.log
