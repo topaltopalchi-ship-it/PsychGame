@@ -21,7 +21,7 @@ export class SpecialistPanel {
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
         <div><h2 style="margin:0 0 6px">پنل متخصص</h2>
         <div style="opacity:.65;font-size:12px">داده‌های خام و گزارش رفتاری — فقط برای بررسی تخصصی</div></div>
-        <div><button id="pg-sp-export">خروجی JSON</button> <button id="pg-sp-close">بستن</button></div>
+        <div><button id="pg-sp-remote">جلسات آنلاین</button> <button id="pg-sp-export">خروجی JSON</button> <button id="pg-sp-close">بستن</button></div>
       </div>
       <div id="pg-sp-body" style="margin-top:20px"></div>
     </div>`;
@@ -29,7 +29,7 @@ export class SpecialistPanel {
     document.body.appendChild(root);
     this.root = root;
     root.querySelector("#pg-sp-close").onclick = () => this.close();
-    root.querySelector("#pg-sp-export").onclick = () => this.export(report);
+    root.querySelector("#pg-sp-export").onclick = () => this.export(report);\n    root.querySelector("#pg-sp-remote").onclick = () => this.loadRemoteSessions();
 
     const body = root.querySelector("#pg-sp-body");
     body.innerHTML = `
@@ -91,7 +91,7 @@ export class SpecialistPanel {
     return value.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   }
 
-  export(report) {
+  async loadRemoteSessions() {\n    const endpoint = String(import.meta.env.VITE_API_URL || "").replace(/\\/$/, "");\n    if (!endpoint) { alert("VITE_API_URL تنظیم نشده است."); return; }\n    const token = prompt("توکن نویسنده را وارد کنید:");\n    if (!token) return;\n    try {\n      const response = await fetch(endpoint + "/api/sessions", { headers: { Authorization: "Bearer " + token } });\n      if (!response.ok) throw new Error("HTTP " + response.status);\n      const data = await response.json();\n      const sessions = Array.isArray(data.sessions) ? data.sessions : [];\n      const body = this.root?.querySelector("#pg-sp-body");\n      if (!body) return;\n      const block = document.createElement("div");\n      block.innerHTML = `<h3>جلسات ثبت‌شده روی سرور (${sessions.length})</h3>` +\n        `<div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:12px">` +\n        (sessions.length ? sessions.map(s => `<div style="padding:10px 0;border-bottom:1px solid #202633"><b>${this.escape(String(s.playerCode || "—"))}</b> · ${this.escape(String(s.sessionId || "—"))}<br><small>رویداد: ${s.eventCount ?? "—"} · تکمیل: ${s.completed ? "بله" : "خیر"} · مسیر: ${this.escape((s.path || []).join(" → "))}</small></div>`).join("") : "هنوز جلسه‌ای روی سرور ثبت نشده است.") +\n        `</div>`;\n      body.prepend(block);\n    } catch (error) {\n      alert("دریافت جلسات آنلاین ناموفق بود.");\n      console.warn("PsychGame remote sessions failed", error);\n    }\n  }\n\n  export(report) {
     const blob = new Blob([JSON.stringify(report,null,2)], { type:"application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
