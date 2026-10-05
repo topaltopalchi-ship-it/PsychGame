@@ -61,6 +61,11 @@ export class SpecialistPanel {
         ${this.trainingPlanView()}
       </div>
 
+      <h3>پیشرفت فعلی تمرین</h3>
+      <div id="pg-training-progress" style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
+        ${this.trainingProgressView(report.trainingProgress)}
+      </div>
+
       <h3>نتیجه تمرین تخصصی</h3>
       <div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
         ${this.trainingResultView(report.trainingResult)}
@@ -81,6 +86,18 @@ export class SpecialistPanel {
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.analysis,null,2))}</pre>`;
 
     this.bindTrainingButtons();
+  }
+
+  trainingProgressView(progress) {
+    if (!progress) return `<div style="opacity:.6">هنوز جلسه تمرینی فعالی ثبت نشده است.</div>`;
+    const assignments = Array.isArray(progress.assignments) ? progress.assignments : [];
+    const active = assignments.filter(item => !item.completed && !item.exhausted && !item.aborted).length;
+    return `<div style="margin-bottom:10px"><b>اتاق جاری:</b> ${this.escape(String(progress.roomId || "—"))} · <b>اهداف فعال:</b> ${active}</div>` +
+      (assignments.length ? assignments.map(item => `<div style="padding:9px 0;border-bottom:1px solid #202633">
+        <b>${this.escape(item.targetId)}</b> · سطح ${this.escape(String(item.level ?? "—"))}
+        <span style="opacity:.7"> · تلاش: ${Number(item.attempts || 0)} · موفق: ${Number(item.successes || 0)} · ناموفق: ${Number(item.failures || 0)}</span>
+        <span style="opacity:.7"> · ${item.completed ? "تکمیل" : item.exhausted ? "سقف تلاش" : item.aborted ? "متوقف‌شده" : "در حال اجرا"}</span>
+      </div>`).join("") : `<div style="opacity:.6">هدف تمرینی فعالی ثبت نشده است.</div>`);
   }
 
   trainingResultView(result) {
