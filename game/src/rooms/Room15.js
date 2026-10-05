@@ -23,9 +23,9 @@ export class Room15 {
   }
   choose(id) {
     if (this.completed || !this.assignment) return;
-    this.lastActionAt = performance.now();
+    const now = performance.now(); const pause = this.lastActionAt ? now - this.lastActionAt : 0;
     this.tracker.log("TRAINING_INHIBITION_ACTION", { roomId: "ROOM_15", objectId: id, requiredPauseMs: this.assignment.target?.config?.requiredPauseMs || 0 });
-    if (id === "INHIBITION_TRIGGER") this.companion?.say?.("مکث کن. هنوز لازم نیست واکنش نشان بدهی.");
+    if (id === "INHIBITION_TRIGGER") { this.lastActionAt = now; this.companion?.say?.("مکث کن. هنوز لازم نیست واکنش نشان بدهی."); }
   }
   finish() {
     if (this.completed || !this.assignment) return;
