@@ -61,7 +61,7 @@ export class Room05 {
     this.tracker.log("ROOM_05_MIRROR_INSPECTED",{mirror:id,count:this.observations[id],firstMirror:this.firstMirror,secondsBeforeChoice:Math.round(elapsed*10)/10});
     if(this.observations[id]>=2){this.glitchMirror(id);}
     if(this.observations[id]>=3 && id!=="MIRROR_CENTER"){
-      this.companion?.say?.("باز هم برگشتی به همون آینه... دنبال چیزی می‌گردی که بار اول ندیدی؟");
+      this.companion?.say?.("باز هم برگشتی به همون آینه... دنبال چیزی می‌گردی که بار اول ندیدی؟", 0, "stress");
     }
   }
   glitchMirror(id){
@@ -72,7 +72,7 @@ export class Room05 {
     glass.material.color.set(this.glitchCount%2?0x3d2430:0x243044);
     const light=this.objects.MIRROR_LIGHT; if(light)light.intensity=2.8;
     this.tracker.log("ROOM_05_REFLECTION_GLITCH",{mirror:id,count:this.glitchCount});
-    this.companion?.say?.(id==="MIRROR_CENTER"?"این یکی... چرا شبیه آینه‌های دیگه نیست؟":"دیدیش؟ فقط چند لحظه بود.");
+    this.companion?.say?.(id==="MIRROR_CENTER"?"این یکی... چرا شبیه آینه‌های دیگه نیست؟":"دیدیش؟ فقط چند لحظه بود.", 0, "fear");
     const timer=setTimeout(()=>{if(this.completed){this.glitchTimers=this.glitchTimers.filter(t=>t!==timer);return;}if(shadow)shadow.visible=false;if(light)light.intensity=1.2;if(glass.material)glass.material.color.set(0x243044);this.glitchTimers=this.glitchTimers.filter(t=>t!==timer);},700);
     this.glitchTimers.push(timer);
   }
