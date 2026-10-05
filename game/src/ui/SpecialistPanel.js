@@ -1,4 +1,5 @@
 import { SpecialistReport } from "../psychology/SpecialistReport.js";
+import { buildTrainingRecommendations } from "../training/TrainingRecommendations.js";
 
 export class SpecialistPanel {
   constructor(session) {
@@ -9,6 +10,7 @@ export class SpecialistPanel {
   open() {
     if (this.root) return;
     const report = SpecialistReport.build(this.session.getSessionData());
+    const recommendations = buildTrainingRecommendations(report);
     const root = document.createElement("div");
     root.id = "pg-specialist-panel";
     Object.assign(root.style, {
@@ -29,7 +31,8 @@ export class SpecialistPanel {
     document.body.appendChild(root);
     this.root = root;
     root.querySelector("#pg-sp-close").onclick = () => this.close();
-    root.querySelector("#pg-sp-export").onclick = () => this.export(report);\n    root.querySelector("#pg-sp-remote").onclick = () => this.loadRemoteSessions();
+    root.querySelector("#pg-sp-export").onclick = () => this.export(report);
+    root.querySelector("#pg-sp-remote").onclick = () => this.loadRemoteSessions();
 
     const body = root.querySelector("#pg-sp-body");
     body.innerHTML = `
@@ -42,17 +45,44 @@ export class SpecialistPanel {
         ${this.card("تعداد تصمیم‌ها", report.decisionCount)}
         ${this.card("اولین تصمیم", this.duration(report.timeToFirstDecisionMs))}
       </div>
+
+      <h3>پیشنهادهای تمرینی برای بررسی متخصص</h3>
+      <div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
+        <div style="opacity:.65;font-size:12px;margin-bottom:10px">
+          این موارد فقط از الگوهای رفتاری بازی استخراج شده‌اند و تشخیص پزشکی نیستند.
+        </div>
+        ${this.trainingRecommendations(recommendations)}
+      </div>
+
       <h3>مسیر طی‌شده</h3>
       <div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:14px">
         ${this.escape((report.path || []).join(" → ") || "—")}
       </div>
       <h3>اتاق‌ها</h3>${this.rooms(report.rooms)}
-      <h3>مدت نگاه به اشیاء</h3><pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px;max-height:320px;overflow:auto">${this.escape(JSON.stringify(report.lookSummary,null,2))}</pre>\n      <h3>تعامل‌های تکرارشده</h3><pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px;max-height:260px;overflow:auto">${this.escape(JSON.stringify(report.repeatedInteractions,null,2))}</pre>\n      <h3>Timeline رفتار</h3><pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px;max-height:420px;overflow:auto">${this.escape(JSON.stringify(report.timeline,null,2))}</pre>\n      <h3>جزئیات اتاق‌های ۰۴ تا ۰۸</h3>
+      <h3>مدت نگاه به اشیاء</h3><pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px;max-height:320px;overflow:auto">${this.escape(JSON.stringify(report.lookSummary,null,2))}</pre>
+      <h3>تعامل‌های تکرارشده</h3><pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px;max-height:260px;overflow:auto">${this.escape(JSON.stringify(report.repeatedInteractions,null,2))}</pre>
+      <h3>Timeline رفتار</h3><pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px;max-height:420px;overflow:auto">${this.escape(JSON.stringify(report.timeline,null,2))}</pre>
+      <h3>جزئیات اتاق‌های ۰۴ تا ۰۸</h3>
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.roomDetails,null,2))}</pre>
       <h3>انواع رویداد</h3>
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.eventTypes,null,2))}</pre>
       <h3>تحلیل</h3>
       <pre style="white-space:pre-wrap;background:#0b0e14;padding:14px;border-radius:10px">${this.escape(JSON.stringify(report.analysis,null,2))}</pre>`;
+  }
+
+  trainingRecommendations(data) {
+    if (!data.recommendations.length) {
+      return `<div style="opacity:.65">بر اساس داده فعلی، پیشنهاد تمرینی مشخصی تولید نشده است.</div>`;
+    }
+
+    return data.recommendations.map((item) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #202633">
+        <div>
+          <div style="font-weight:bold">${this.escape(item.label)}</div>
+          <div style="opacity:.55;font-size:11px;margin-top:4px">${this.escape(item.targetId)} · نیازمند بررسی متخصص</div>
+        </div>
+        <button data-training-target="${this.escape(item.targetId)}">انتخاب</button>
+      </div>`).join("");
   }
 
   card(label, value) {
@@ -91,7 +121,31 @@ export class SpecialistPanel {
     return value.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   }
 
-  async loadRemoteSessions() {\n    const endpoint = String(import.meta.env.VITE_API_URL || "").replace(/\\/$/, "");\n    if (!endpoint) { alert("VITE_API_URL تنظیم نشده است."); return; }\n    const token = prompt("توکن نویسنده را وارد کنید:");\n    if (!token) return;\n    try {\n      const response = await fetch(endpoint + "/api/sessions", { headers: { Authorization: "Bearer " + token } });\n      if (!response.ok) throw new Error("HTTP " + response.status);\n      const data = await response.json();\n      const sessions = Array.isArray(data.sessions) ? data.sessions : [];\n      const body = this.root?.querySelector("#pg-sp-body");\n      if (!body) return;\n      const block = document.createElement("div");\n      block.innerHTML = `<h3>جلسات ثبت‌شده روی سرور (${sessions.length})</h3>` +\n        `<div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:12px">` +\n        (sessions.length ? sessions.map(s => `<div style="padding:10px 0;border-bottom:1px solid #202633"><b>${this.escape(String(s.playerCode || "—"))}</b> · ${this.escape(String(s.sessionId || "—"))}<br><small>رویداد: ${s.eventCount ?? "—"} · تکمیل: ${s.completed ? "بله" : "خیر"} · مسیر: ${this.escape((s.path || []).join(" → "))}</small></div>`).join("") : "هنوز جلسه‌ای روی سرور ثبت نشده است.") +\n        `</div>`;\n      body.prepend(block);\n    } catch (error) {\n      alert("دریافت جلسات آنلاین ناموفق بود.");\n      console.warn("PsychGame remote sessions failed", error);\n    }\n  }\n\n  export(report) {
+  async loadRemoteSessions() {
+    const endpoint = String(import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+    if (!endpoint) { alert("VITE_API_URL تنظیم نشده است."); return; }
+    const token = prompt("توکن نویسنده را وارد کنید:");
+    if (!token) return;
+    try {
+      const response = await fetch(endpoint + "/api/sessions", { headers: { Authorization: "Bearer " + token } });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const data = await response.json();
+      const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+      const body = this.root?.querySelector("#pg-sp-body");
+      if (!body) return;
+      const block = document.createElement("div");
+      block.innerHTML = `<h3>جلسات ثبت‌شده روی سرور (${sessions.length})</h3>` +
+        `<div style="background:#0b0e14;border:1px solid #202633;border-radius:10px;padding:12px">` +
+        (sessions.length ? sessions.map(s => `<div style="padding:10px 0;border-bottom:1px solid #202633"><b>${this.escape(String(s.playerCode || "—"))}</b> · ${this.escape(String(s.sessionId || "—"))}<br><small>رویداد: ${s.eventCount ?? "—"} · تکمیل: ${s.completed ? "بله" : "خیر"} · مسیر: ${this.escape((s.path || []).join(" → "))}</small></div>`).join("") : "هنوز جلسه‌ای روی سرور ثبت نشده است.") +
+        `</div>`;
+      body.prepend(block);
+    } catch (error) {
+      alert("دریافت جلسات آنلاین ناموفق بود.");
+      console.warn("PsychGame remote sessions failed", error);
+    }
+  }
+
+  export(report) {
     const blob = new Blob([JSON.stringify(report,null,2)], { type:"application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
