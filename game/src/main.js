@@ -162,9 +162,16 @@ window.addEventListener("psychgame-target", (event) => {
 function clearRoomGeometry() {
   activeRoom?.destroy?.();
   scene.children.slice().forEach((child) => {
-    if (child.isMesh || (child.isLight && child !== ambientLight && child !== mainLight && child !== rimLight)) {
-      scene.remove(child);
+    if (child === ambientLight || child === mainLight || child === rimLight) return;
+    if (!child.isMesh && !child.isLight) return;
+
+    if (child.isMesh) {
+      child.geometry?.dispose?.();
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach((material) => material?.dispose?.());
     }
+
+    scene.remove(child);
   });
 }
 
