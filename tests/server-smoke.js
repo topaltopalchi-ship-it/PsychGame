@@ -176,6 +176,42 @@ try {
   assert.equal(retentionSessions.sessions.some((item) => item.id === "retention-0"), false);
   assert.equal(retentionSessions.sessions.some((item) => item.id === "retention-new"), true);
 
+  const maxEventsReport = {
+    sessionId: "max-events-session",
+    playerCode: "PLAYER-LIMIT",
+    events: Array.from({ length: 10000 }, (_, index) => ({
+      eventIndex: index,
+      type: "TEST_EVENT",
+      elapsedMs: index
+    })),
+    eventCount: 10000
+  };
+  const maxEvents = await request("/api/sessions", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer test-token",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ completed: false, report: maxEventsReport })
+  });
+  assert.equal(maxEvents.status, 201);
+
+  const tooManyEventsReport = {
+    ...maxEventsReport,
+    sessionId: "too-many-events-session",
+    events: [...maxEventsReport.events, { eventIndex: 10000, type: "TEST_EVENT", elapsedMs: 10000 }],
+    eventCount: 10001
+  };
+  const tooManyEvents = await request("/api/sessions", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer test-token",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ completed: false, report: tooManyEventsReport })
+  });
+  assert.equal(tooManyEvents.status, 400);
+
   const oversized = await request("/api/sessions", {
     method: "POST",
     headers: {
