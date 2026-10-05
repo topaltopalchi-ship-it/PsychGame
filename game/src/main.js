@@ -229,14 +229,7 @@ window.addEventListener("psychgame-room-complete", (event) => {
 window.psychGame = {
   interact: () => interaction.interact(),
   interactAt: (x, y) => interaction.interactAt(x, y),
-  session,
-  tracker,
-  getPlayerCode: () => session.getPlayerCode(),
-  getEvents: () => tracker.getEvents(),
-  getAnalysis: () => session.getAnalysis(),
-  getReport: () => session.getSessionData(),
-  exportSession: () => session.exportSession(),
-  audioManager
+  getPlayerCode: () => session.getPlayerCode()
 };
 
 const clock = new THREE.Clock();
