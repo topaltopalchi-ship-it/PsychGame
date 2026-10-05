@@ -13,9 +13,14 @@ export function createTrainingPlan({
   sourceSessionId = null,
   assignments = []
 } = {}) {
-  const safeAssignments = assignments
-    .map((assignment) => createTrainingAssignment(assignment))
-    .filter(Boolean);
+  const safeAssignments = [];
+  const targetIds = new Set();
+  for (const assignment of assignments) {
+    const created = createTrainingAssignment(assignment);
+    if (!created || targetIds.has(created.targetId)) continue;
+    targetIds.add(created.targetId);
+    safeAssignments.push(created);
+  }
 
   return {
     version: 1,
@@ -34,6 +39,9 @@ export function addTrainingAssignment(plan, assignment) {
   };
 
   const created = createTrainingAssignment(assignment);
+  if (next.assignments.some((item) => item.targetId === created.targetId)) {
+    return next;
+  }
   next.assignments.push(created);
   return next;
 }
