@@ -9,6 +9,12 @@ const dataFile = path.join(dataDir, "sessions.json");
 const PORT = Number(process.env.PORT || 8787);
 const AUTHOR_TOKEN = process.env.AUTHOR_TOKEN || "";
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
+const NODE_ENV = String(process.env.NODE_ENV || "development").toLowerCase();
+
+if (NODE_ENV === "production") {
+  if (!AUTHOR_TOKEN) throw new Error("AUTHOR_TOKEN must be configured in production");
+  if (!CORS_ORIGIN || CORS_ORIGIN === "*") throw new Error("CORS_ORIGIN must be an exact origin in production");
+}
 
 fs.mkdirSync(dataDir, { recursive: true });
 if (!fs.existsSync(dataFile)) fs.writeFileSync(dataFile, "[]", "utf8");
