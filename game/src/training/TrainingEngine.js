@@ -15,6 +15,7 @@ export class TrainingEngine {
     this.roomId = roomId;
     this.onEvent = onEvent;
     this.session = createTrainingSession(plan, roomId);
+    this.completedTargets = new Set();
   }
 
   getSession() {
@@ -44,6 +45,8 @@ export class TrainingEngine {
   }
 
   recordAttempt(targetId, successful, metrics = {}) {
+    const assignment = this.getAssignment(targetId);
+    if (!assignment) return this.getSession();
     if (!this.canAttempt(targetId)) return this.getSession();
 
     const before = this.getAssignment(targetId);
