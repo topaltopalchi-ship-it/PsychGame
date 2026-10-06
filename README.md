@@ -85,7 +85,7 @@ Client-side Vite variables:
 - `VITE_DATA_COLLECTION_ENABLED` — enables local behavioral event collection; defaults to `true`.
 - `VITE_DATA_UPLOAD_ENABLED` — enables remote session upload; defaults to `true`.
 - `VITE_API_URL` — API endpoint used by the session manager/uploader when configured.
-- `VITE_AUTHOR_TOKEN` — optional bearer token sent to the session API.
+- `VITE_AUTHOR_TOKEN` — optional bearer token sent to the session API; browser-exposed and not a secret.\n- `VITE_AUTHOR_PANEL_CODE` — optional author-panel gate used by the local/specialist UI. Do not treat it as a production secret; for production, specialist access should be enforced server-side.
 
 Server variables:
 
