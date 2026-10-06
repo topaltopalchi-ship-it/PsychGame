@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { PlayerController } from "./player/PlayerController.js";
 import { InteractionSystem } from "./interaction/InteractionSystem.js";
 import { SessionManager } from "./session/SessionManager.js";
+import { SessionUploader } from "./session/SessionUploader.js";
 import { Room01 } from "./rooms/Room01.js";
 import { Room02 } from "./rooms/Room02.js";
 import { Room03 } from "./rooms/Room03.js";
@@ -281,6 +282,9 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) { if (activeRoom?.co
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_03" || activeRoom?.constructor?.name !== "Room03" || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion })); });
 
 window.psychGame = { interact: () => interaction.interact(), interactAt: (x, y) => interaction.interactAt(x, y), getPlayerCode: () => session.getPlayerCode() };
+if (new URLSearchParams(window.location.search).has("browserSmoke")) {
+  window.psychGame.createSessionUploader = (options) => new SessionUploader(options);
+}
 
 const clock = new THREE.Clock();
 function startRoom05(context={previousRoom:"ROOM_04"}) { if (gameFinished || activeRoom?.constructor?.name !== "Room04" || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room05(scene, tracker); activeRoom.start({...context, companion}); interaction.setRoom(activeRoom,5); audioManager.setRoom(5); setRoomMovementBounds(5); document.getElementById("pg-title").textContent="YOL · اتاق ۰۵ — اتاق آینه‌ها"; companion?.say("اتاق پنجمه... اینجا به چیزی که می‌بینی زود اعتماد نکن.", 0, "tense"); }
