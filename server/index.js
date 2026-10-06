@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(__dirname, "data");
 const dataFile = path.join(dataDir, "sessions.json");
+const patientsFile = path.join(dataDir, "patients.json");
 const PORT = Number(process.env.PORT || 8787);
 const AUTHOR_TOKEN = process.env.AUTHOR_TOKEN || "";
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "";
@@ -20,10 +21,22 @@ if (NODE_ENV === "production") {
 
 fs.mkdirSync(dataDir, { recursive: true });
 if (!fs.existsSync(dataFile)) fs.writeFileSync(dataFile, "[]", "utf8");
+if (!fs.existsSync(patientsFile)) fs.writeFileSync(patientsFile, "[]", "utf8");
 
 function readSessions() {
   try { return JSON.parse(fs.readFileSync(dataFile, "utf8")); }
   catch { return []; }
+}
+
+function readPatients() {
+  try { return JSON.parse(fs.readFileSync(patientsFile, "utf8")); }
+  catch { return []; }
+}
+
+function writePatients(items) {
+  const tempFile = patientsFile + ".tmp";
+  fs.writeFileSync(tempFile, JSON.stringify(items, null, 2), "utf8");
+  fs.renameSync(tempFile, patientsFile);
 }
 
 function writeSessions(items) {
@@ -129,9 +142,41 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.url.startsWith("/api/patients") && req.method === "POST") {
+    if (!adminAuthorized(req)) return send(res, 401, { error: "Unauthorized" });
+    let raw = "";
+    req.on("data", chunk => { raw += chunk; if (Buffer.byteLength(raw, "utf8") > 10000) req.destroy(); });
+    req.on("end", () => {
+      try {
+        const body = JSON.parse(raw || "{}");
+        const name = String(body.name || "").trim();
+        let code = String(body.code || "").trim().toUpperCase();
+        if (!name || name.length > 200) return send(res, 400, { error: "Invalid patient name" });
+        if (!code) code = "P-" + Math.floor(100000 + Math.random() * 900000);
+        if (!/^[A-Z0-9_-]{4,64}$/.test(code)) return send(res, 400, { error: "Invalid patient code" });
+        const patients = readPatients();
+        if (patients.some(p => p.code === code)) return send(res, 409, { error: "Patient code already exists" });
+        const patient = { code, name, createdAt: new Date().toISOString() };
+        patients.push(patient); writePatients(patients.slice(-10000));
+        return send(res, 201, { ok: true, patient });
+      } catch { return send(res, 400, { error: "Invalid JSON" }); }
+    });
+    return;
+  }
+
+  if (req.url.startsWith("/api/patients") && req.method === "GET") {
+    if (!adminAuthorized(req)) return send(res, 401, { error: "Unauthorized" });
+    const url = new URL(req.url, "http://localhost");
+    const search = String(url.searchParams.get("search") || "").trim().toLowerCase();
+    const patients = readPatients().filter(p => !search || String(p.code).toLowerCase().includes(search) || String(p.name).toLowerCase().includes(search));
+    return send(res, 200, { patients: patients.slice(-100) });
+  }
+
   if (req.url === "/api/sessions" && req.method === "GET") {
     if (!adminAuthorized(req)) return send(res, 401, { error: "Unauthorized" });
-    const sessions = readSessions().map(({ report, ...meta }) => ({
+    const url = new URL(req.url, "http://localhost");
+    const patientCode = String(url.searchParams.get("patientCode") || "").trim();
+    const sessions = readSessions().filter(item => !patientCode || item.playerCode === patientCode || item.report?.playerCode === patientCode).map(({ report, ...meta }) => ({
       ...meta,
       playerCode: report.playerCode,
       sessionId: report.sessionId,
