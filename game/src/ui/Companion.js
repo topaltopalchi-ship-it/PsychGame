@@ -4,7 +4,7 @@ export class Companion {
     this.lastEventCount = 0;
     this.memory = { sawButton:false, pressedButton:false, failed:false, retriedButton:false, searchedDrawer:false, checkedDoorAfterFailure:false, exploredBeforeFailure:false };
     this.voiceEnabled = true;
-    this.showText = false;
+    this.showText = true;
     this.voiceUnlocked = false;
     this.pendingVoice = null;
     this.voiceMood = "calm";
@@ -18,7 +18,7 @@ export class Companion {
     this.sayTimers = new Set();
     this.createUI();
     this.installVoiceUnlock();
-    this.say("خب... بریم ببینیم راه خروج کجاست.", 1000, "calm");
+    this.say("خب... بریم ببینیم راه خروج کجاست.", 900, "calm");
     this.timer = setInterval(() => this.observe(), 350);
   }
 
@@ -50,7 +50,7 @@ export class Companion {
     if(this.speechActive){if(message===this.pendingVoice?.message||message===this.queuedVoice?.message)return;this.queuedVoice={message,mood};return;}
     this.pendingVoice={message,mood};
     try{
-      const synth=window.speechSynthesis;synth.cancel();synth.resume();const voices=synth.getVoices();const voice=voices.find(v=>/^fa(-|_)/i.test(v.lang))||voices.find(v=>/^ar(-|_)/i.test(v.lang))||voices.find(v=>v.default)||voices[0];
+      const synth=window.speechSynthesis;synth.cancel();synth.resume();const voices=synth.getVoices();const voice=voices.find(v=>/^fa(-|_)/i.test(v.lang))||voices.find(v=>/^ar(-|_)/i.test(v.lang))||voices.find(v=>/^tr(-|_)/i.test(v.lang))||voices.find(v=>v.default)||voices[0];
       const utterance=new SpeechSynthesisUtterance(message);utterance.lang=voice?.lang||"fa-IR";
       const profile={calm:{rate:.88,pitch:.95,volume:1},tense:{rate:.96,pitch:.82,volume:1},stress:{rate:1.02,pitch:.78,volume:1},fear:{rate:.70,pitch:.62,volume:.92}}[mood]||{rate:.88,pitch:.95,volume:1};
       utterance.rate=profile.rate;utterance.pitch=profile.pitch;utterance.volume=profile.volume;if(voice)utterance.voice=voice;
