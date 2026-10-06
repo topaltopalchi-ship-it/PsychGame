@@ -1,3 +1,5 @@
+let schemaPromise = null;
+
 const MAX_BODY_BYTES = 2_000_000;
 const MAX_SESSIONS = 5000;
 
@@ -46,6 +48,46 @@ async function parseJson(request) {
   } catch {
     return undefined;
   }
+}
+
+async function ensureSchema(env) {
+  if (schemaPromise) return schemaPromise;
+
+  schemaPromise = env.DB.batch([
+    env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id TEXT PRIMARY KEY,
+        player_code TEXT NOT NULL,
+        received_at TEXT NOT NULL,
+        completed INTEGER NOT NULL DEFAULT 0,
+        report_json TEXT NOT NULL
+      )
+    `),
+    env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_received_at
+      ON sessions(received_at)
+    `),
+    env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_player_code
+      ON sessions(player_code)
+    `),
+    env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS patients (
+        code TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    `),
+    env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_patients_name
+      ON patients(name)
+    `)
+  ]).catch(error => {
+    schemaPromise = null;
+    throw error;
+  });
+
+  return schemaPromise;
 }
 
 async function countSessions(env) {
@@ -228,6 +270,7 @@ export default {
 
     if (url.pathname === "/api/sessions" && request.method === "POST") {
       try {
+        await ensureSchema(env);
         return await handlePost(request, env);
       } catch (error) {
         console.error(error);
@@ -237,6 +280,7 @@ export default {
 
     if (url.pathname === "/api/patients" && request.method === "POST") {
       try {
+        await ensureSchema(env);
         return await handlePatientPost(request, env);
       } catch (error) {
         console.error(error);
@@ -247,6 +291,7 @@ export default {
     if (url.pathname === "/api/patients" && request.method === "GET") {
       if (!authorized(request, env.ADMIN_TOKEN)) return json(env, 401, {error: "Unauthorized"});
       try {
+        await ensureSchema(env);
         return await handlePatientList(url, env);
       } catch (error) {
         console.error(error);
@@ -257,6 +302,7 @@ export default {
     if (url.pathname === "/api/sessions" && request.method === "GET") {
       if (!authorized(request, env.ADMIN_TOKEN)) return json(env, 401, {error: "Unauthorized"});
       try {
+        await ensureSchema(env);
         return await handleSessionList(url, env);
       } catch (error) {
         console.error(error);
@@ -267,6 +313,7 @@ export default {
     if (url.pathname.startsWith("/api/sessions/") && request.method === "GET") {
       if (!authorized(request, env.ADMIN_TOKEN)) return json(env, 401, {error: "Unauthorized"});
       try {
+        await ensureSchema(env);
         return await handleGet(decodeURIComponent(url.pathname.slice("/api/sessions/".length)), env);
       } catch (error) {
         console.error(error);
