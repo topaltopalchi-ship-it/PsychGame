@@ -21,32 +21,68 @@ jobs:
       - name: Install Wrangler
         run: npm install --global wrangler
 
-      - name: Inject D1 database id
-        env:
-          D1_DATABASE_ID: ${{ secrets.PSYCHGAME_D1_DATABASE_ID }}
-        run: |
-          test -n "$D1_DATABASE_ID"
-          sed -i "s/REPLACE_WITH_D1_DATABASE_ID/$D1_DATABASE_ID/" worker/wrangler.toml
-
-      - name: Apply D1 schema
+      - name: Resolve Cloudflare account
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          D1_DATABASE_ID: ${{ secrets.PSYCHGAME_D1_DATABASE_ID }}
-        run: wrangler --config=worker/wrangler.toml d1 execute psychgame-sessions-2026 --remote --file=worker/schema.sql
-
-      - name: Set Worker secrets
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          AUTHOR_TOKEN: ${{ secrets.PSYCHGAME_AUTHOR_TOKEN }}
-          ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
+          CONFIGURED_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          printf '%s' "$AUTHOR_TOKEN" | wrangler secret put AUTHOR_TOKEN
-          printf '%s' "$ADMIN_TOKEN" | wrangler secret put ADMIN_TOKEN
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4"
+          account_id="${CONFIGURED_ACCOUNT_ID:-}"
+
+          if [ -n "$account_id" ]; then
+            status="$(curl -sS -o /tmp/account.json -w "%{http_code}" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "$api/accounts/$account_id")"
+            if [ "$status" = "200" ] && jq -e '.success == true' /tmp/account.json >/dev/null; then
+              echo "Using configured Cloudflare account."
+              echo "CLOUDFLARE_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
+              exit 0
+            fi
+            echo "Configured Cloudflare account ID is not valid for this token; discovering the correct account."
+          fi
+
+          curl -sS -f \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "$api/accounts?per_page=50" > /tmp/accounts.json
+
+          mapfile -t account_ids < <(jq -r '.result[]?.id' /tmp/accounts.json)
+          if [ "${#account_ids[@]}" -eq 1 ]; then
+            echo "Using the only Cloudflare account available to the token."
+            echo "CLOUDFLARE_ACCOUNT_ID=${account_ids[0]}" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          matches=()
+          for id in "${account_ids[@]}"; do
+            status="$(curl -sS -o /tmp/worker.json -w "%{http_code}" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "$api/accounts/$id/workers/scripts/psychgame-api/settings" || true)"
+            if [ "$status" = "200" ] && jq -e '.success == true' /tmp/worker.json >/dev/null 2>&1; then
+              matches+=( "$id" )
+            fi
+          done
+
+          if [ "${#matches[@]}" -eq 1 ]; then
+            echo "Found psychgame-api in the correct Cloudflare account."
+            echo "CLOUDFLARE_ACCOUNT_ID=${matches[0]}" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          echo "::error::Could not uniquely resolve the Cloudflare account for psychgame-api."
+          echo "Available account count: ${#account_ids[@]}"
+          exit 1
 
       - name: Deploy Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: wrangler deploy --config worker/wrangler.toml
+        run: wrangler deploy --config=worker/wrangler.toml
+
+      - name: Set Worker secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          AUTHOR_TOKEN: ${{ secrets.PSYCHGAME_AUTHOR_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
+        run: |
+          printf '%s' "$AUTHOR_TOKEN" | wrangler secret put AUTHOR_TOKEN --config=worker/wrangler.toml
+          printf '%s' "$ADMIN_TOKEN" | wrangler secret put ADMIN_TOKEN --config=worker/wrangler.toml
