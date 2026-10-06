@@ -20,7 +20,12 @@ test("clinician can authenticate against the protected report API", async ({ pag
   await page.locator("#adminToken").fill(token);
   await page.locator("#login").click();
 
-  await expect(page.locator("#authStatus")).toHaveText("دسترسی تأیید شد.", { timeout: 10000 });
+  await expect.poll(
+    async () => page.locator("#authStatus").textContent(),
+    { timeout: 10000 }
+  ).toMatch(/دسترسی (تأیید شد|رد شد)/);
+  const authStatus = await page.locator("#authStatus").textContent();
+  expect(authStatus, `Clinician authentication failed. API statuses: \${apiStatuses.join(",") || "none"}; status: \${authStatus}`).toBe("دسترسی تأیید شد.");
   expect(apiStatuses).toContain(200);
   await expect(page.locator("#app")).toBeVisible({ timeout: 10000 });
   await expect(page.locator("#authCard")).toBeHidden();
