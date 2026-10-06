@@ -5,26 +5,55 @@ export class BehaviorAnalyzer {
 
   analyze() {
     return {
-      exploration:
-        this.calculateExploration(),
+      exploration: this.calculateExploration(),
+      riskTaking: this.calculateRiskTaking(),
+      persistence: this.calculatePersistence(),
+      strategyChange: this.calculateStrategyChange(),
+      decisionLatency: this.calculateDecisionLatency(),
+      helpSeeking: this.calculateHelpSeeking(),
+      roomBehavior: this.calculateRoomBehavior(),
+      behavioralIndicators: this.calculateBehavioralIndicators()
+    };
+  }
 
-      riskTaking:
-        this.calculateRiskTaking(),
-
-      persistence:
-        this.calculatePersistence(),
-
-      strategyChange:
-        this.calculateStrategyChange(),
-
-      decisionLatency:
-        this.calculateDecisionLatency(),
-
-      helpSeeking:
-        this.calculateHelpSeeking(),
-
-      roomBehavior:
-        this.calculateRoomBehavior()
+  calculateBehavioralIndicators() {
+    const events = this.events;
+    const count = (type) => events.filter(e => e.type === type).length;
+    const sum = (field, filter = () => true) => events.reduce((n,e) => n + (filter(e) ? Number(e[field]) || 0 : 0), 0);
+    const avg = (field, filter = () => true) => {
+      const values = events.filter(filter).map(e => Number(e[field])).filter(Number.isFinite);
+      return values.length ? Math.round(values.reduce((a,b) => a+b,0) / values.length) : null;
+    };
+    const repeatedChecks = events.filter(e => Number(e.attempt) > 1 || /RECHECK|REPEAT|REPEATED/i.test(e.type || "")).length;
+    const choiceSwitches = sum("choiceSwitches") + sum("switchCount");
+    const backtracks = sum("retreatCount") + count("PATH_RETURN");
+    const riskEvents = count("RED_BUTTON_PRESS") + events.filter(e => ["PATH_LEFT","PATH_RIGHT"].includes(e.path)).length;
+    const failures = count("FAILURE");
+    const retries = count("RETRY_AFTER_FAILURE");
+    const blocked = events.filter(e => String(e.type || "").endsWith("_EXIT_BLOCKED")).length;
+    const companionFollow = events.filter(e => e.choice === "FOLLOW_COMPANION" || e.firstChoice === "FOLLOW_COMPANION").length;
+    const alone = events.filter(e => e.choice === "GO_ALONE" || e.firstChoice === "GO_ALONE").length;
+    return {
+      stress: { failures, blockedExits: blocked, recoveryRetries: retries, postFailureReactionMs: avg("reactionTimeMs", e => e.type === "FAILURE") },
+      anxiety: { rechecks: repeatedChecks, backtracks, uncertaintyDelaysMs: avg("reactionTimeMs", e => e.type.includes("CHECK") || e.type.includes("INSPECT")) },
+      excitement: { riskEvents, rapidDecisions: events.filter(e => Number(e.reactionTimeMs) >= 0 && Number(e.reactionTimeMs) < 2000).length },
+      hesitation: { choiceSwitches, longDecisionCount: events.filter(e => Number(e.reactionTimeMs) >= 5000).length, averageDecisionMs: avg("reactionTimeMs", e => Number.isFinite(e.reactionTimeMs)) },
+      compulsiveChecking: { repeatedChecks, repeatedObjectTypes: new Set(events.filter(e => Number(e.attempt) > 1).map(e => e.objectId).filter(Boolean)).size },
+      impulsivity: { veryFastActions: events.filter(e => Number(e.reactionTimeMs) >= 0 && Number(e.reactionTimeMs) < 1200).length, actionWithoutInspection: count("ACTION_WITHOUT_INSPECTION") },
+      attention: { missedClues: count("CLUE_MISSED"), detailInspections: count("CLUE_INSPECTED") + count("DECISION_POINT_INSPECTED") },
+      suspiciousness: { sourceChecks: count("SOURCE_CHECKED") + count("CLUE_INSPECTED"), companionOverrides: alone },
+      pessimism: { negativeChoices: count("NEGATIVE_OUTCOME_CHOICE"), threatChecks: count("THREAT_CHECKED") },
+      trust: { companionFollow, independentOverrides: alone, choiceSwitches },
+      independence: { aloneChoices: alone, selfDirectedInteractions: count("SELF_DIRECTED_SEARCH"), helpRequests: count("HELP_REQUEST") },
+      persistence: { failures, retries, totalRetryBehavior: retries + count("ROOM_RETRY") },
+      threatSensitivity: { threatChecks: count("THREAT_CHECKED") + count("PATH_SCARE"), blockedExits: blocked },
+      frustrationTolerance: { failures, retries, recoveryAfterFailure: retries > 0 },
+      intoleranceOfUncertainty: { repeatedChecks, blockedExits: blocked, longDecisionCount: events.filter(e => Number(e.reactionTimeMs) >= 5000).length },
+      cognitiveFlexibility: { choiceSwitches, strategyChanges: this.calculateStrategyChange() === "OBSERVED" ? 1 : 0 },
+      noveltyResponse: { exploration: this.calculateExploration(), unknownInteractions: count("UNKNOWN_OBJECT_INSPECTED") },
+      rewardSensitivity: { riskEvents, rewardChoices: count("REWARD_CHOICE") },
+      ruleFollowing: { failures, shortcuts: count("RULE_BYPASS") },
+      socialDependency: { companionFollow, helpRequests: count("HELP_REQUEST") }
     };
   }
 
