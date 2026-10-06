@@ -59,6 +59,14 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Verify deployed clinician authentication
         env:
           PSYCHGAME_ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
