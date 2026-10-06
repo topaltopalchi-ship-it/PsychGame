@@ -18,6 +18,9 @@ export class InteractionSystem {
     this.room = null;
     this.roomNumber = 1;
     this.keyFound = false;
+    this.roomEntryAt = performance.now();
+    this.keyClueCount = 0;
+    this.exitBlockCount = 0;
     this.completed = false;
     this.gameFinished = false;
     this.room8CompletionTimer = null;
@@ -40,9 +43,9 @@ export class InteractionSystem {
   }
 
   setCompanion(companion) { this.companion = companion; }
-  setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.gameFinished = false; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
+  setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.gameFinished = false; this.roomEntryAt = performance.now(); this.keyClueCount = 0; this.exitBlockCount = 0; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
 
-  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer); this.room8CompletionTimer = null; this.room3CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.room8GameCompleteDispatched = false; this.interactionCounts = {}; }
+  clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer); this.room8CompletionTimer = null; this.room3CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.room8GameCompleteDispatched = false; this.interactionCounts = {}; this.roomEntryAt = performance.now(); this.keyClueCount = 0; this.exitBlockCount = 0; }
 
   register(object, objectId) {
     object.userData.interactable = true;
@@ -152,9 +155,12 @@ export class InteractionSystem {
     }
 
     if (String(objectId).startsWith("KEY_CLUE_")) {
+      this.keyClueCount++;
       this.tracker.log("KEY_CLUE_INSPECTED", {
         roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
-        objectId
+        objectId,
+        clueNumber: this.keyClueCount,
+        secondsSinceRoomEntry: Math.round((performance.now() - this.roomEntryAt) / 100) / 10
       });
       this.companion?.say("اینجا یه نشانه‌ی ظریفه... اطرافش رو دقیق‌تر بگرد.");
       return;
@@ -162,9 +168,12 @@ export class InteractionSystem {
 
     const roomExitIds = {3:"WAIT_EXIT",4:"HALL_EXIT",5:"MIRROR_EXIT",6:"REC_EXIT",7:"COMP_EXIT",8:"TRUTH_EXIT"};
     if (this.roomNumber >= 3 && this.roomNumber <= 8 && roomExitIds[this.roomNumber] === objectId && !this.keyFound) {
+      this.exitBlockCount++;
       this.tracker.log("ROOM_EXIT_BLOCKED_BY_KEY", {
         roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
-        exitId: objectId
+        exitId: objectId,
+        blockNumber: this.exitBlockCount,
+        secondsSinceRoomEntry: Math.round((performance.now() - this.roomEntryAt) / 100) / 10
       });
       this.companion?.say("این در هنوز باز نمی‌شه. اول باید کلید همین اتاق رو پیدا کنی.");
       return;
