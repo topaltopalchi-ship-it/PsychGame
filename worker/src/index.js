@@ -63,12 +63,7 @@ async function handlePatientPost(request, env) {
   await env.DB.prepare("INSERT INTO patients (code,name,created_at) VALUES (?,?,?)").bind(code,name,patient.createdAt).run();
   return json(env,201,{ok:true,patient});
 }
-async function handlePatientList(url, env) {
-  if (!authorized(new Request(url), env.ADMIN_TOKEN)) return json(env,401,{error:"Unauthorized"});
-  const search = String(new URL(url).searchParams.get("search") || "").trim();
-  let rows;
-  if (search) {
-    const like = "%" + search.replace(/[%_]/g, "\\async function handleList(url,env) {") + "%";
+async function handleList(url,env) {") + "%";
     rows = (await env.DB.prepare("SELECT code,name,created_at FROM patients WHERE code LIKE ? ESCAPE \\\\ OR name LIKE ? ESCAPE \\\\ ORDER BY created_at DESC LIMIT 100").bind(like,like).all()).results;
   } else rows = (await env.DB.prepare("SELECT code,name,created_at FROM patients ORDER BY created_at DESC LIMIT 100").all()).results;
   return json(env,200,{patients:rows.map(r=>({code:r.code,name:r.name,createdAt:r.created_at}))});
