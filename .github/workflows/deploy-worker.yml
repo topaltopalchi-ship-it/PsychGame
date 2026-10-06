@@ -78,6 +78,21 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: wrangler deploy --config=worker/wrangler.toml
 
+      - name: Verify deployed admin API
+        env:
+          ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          status="$(curl -sS -o /tmp/patients.json -w "%{http_code}" \\
+            -H "Authorization: Bearer $ADMIN_TOKEN" \\
+            "https://psychgame-api.topaltopalchi.workers.dev/api/patients?search=%20")"
+          if [ "$status" != "200" ]; then
+            echo "::error::Admin API verification failed with HTTP $status"
+            cat /tmp/patients.json
+            exit 1
+          fi
+          echo "Admin API verification passed (HTTP 200)."
+
       - name: Set Worker secrets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
