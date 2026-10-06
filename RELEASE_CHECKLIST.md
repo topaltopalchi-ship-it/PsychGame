@@ -19,6 +19,7 @@
 - [ ] `NODE_ENV=production` in the target deployment.
 - [ ] `AUTHOR_TOKEN` is configured for session ingestion (browser-exposed; not a secret).
 - [ ] `CORS_ORIGIN` is the exact production game origin.
+- [ ] A separate production API deployment exists for `server/index.js` with persistent storage.
 - [ ] API and game are served over HTTPS.
 - [x] `VITE_AUTHOR_TOKEN` is explicitly documented as a browser-exposed, non-secret token.
 - [ ] Session storage has appropriate filesystem access controls and backups.
@@ -29,6 +30,7 @@
 - [x] Rooms 09-20 are not part of the current observation release scope.
 - [x] Player-facing flow does not expose specialist behavioral interpretation or diagnostic conclusions.
 - [ ] `ADMIN_TOKEN` is a strong server-only secret and production access to collected behavioral data is restricted to authorized personnel.
+- [ ] `VITE_API_URL` points to the verified HTTPS production API origin.
 
 ## Final release gate
 A release is ready only when the validation checks above pass in the target deployment environment and the production configuration has been reviewed.
