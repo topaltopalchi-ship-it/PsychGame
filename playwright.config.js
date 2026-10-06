@@ -14,8 +14,10 @@ export default defineConfig({
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "firefox", use: {
       ...devices["Desktop Firefox"],
+      headless: process.env.CI ? false : true,
       firefoxUserPrefs: {
         "webgl.force-enabled": true,
+        "webgl.forbid-software": false,
         "layers.acceleration.force-enabled": true,
         "gfx.webrender.all": true
       }
