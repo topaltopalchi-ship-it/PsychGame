@@ -6,7 +6,6 @@ on:
 
   workflow_dispatch:
 
-
 permissions:
   contents: read
   pages: write
@@ -33,6 +32,9 @@ jobs:
         run: npm install
 
       - name: Build game
+        env:
+          VITE_API_URL: https://psychgame-api.topaltopalchi.workers.dev
+          VITE_AUTHOR_TOKEN: ${{ secrets.VITE_AUTHOR_TOKEN }}
         run: npm run build
 
       - name: Setup Pages
