@@ -28,6 +28,7 @@ import { Room18 } from "./rooms/Room18.js";
 import { Room19 } from "./rooms/Room19.js";
 import { Room20 } from "./rooms/Room20.js";
 import { getTrainingRoomForTarget } from "./training/TrainingTargets.js";
+import { attachRoomKey } from "./rooms/RoomKeyChallenge.js";
 
 const browserSmoke = new URLSearchParams(window.location.search).has("browserSmoke");
 const game = document.getElementById("game");
@@ -262,6 +263,12 @@ function clearRoomGeometry() {
   });
 }
 
+function armRoomKey(roomNumber) {
+  if (roomNumber < 2 || roomNumber > 8) return;
+  const challenge = attachRoomKey(scene, tracker, roomNumber);
+  if (challenge) activeRoom.roomKeyChallenge = challenge;
+}
+
 function setRoomMovementBounds(roomNumber) {
   const bounds = {
     1:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2}, 2:{minX:-5.0,maxX:5.0,minZ:-4.8,maxZ:4.8}, 3:{minX:-4.2,maxX:4.2,minZ:-4.2,maxZ:4.2},
@@ -272,14 +279,14 @@ function setRoomMovementBounds(roomNumber) {
 
 function startRoom02(previousPath = "ROOM_01") {
   if (activeRoom !== room01 || !room01.completed) return;
-  clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room02(scene, tracker); activeRoom.start({ previousPath }); interaction.setRoom(activeRoom, 2); audioManager.setRoom(2); camera.position.set(0, 1.7, 3.5); camera.rotation.set(0, 0, 0); player.rotation.set(0, 0, 0); setRoomMovementBounds(2); mainLight.intensity = 34; companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
+  clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room02(scene, tracker); activeRoom.start({ previousPath }); armRoomKey(2); interaction.setRoom(activeRoom, 2); audioManager.setRoom(2); camera.position.set(0, 1.7, 3.5); camera.rotation.set(0, 0, 0); player.rotation.set(0, 0, 0); setRoomMovementBounds(2); mainLight.intensity = 34; companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
 }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_01" || activeRoom !== room01 || !room01.completed) return; scheduleRoomTransition(() => startRoom02("ROOM_01")); });
 
-function startRoom03(context = { previousPath: "ROOM_02" }) { if (interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room03(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 3); audioManager.setRoom(3); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); setRoomMovementBounds(3); mainLight.intensity = 32; companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار"; }
+function startRoom03(context = { previousPath: "ROOM_02" }) { if (interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room03(scene, tracker); activeRoom.start(context); armRoomKey(3); interaction.setRoom(activeRoom, 3); audioManager.setRoom(3); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); setRoomMovementBounds(3); mainLight.intensity = 32; companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار"; }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_02" || interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion })); });
 
-function startRoom04(context = { previousRoom: "ROOM_03" }) { if (interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room04(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 4); audioManager.setRoom(4); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); setRoomMovementBounds(4); mainLight.intensity=28; companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense"); document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها"; }
+function startRoom04(context = { previousRoom: "ROOM_03" }) { if (interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room04(scene, tracker); activeRoom.start(context); armRoomKey(4); interaction.setRoom(activeRoom, 4); audioManager.setRoom(4); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); setRoomMovementBounds(4); mainLight.intensity=28; companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense"); document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها"; }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_03" || interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion })); });
 
 window.psychGame = {
@@ -301,10 +308,10 @@ if (browserSmoke) {
 }
 
 const clock = new THREE.Clock();
-function startRoom05(context={previousRoom:"ROOM_04"}) { if (gameFinished || interaction.roomNumber !== 4 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room05(scene, tracker); activeRoom.start({...context, companion}); interaction.setRoom(activeRoom,5); audioManager.setRoom(5); setRoomMovementBounds(5); document.getElementById("pg-title").textContent="YOL · اتاق ۰۵ — اتاق آینه‌ها"; companion?.say("اتاق پنجمه... اینجا به چیزی که می‌بینی زود اعتماد نکن.", 0, "tense"); }
-function startRoom06(context={previousRoom:"ROOM_05"}) { if (gameFinished || interaction.roomNumber !== 5 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion}); interaction.setRoom(activeRoom,6); audioManager.setRoom(6); setRoomMovementBounds(6); document.getElementById("pg-title").textContent="YOL · اتاق ۰۶ — صداهای آشنا"; companion?.say("اتاق ششمه... بعضی صداها آشنا به نظر می‌رسن؛ ولی زود به این حس اعتماد نکن.", 0, "tense"); }
-function startRoom07(context={previousRoom:"ROOM_06"}) { if (gameFinished || interaction.roomNumber !== 6 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion}); interaction.setRoom(activeRoom,7); audioManager.setRoom(7); setRoomMovementBounds(7); document.getElementById("pg-title").textContent="YOL · اتاق ۰۷ — اعتماد"; companion?.say("اتاق هفتمه... اینجا باید تصمیم بگیری به کی اعتماد کنی.", 0, "tense"); }
-function startRoom08(context={previousRoom:"ROOM_07"}) { if (gameFinished || interaction.roomNumber !== 7 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion}); interaction.setRoom(activeRoom,8); audioManager.setRoom(8); setRoomMovementBounds(8); document.getElementById("pg-title").textContent="YOL · اتاق ۰۸ — حقیقت"; companion?.say("اتاق آخره... اینجا انتخاب‌هات دوباره برمی‌گردن سراغت.", 0, "tense"); }
+function startRoom05(context={previousRoom:"ROOM_04"}) { if (gameFinished || interaction.roomNumber !== 4 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room05(scene, tracker); activeRoom.start({...context, companion}); armRoomKey(5); interaction.setRoom(activeRoom,5); audioManager.setRoom(5); setRoomMovementBounds(5); document.getElementById("pg-title").textContent="YOL · اتاق ۰۵ — اتاق آینه‌ها"; companion?.say("اتاق پنجمه... اینجا به چیزی که می‌بینی زود اعتماد نکن.", 0, "tense"); }
+function startRoom06(context={previousRoom:"ROOM_05"}) { if (gameFinished || interaction.roomNumber !== 5 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room06(scene,tracker); activeRoom.start({...context,companion}); armRoomKey(6); interaction.setRoom(activeRoom,6); audioManager.setRoom(6); setRoomMovementBounds(6); document.getElementById("pg-title").textContent="YOL · اتاق ۰۶ — صداهای آشنا"; companion?.say("اتاق ششمه... بعضی صداها آشنا به نظر می‌رسن؛ ولی زود به این حس اعتماد نکن.", 0, "tense"); }
+function startRoom07(context={previousRoom:"ROOM_06"}) { if (gameFinished || interaction.roomNumber !== 6 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room07(scene,tracker); activeRoom.start({...context,companion}); armRoomKey(7); interaction.setRoom(activeRoom,7); audioManager.setRoom(7); setRoomMovementBounds(7); document.getElementById("pg-title").textContent="YOL · اتاق ۰۷ — اعتماد"; companion?.say("اتاق هفتمه... اینجا باید تصمیم بگیری به کی اعتماد کنی.", 0, "tense"); }
+function startRoom08(context={previousRoom:"ROOM_07"}) { if (gameFinished || interaction.roomNumber !== 7 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom=new Room08(scene,tracker); activeRoom.start({...context, ...behavioralHistory, companion}); armRoomKey(8); interaction.setRoom(activeRoom,8); audioManager.setRoom(8); setRoomMovementBounds(8); document.getElementById("pg-title").textContent="YOL · اتاق ۰۸ — حقیقت"; companion?.say("اتاق آخره... اینجا انتخاب‌هات دوباره برمی‌گردن سراغت.", 0, "tense"); }
 
 function animate() { requestAnimationFrame(animate); const delta = clock.getDelta(); if (!gameFinished) { player.update(delta); activeRoom?.update?.(delta, player); } interaction.update(); renderer.render(scene, camera); }
 animate();
