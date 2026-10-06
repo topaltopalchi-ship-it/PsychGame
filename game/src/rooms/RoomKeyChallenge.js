@@ -3,11 +3,11 @@ import * as THREE from "three";
 const KEY_LAYOUT = {
   2: { position:[-4.78,0.34,2.92], clue:[3.55,1.48,-1.74], color:0x92764b },
   3: { position:[-4.72,0.31,-4.68], clue:[3.78,1.20,0.82], color:0x9a7c4e },
-  4: { position:[1.05,0.62,-18.2], clue:[1.08,1.18,-17.55], color:0xb58d52 },
-  5: { position:[5.9,0.72,1.65], clue:[5.65,1.3,1.25], color:0xc4a05d },
-  6: { position:[-5.7,0.7,1.55], clue:[-5.25,1.25,1.8], color:0xd2ad62 },
-  7: { position:[5.55,0.7,2.45], clue:[5.2,1.25,2.1], color:0xc29b59 },
-  8: { position:[6.35,0.7,-3.75], clue:[5.95,1.25,-3.35], color:0xd5b56d }
+  4: { position:[1.52,0.62,-20.55], clue:[-1.15,1.18,-17.05], color:0xb58d52 },
+  5: { position:[-6.85,0.72,3.85], clue:[-5.15,1.3,2.25], color:0xc4a05d },
+  6: { position:[6.05,0.7,4.15], clue:[5.15,1.25,-4.25], color:0xd2ad62 },
+  7: { position:[-6.35,0.7,-4.35], clue:[-4.85,1.25,-3.35], color:0xc29b59 },
+  8: { position:[-6.45,0.7,-4.75], clue:[-5.05,1.25,-3.45], color:0xd5b56d }
 };
 
 export function attachRoomKey(scene, tracker, roomNumber) {
