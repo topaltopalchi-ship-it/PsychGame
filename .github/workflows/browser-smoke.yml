@@ -82,6 +82,7 @@ jobs:
       - name: Verify clinician authentication
         env:
           PSYCHGAME_ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
+          CLINICIAN_BASE_URL: https://topaltopalchi-ship-it.github.io/PsychGame/clinician.html
         run: xvfb-run -a timeout 2m npx playwright test tests/clinician-auth.spec.js --project=chromium --trace=off
 
       - name: Upload clinician diagnostics on failure
