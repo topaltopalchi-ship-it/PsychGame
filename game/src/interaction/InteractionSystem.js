@@ -304,8 +304,14 @@ export class InteractionSystem {
 
     if (!this.completed) {
       this.completed = true;
+      this.room?.openExitDoor?.();
       this.room?.completeRoom?.();
-      this.companion?.say("بازش کردی... فکر کنم آماده‌ای بریم اتاق بعدی.");
+      this.tracker.log("ROOM_01_EXIT_CONFIRMED", {
+        keyFound: this.keyFound === true,
+        roomKeyConfirmed: this.room?.hasKey === true,
+        doorOpen: this.room?.objects?.exitDoor?.userData?.open === true
+      });
+      this.companion?.say("قفل باز شد. در داره باز می‌شه... بریم اتاق بعدی.");
       window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01", keyCollected: this.keyFound === true && this.room?.hasKey === true } }));
     }
   }
