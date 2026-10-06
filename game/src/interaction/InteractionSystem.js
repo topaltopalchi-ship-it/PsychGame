@@ -288,12 +288,12 @@ export class InteractionSystem {
     const locked = this.exitDoor?.userData.locked === true;
 
     // If the player never pressed the red button, the door remains unlocked.
-    if (!locked && !this.keyFound) {
-      this.tracker.log("DOOR_CHECKED", { status: "UNLOCKED", result: "SAFE_EXIT" });
+    if (!this.keyFound) {
+      this.tracker.log("DOOR_CHECKED", { status: locked ? "LOCKED" : "UNLOCKED", result: "NEEDS_KEY" });
       if (!this.completed) {
         this.completed = true;
         this.room?.completeRoom?.();
-        this.companion?.say("در بازه. بدون دردسر می‌تونی از اتاق خارج بشی.");
+        this.companion?.say("در هنوز باز نمی‌شه. اول کلید اتاق رو پیدا کن.");
         window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01" } }));
       }
       return;
