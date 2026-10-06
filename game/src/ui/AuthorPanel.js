@@ -3,7 +3,7 @@ import { SpecialistPanel } from "./SpecialistPanel.js";
 export class AuthorPanel {
   constructor(session) {
     this.session = session;
-    this.authorCode = "PSYCH-AUTHOR-2026";
+    this.authorCode = String(import.meta.env.VITE_AUTHOR_PANEL_CODE || "");
     this.panel = null;
     this.specialistPanel = new SpecialistPanel(session);
     this.createPanel();
@@ -38,7 +38,7 @@ export class AuthorPanel {
   }
 
   open(code) {
-    if (code !== this.authorCode) return false;
+    if (!this.authorCode || code !== this.authorCode) return false;
     this.show();
     return true;
   }
