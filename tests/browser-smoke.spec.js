@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("explicit consent gate is shown before telemetry starts", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await expect(page.locator("#pg-consent")).toBeVisible();
   await expect(page.locator("#pg-consent-accept")).toBeVisible();
   await expect(page.locator("#pg-consent-decline")).toBeVisible();
@@ -14,7 +14,7 @@ test("explicit consent gate is shown before telemetry starts", async ({ page }) 
 test("desktop browser smoke test", async ({ page }) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
   await expect(page.locator("canvas")).toBeVisible();
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
@@ -31,7 +31,7 @@ test("mobile touch UI smoke test", async ({ browser }) => {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
   await expect(page.locator("canvas")).toBeVisible();
   await expect(page.locator("#pg-joystick")).toBeVisible();
@@ -132,7 +132,7 @@ async function completeRooms04To08(page) {
 test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
 
@@ -149,7 +149,7 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
   page.on("pageerror", (error) => errors.push(String(error)));
   page.on("crash", () => crashes.push("PAGE_CRASH"));
 
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
 
@@ -184,7 +184,7 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
   page.on("pageerror", (error) => errors.push(String(error)));
   page.on("crash", () => crashes.push("PAGE_CRASH"));
 
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
 
@@ -222,7 +222,7 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
 
 
 test("Session upload queues failed payloads and flushes them after recovery", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
@@ -278,7 +278,7 @@ test("Session upload queues failed payloads and flushes them after recovery", as
 
 
 test("Session upload queue preserves completed sessions and deduplicates progress", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
@@ -332,7 +332,7 @@ test("Session upload queue preserves completed sessions and deduplicates progres
 
 
 test("Session upload queue retains only failed payloads during partial flush", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
@@ -383,7 +383,7 @@ test("Session upload queue retains only failed payloads during partial flush", a
 
 
 test("Concurrent session uploads are serialized without duplicate queue entries", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
@@ -436,7 +436,7 @@ test("Concurrent session uploads are serialized without duplicate queue entries"
 
 
 test("Session uploader tolerates corrupted local upload queue storage", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
@@ -478,7 +478,7 @@ test("Session uploader tolerates corrupted local upload queue storage", async ({
 
 
 test("Session uploader reports when local queue storage is unavailable", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto("/"), { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
