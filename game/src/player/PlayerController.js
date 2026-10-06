@@ -60,7 +60,7 @@ export class PlayerController {
     this.bounds={minX:Number.isFinite(bounds.minX)?bounds.minX:-4.2,maxX:Number.isFinite(bounds.maxX)?bounds.maxX:4.2,minZ:Number.isFinite(bounds.minZ)?bounds.minZ:-4.2,maxZ:Number.isFinite(bounds.maxZ)?bounds.maxZ:4.2};
     this.camera.position.x=THREE.MathUtils.clamp(this.camera.position.x,this.bounds.minX,this.bounds.maxX); this.camera.position.z=THREE.MathUtils.clamp(this.camera.position.z,this.bounds.minZ,this.bounds.maxZ);
   }
-  look(dx,dy){this.rotation.y-=dx*this.lookSpeed;this.rotation.x-=dy*this.lookSpeed;const max=0.42;this.rotation.x=Math.max(-max,Math.min(max,this.rotation.x));this.camera.rotation.copy(this.rotation);}
+  look(dx,dy){this.rotation.y-=dx*this.lookSpeed;this.rotation.x-=dy*this.lookSpeed;const max=THREE.MathUtils.degToRad(75);this.rotation.x=Math.max(-max,Math.min(max,this.rotation.x));this.camera.rotation.copy(this.rotation);}
   update(delta) {
     this.direction.set(0,0,0); const keyboardX=(this.keys.right?1:0)-(this.keys.left?1:0); const keyboardZ=(this.keys.backward?1:0)-(this.keys.forward?1:0); const hasKeyboard=keyboardX!==0||keyboardZ!==0;
     this.direction.x=keyboardX+this.touchMove.x; this.direction.z=keyboardZ+this.touchMove.y; const length=this.direction.length(); if(length===0)return;
