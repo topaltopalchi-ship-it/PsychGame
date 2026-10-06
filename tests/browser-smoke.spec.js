@@ -65,16 +65,9 @@ async function completeRoom01(page) {
   await page.waitForTimeout(2500);
   await page.keyboard.up("KeyD");
 
-  const doorInteracted = await page.evaluate(() => {
-    const xs = [0.78, 0.82, 0.86, 0.90, 0.94, 0.97, 0.99];
-    const ys = [0.34, 0.40, 0.46, 0.52, 0.58, 0.64, 0.70];
-    return xs.some((x) => ys.some((y) =>
-      window.psychGame?.interactAt?.(
-        window.innerWidth * x,
-        window.innerHeight * y
-      ) === true
-    ));
-  });
+  const doorInteracted = await page.evaluate(() =>
+    window.psychGame?.interactObject?.("EXIT_DOOR") === true
+  );
   expect(doorInteracted).toBe(true);
 }
 
