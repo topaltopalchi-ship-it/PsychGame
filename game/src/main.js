@@ -32,7 +32,7 @@ import { getTrainingRoomForTarget } from "./training/TrainingTargets.js";
 const browserSmoke = new URLSearchParams(window.location.search).has("browserSmoke");
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x080a0d);
+scene.background = new THREE.Color(0x14171c);
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(0, 1.7, 3.6);
@@ -48,17 +48,17 @@ renderer.shadowMap.enabled = !browserSmoke;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.82;
+renderer.toneMappingExposure = 1.12;
 game.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.HemisphereLight(0x9aa6b5, 0x1a1a1a, 1.05);
+const ambientLight = new THREE.HemisphereLight(0xc8d5e6, 0x3a2a22, 1.65);
 scene.add(ambientLight);
-const mainLight = new THREE.PointLight(0xffd6a0, 28, 13);
+const mainLight = new THREE.PointLight(0xffd6a0, 40, 16);
 mainLight.position.set(0, 3.45, -0.4);
 mainLight.castShadow = true;
 mainLight.shadow.mapSize.set(1024, 1024);
 scene.add(mainLight);
-const rimLight = new THREE.PointLight(0x4b6282, 10, 10);
+const rimLight = new THREE.PointLight(0x6f86aa, 16, 12);
 rimLight.position.set(-3.8, 2.6, -3.8);
 scene.add(rimLight);
 
@@ -272,11 +272,11 @@ function setRoomMovementBounds(roomNumber) {
 
 function startRoom02(previousPath = "ROOM_01") {
   if (activeRoom !== room01 || !room01.completed) return;
-  clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room02(scene, tracker); activeRoom.start({ previousPath }); interaction.setRoom(activeRoom, 2); audioManager.setRoom(2); camera.position.set(0, 1.7, 3.5); camera.rotation.set(0, 0, 0); player.rotation.set(0, 0, 0); setRoomMovementBounds(2); mainLight.intensity = 24; companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
+  clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room02(scene, tracker); activeRoom.start({ previousPath }); interaction.setRoom(activeRoom, 2); audioManager.setRoom(2); camera.position.set(0, 1.7, 3.5); camera.rotation.set(0, 0, 0); player.rotation.set(0, 0, 0); setRoomMovementBounds(2); mainLight.intensity = 34; companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
 }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_01" || activeRoom !== room01 || !room01.completed) return; scheduleRoomTransition(() => startRoom02("ROOM_01")); });
 
-function startRoom03(context = { previousPath: "ROOM_02" }) { if (interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room03(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 3); audioManager.setRoom(3); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); setRoomMovementBounds(3); mainLight.intensity = 22; companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار"; }
+function startRoom03(context = { previousPath: "ROOM_02" }) { if (interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room03(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 3); audioManager.setRoom(3); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); setRoomMovementBounds(3); mainLight.intensity = 32; companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار"; }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_02" || interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion })); });
 
 function startRoom04(context = { previousRoom: "ROOM_03" }) { if (interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room04(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 4); audioManager.setRoom(4); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); setRoomMovementBounds(4); mainLight.intensity=18; companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense"); document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها"; }
@@ -331,7 +331,7 @@ function startTrainingRoom(roomNumber, plan, previousRoom = null, targetId = nul
   const RoomClass = constructors[safeRoomNumber];
   if (!RoomClass || safeRoomNumber < 15 || safeRoomNumber > 20) return false;
   activeRoom = new RoomClass(scene, tracker, plan, companion);
-  const selectedTargetId = targetId || getTrainingRouteTarget(plan)?.targetId || null; activeRoom.start({ previousRoom, targetId: selectedTargetId }); interaction.setRoom(activeRoom, safeRoomNumber); audioManager.setRoom(safeRoomNumber); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); mainLight.intensity = 20;
+  const selectedTargetId = targetId || getTrainingRouteTarget(plan)?.targetId || null; activeRoom.start({ previousRoom, targetId: selectedTargetId }); interaction.setRoom(activeRoom, safeRoomNumber); audioManager.setRoom(safeRoomNumber); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); mainLight.intensity = 30;
   document.getElementById("pg-title").textContent = `YOL · مرحله تمرینی ${String(safeRoomNumber - 14).padStart(2, "0")}`;
   return true;
 }
