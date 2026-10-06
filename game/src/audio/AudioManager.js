@@ -31,7 +31,7 @@ export class AudioManager {
       if (result?.catch) result.catch(() => {
         if (generation === this.voiceGeneration) {
           this.voiceAudio = null;
-          // The caller can fall back to browser TTS when playback is blocked.
+          audio.onerror?.();
         }
       });
       return audio;
