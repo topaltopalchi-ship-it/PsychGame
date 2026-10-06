@@ -32,7 +32,7 @@ import { getTrainingRoomForTarget } from "./training/TrainingTargets.js";
 const browserSmoke = new URLSearchParams(window.location.search).has("browserSmoke");
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x14171c);
+scene.background = new THREE.Color(0x202631);
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(0, 1.7, 3.6);
@@ -48,17 +48,17 @@ renderer.shadowMap.enabled = !browserSmoke;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.12;
+renderer.toneMappingExposure = 1.3;
 game.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.HemisphereLight(0xc8d5e6, 0x3a2a22, 1.65);
+const ambientLight = new THREE.HemisphereLight(0xd8e4f2, 0x5a463b, 2.15);
 scene.add(ambientLight);
-const mainLight = new THREE.PointLight(0xffd6a0, 40, 16);
+const mainLight = new THREE.PointLight(0xffd6a0, 52, 18);
 mainLight.position.set(0, 3.45, -0.4);
 mainLight.castShadow = true;
 mainLight.shadow.mapSize.set(1024, 1024);
 scene.add(mainLight);
-const rimLight = new THREE.PointLight(0x6f86aa, 16, 12);
+const rimLight = new THREE.PointLight(0x8aa0c8, 24, 14);
 rimLight.position.set(-3.8, 2.6, -3.8);
 scene.add(rimLight);
 
@@ -279,7 +279,7 @@ window.addEventListener("psychgame-room-complete", (event) => { if (event.detail
 function startRoom03(context = { previousPath: "ROOM_02" }) { if (interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room03(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 3); audioManager.setRoom(3); camera.position.set(0, 1.7, 3.5); player.rotation.set(0, 0, 0); camera.rotation.copy(player.rotation); setRoomMovementBounds(3); mainLight.intensity = 32; companion?.say("اتاق سومه... اینجا عجله نکردن خودش یه انتخابه.", 0, "calm"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۳ — اتاق انتظار"; }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_02" || interaction.roomNumber !== 2 || interaction.room !== activeRoom || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom03({ previousPath: event.detail.path || "PATH_CENTER", wrongPaths: event.detail.wrongPaths || [], companion })); });
 
-function startRoom04(context = { previousRoom: "ROOM_03" }) { if (interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room04(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 4); audioManager.setRoom(4); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); setRoomMovementBounds(4); mainLight.intensity=18; companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense"); document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها"; }
+function startRoom04(context = { previousRoom: "ROOM_03" }) { if (interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room04(scene, tracker); activeRoom.start(context); interaction.setRoom(activeRoom, 4); audioManager.setRoom(4); camera.position.set(0,1.7,3.5); player.rotation.set(0,0,0); camera.rotation.copy(player.rotation); setRoomMovementBounds(4); mainLight.intensity=28; companion?.say("اتاق چهارمه... اگه راهرو دوباره تکرار شد، به چیزی که یادت میاد زود اعتماد نکن.", 0, "tense"); document.getElementById("pg-title").textContent="YOL · اتاق ۰۴ — راهروی بی‌انتها"; }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_03" || interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion })); });
 
 window.psychGame = {
