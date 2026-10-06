@@ -6,7 +6,7 @@
 - Package version: 0.1.0.
 
 ## Required validation
-- [ ] `npm ci` completes from the lockfile.
+- [ ] `npm install` completes cleanly (the repository currently does not commit a package-lock.json).
 - [ ] `npm run build` succeeds.
 - [ ] `npm run test:api` succeeds.
 - [ ] `npx playwright install --with-deps chromium firefox webkit` succeeds in CI.
