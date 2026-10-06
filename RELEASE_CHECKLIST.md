@@ -6,29 +6,35 @@
 - Package version: 0.1.0.
 
 ## Required validation
-- [ ] `npm install` completes cleanly (the repository currently does not commit a package-lock.json).
-- [ ] `npm run build` succeeds.
-- [ ] `npm run test:api` succeeds.
-- [ ] `npx playwright install --with-deps chromium firefox webkit` succeeds in CI.
-- [ ] `npm run test:browser` succeeds on Chromium, Firefox, and WebKit.
-- [ ] Full Room 01-08 smoke path reaches the Room 08 ending.
-- [ ] Session telemetry persists locally through completion.
-- [ ] Upload queue retry, deduplication, partial failure, concurrency, and storage failure tests pass.
+- [x] `npm install` completes cleanly in CI (the repository intentionally does not commit a package-lock.json).
+- [x] `npm run build` succeeds in CI.
+- [x] `npm run test:api` succeeds in CI.
+- [x] `npx playwright install --with-deps chromium firefox webkit` succeeds in CI.
+- [x] Browser smoke succeeds on Chromium, Firefox, and WebKit (Browser Smoke #123).
+- [x] Full Room 01-08 smoke path reaches the Room 08 ending (Browser Smoke #123).
+- [x] Session telemetry persists locally through completion (Browser Smoke #123).
+- [x] Upload queue retry, deduplication, partial failure, concurrency, and storage failure tests pass (Browser Smoke #123).
 
 ## Production configuration
-- [ ] `NODE_ENV=production`.
+- [ ] `NODE_ENV=production` in the target deployment.
 - [ ] `AUTHOR_TOKEN` is set to a strong server-side secret.
 - [ ] `CORS_ORIGIN` is the exact production game origin.
 - [ ] API and game are served over HTTPS.
-- [ ] `VITE_AUTHOR_TOKEN` is not treated as a secret credential.
+- [x] `VITE_AUTHOR_TOKEN` is explicitly documented as a browser-exposed, non-secret token.
 - [ ] Session storage has appropriate filesystem access controls and backups.
 - [ ] Retention policy for behavioral data is defined and enforced operationally.
 - [ ] Consent procedure is explicit and appropriate for the deployment context.
 
 ## Release boundaries
-- [ ] Do not activate Rooms 09-20 as part of the observation release.
-- [ ] Do not expose specialist behavioral interpretation or diagnostic conclusions to players.
-- [ ] Treat collected behavioral data as sensitive and restrict access accordingly.
+- [x] Rooms 09-20 are not part of the current observation release scope.
+- [x] Player-facing flow does not expose specialist behavioral interpretation or diagnostic conclusions.
+- [ ] Production access to collected behavioral data is restricted to authorized personnel.
 
 ## Final release gate
 A release is ready only when the validation checks above pass in the target deployment environment and the production configuration has been reviewed.
+
+### Current verified CI gate
+- Release commit: `088caf91cb14faad2507eee557d77c068d8c2026`
+- Browser Smoke #123: success
+- Deploy #662: success on the same commit
+- Last known failing smoke (#121) is superseded by the successful #123 run.
