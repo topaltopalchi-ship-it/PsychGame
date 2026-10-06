@@ -326,16 +326,40 @@ export class InteractionSystem {
       this.companion?.say("کلید رو قبلاً برداشتی. حالا برو سمت در.");
       return;
     }
+
     this.keyFound = true;
-    if (this.roomNumber === 1 && this.room) this.room.hasKey = true;
-    this.tracker.log("KEY_FOUND", { source: "KEY_FROM_DRAWER", roomKeyConfirmed: this.roomNumber === 1 ? true : undefined });
+    if (this.roomNumber === 1 && this.room) {
+      this.room.hasKey = true;
+
+      // Room 1 uses the drawer key as the authoritative unlock.
+      // Unlock the actual exit object immediately so a previous button
+      // press cannot leave the door visually/logically stuck.
+      const exitDoor = this.exitDoor || this.room.objects?.exitDoor;
+      if (exitDoor) {
+        exitDoor.userData.locked = false;
+        if (exitDoor.material) {
+          exitDoor.material = exitDoor.material.clone();
+          exitDoor.material.color = new THREE.Color(0x493326);
+        }
+        this.tracker.log("DOOR_UNLOCKED", {
+          objectId: "EXIT_DOOR",
+          source: "ROOM_01_DRAWER_KEY"
+        });
+      }
+    }
+
+    this.tracker.log("KEY_FOUND", {
+      source: "KEY_FROM_DRAWER",
+      roomKeyConfirmed: this.roomNumber === 1 ? true : undefined
+    });
+
     const key = this.room?.objects?.drawerKey;
     if (key) {
       this.interactables = this.interactables.filter(object => object !== key);
       if (this.currentTarget === key) this.currentTarget = null;
     }
     this.room?.hideDrawerKey?.();
-    this.companion?.say("کلید رو برداشتی. حالا به در نگاه کن و دکمه تعامل رو بزن.");
+    this.companion?.say("کلید رو برداشتی. قفل در باز شد. حالا به در نگاه کن و دکمه تعامل رو بزن.");
   }
 
   handleBox() {
