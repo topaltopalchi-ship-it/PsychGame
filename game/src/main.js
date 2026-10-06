@@ -29,6 +29,7 @@ import { Room19 } from "./rooms/Room19.js";
 import { Room20 } from "./rooms/Room20.js";
 import { getTrainingRoomForTarget } from "./training/TrainingTargets.js";
 
+const browserSmoke = new URLSearchParams(window.location.search).has("browserSmoke");
 const game = document.getElementById("game");
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080a0d);
@@ -42,8 +43,8 @@ renderer.domElement.style.height = "100%";
 renderer.domElement.style.display = "block";
 renderer.domElement.style.touchAction = "none";
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
+renderer.setPixelRatio(browserSmoke ? 1 : Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = !browserSmoke;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -282,7 +283,7 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) { if (activeRoom?.co
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_03" || activeRoom?.constructor?.name !== "Room03" || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion })); });
 
 window.psychGame = { interact: () => interaction.interact(), interactAt: (x, y) => interaction.interactAt(x, y), getPlayerCode: () => session.getPlayerCode() };
-if (new URLSearchParams(window.location.search).has("browserSmoke")) {
+if (browserSmoke) {
   window.psychGame.createSessionUploader = (options) => new SessionUploader(options);
 }
 
