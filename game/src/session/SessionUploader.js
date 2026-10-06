@@ -68,9 +68,11 @@ export class SessionUploader {
         if (isCompleted) {
           filtered = current.filter(item => item?.report?.sessionId !== sessionId);
         } else {
-          filtered = current.filter(item =>
-            item?.report?.sessionId !== sessionId || Boolean(item.completed)
+          const hasCompleted = current.some(item =>
+            item?.report?.sessionId === sessionId && Boolean(item.completed)
           );
+          if (hasCompleted) return true;
+          filtered = current.filter(item => item?.report?.sessionId !== sessionId);
         }
       }
 
