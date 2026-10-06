@@ -5,12 +5,12 @@
 Set these server-side before starting the API:
 
 - `NODE_ENV=production`
-- `AUTHOR_TOKEN` — strong random bearer secret; never commit it.
+- `AUTHOR_TOKEN` — ingestion bearer token exposed to the browser; it is **not** a secret and must only authorize session submission. Never use it for reading session data.\n- `ADMIN_TOKEN` — strong server-side bearer secret; never expose it to the browser. It is required for reading session data.
 - `CORS_ORIGIN` — exact public game origin.
 - `PORT` — normally 8787 behind the reverse proxy.
 - `DATA_DIR` — persistent directory for session storage.
 
-The browser variable `VITE_AUTHOR_TOKEN` is not a secret. It is exposed to players and must not be treated as server credentialing.
+The browser variable `VITE_AUTHOR_TOKEN` is not a secret. It is exposed to players and must only be used for session ingestion. Never reuse it for administrative/session-read access.
 
 ## HTTPS and proxy
 
@@ -28,7 +28,7 @@ Before release:
 2. Restrict filesystem permissions so only the API service account can read/write it.
 3. Configure encrypted backups appropriate to the sensitivity of behavioral data.
 4. Define and enforce a retention/deletion policy.
-5. Restrict production API access to authorized personnel.
+5. Restrict production API access to authorized personnel.\n6. Keep `ADMIN_TOKEN` only in the server environment; never put it in any `VITE_*` variable.
 
 ## Consent
 
