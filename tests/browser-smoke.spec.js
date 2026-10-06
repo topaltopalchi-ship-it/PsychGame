@@ -183,7 +183,8 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
   expect(await page.evaluate(() => window.psychGame?.interactObject?.("PATH_CENTER") === true)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 5000 });
 
-  // Room 03 is intentionally wait-based; allow its completion timer to fire.
+  // Room 03 completes after explicitly choosing the exit, then its ending sequence settles.
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("WAIT_EXIT") === true)).toBe(true);
   await page.waitForTimeout(3500);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۴", { timeout: 5000 });
 
