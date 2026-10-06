@@ -39,6 +39,11 @@ jobs:
       - name: Run cross-browser smoke tests
         run: xvfb-run -a timeout 10m npx playwright test --project=chromium --project=firefox --project=webkit
 
+      - name: Verify clinician authentication
+        env:
+          PSYCHGAME_ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
+        run: xvfb-run -a timeout 2m npx playwright test tests/clinician-auth.spec.js --project=chromium --trace=off
+
       - name: Upload Playwright diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
