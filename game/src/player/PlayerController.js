@@ -23,9 +23,10 @@ export class PlayerController {
     });
   }
   setupMouse() {
+    const browserSmoke = new URLSearchParams(window.location.search).has("browserSmoke");
+    if (browserSmoke) return;
     window.addEventListener("click", () => {
       if (!window.matchMedia("(pointer:fine)").matches) return;
-      if (new URLSearchParams(window.location.search).has("browserSmoke")) return;
       try {
         const request = document.body.requestPointerLock?.();
         request?.catch?.(() => {});
