@@ -85,15 +85,15 @@ Client-side Vite variables:
 - `VITE_DATA_COLLECTION_ENABLED` — enables local behavioral event collection; defaults to `true`.
 - `VITE_DATA_UPLOAD_ENABLED` — enables remote session upload; defaults to `true`.
 - `VITE_API_URL` — API endpoint used by the session manager/uploader when configured.
-- `VITE_AUTHOR_TOKEN` — optional bearer token sent to the session API; browser-exposed and not a secret.\n- `VITE_AUTHOR_PANEL_CODE` — optional author-panel gate used by the local/specialist UI. Do not treat it as a production secret; for production, specialist access should be enforced server-side.
+- `VITE_AUTHOR_TOKEN` — optional bearer token sent to the session ingestion API; browser-exposed and not a secret.\n- `VITE_AUTHOR_PANEL_CODE` — optional author-panel gate used by the local/specialist UI. Do not treat it as a production secret; for production, specialist access should be enforced server-side.
 
 Server variables:
 
 - `PORT` — API port; defaults to `8787`.
-- `AUTHOR_TOKEN` — bearer token required by session GET/POST endpoints. In production, the server refuses to start if it is missing.
+- `AUTHOR_TOKEN` — bearer token used for session ingestion (`POST /api/sessions`). It is browser-exposed when configured through `VITE_AUTHOR_TOKEN` and is not a secret.\n- `ADMIN_TOKEN` — strong server-only bearer secret required for session reads (`GET /api/sessions` and `GET /api/sessions/:id`). In production, the server refuses to start if it is missing.
 - `CORS_ORIGIN` — allowed CORS origin; defaults to `*` for local development. In production, the server refuses to start unless this is set to an exact origin.
 
-If `AUTHOR_TOKEN` is enabled, the client must be configured with the matching token. Treat client-side tokens as non-secret because browser applications expose them to the user.
+If `AUTHOR_TOKEN` is enabled, the client must be configured with the matching token for uploads. Never expose `ADMIN_TOKEN` through any `VITE_*` variable.
 
 ## Session API
 
