@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 const KEY_LAYOUT = {
-  2: { position:[-4.35,0.72,-1.55], clue:[-4.1,1.25,-1.35], color:0xc6a15a },
+  2: { position:[1.12,0.43,1.38], clue:[3.55,1.48,-1.74], color:0x9f8455 },
   3: { position:[4.15,0.68,0.55], clue:[3.75,1.2,0.8], color:0xd0b16a },
   4: { position:[1.05,0.62,-18.2], clue:[1.08,1.18,-17.55], color:0xb58d52 },
   5: { position:[5.9,0.72,1.65], clue:[5.65,1.3,1.25], color:0xc4a05d },
@@ -17,11 +17,11 @@ export function attachRoomKey(scene, tracker, roomNumber) {
   const group = new THREE.Group();
   group.position.set(...cfg.position);
   group.rotation.set(0.18, 0.35, -0.12);
-  group.scale.setScalar(1.65);
+  group.scale.setScalar(roomNumber === 2 ? 0.62 : 1.65);
 
   const metal = new THREE.MeshStandardMaterial({
     color: cfg.color, roughness: .24, metalness: .82,
-    emissive: new THREE.Color(cfg.color), emissiveIntensity: .18
+    emissive: new THREE.Color(cfg.color), emissiveIntensity: roomNumber === 2 ? .055 : .18
   });
   const ring = new THREE.Mesh(new THREE.TorusGeometry(.13,.035,10,24), metal);
   ring.rotation.x = Math.PI / 2;
