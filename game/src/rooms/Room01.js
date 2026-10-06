@@ -6,7 +6,7 @@ export class Room01 {
     this.tracker = tracker;
     this.objects = {};
     this.dynamic = { clueVisible: false, redGlow: null, deskLight: null, roomLights: [], baseLightIntensity: new Map() };
-    this.completed = false; this.hasKey = false; this.buttonPulseTimer = null;
+    this.completed = false; this.hasKey = false; this.buttonPulseTimer = null; this.doorOpenTimer = null;
   }
 
   start() {
@@ -39,6 +39,28 @@ export class Room01 {
     if (this.objects.drawerKey) this.objects.drawerKey.visible = false;
   }
 
+  openExitDoor() {
+    const door = this.objects.exitDoor;
+    if (!door || this.doorOpenTimer) return;
+    door.userData.locked = false;
+    door.userData.open = true;
+    const startX = door.position.x;
+    const targetX = startX + 1.35;
+    const start = performance.now();
+    const duration = 420;
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      door.position.x = startX + (targetX - startX) * eased;
+      if (t < 1) {
+        this.doorOpenTimer = requestAnimationFrame(step);
+      } else {
+        this.doorOpenTimer = null;
+      }
+    };
+    this.doorOpenTimer = requestAnimationFrame(step);
+  }
+
   completeRoom() {
     if (this.completed) return;
     this.completed = true;
@@ -48,7 +70,9 @@ export class Room01 {
   destroy() {
     this.completed = true;
     if (this.buttonPulseTimer) clearTimeout(this.buttonPulseTimer);
+    if (this.doorOpenTimer) cancelAnimationFrame(this.doorOpenTimer);
     this.buttonPulseTimer = null;
+    this.doorOpenTimer = null;
     this.objects = {};
   }
 
