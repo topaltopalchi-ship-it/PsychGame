@@ -6,7 +6,7 @@ export class Room01 {
     this.tracker = tracker;
     this.objects = {};
     this.dynamic = { clueVisible: false, redGlow: null, deskLight: null, roomLights: [], baseLightIntensity: new Map() };
-    this.completed = false; this.buttonPulseTimer = null;
+    this.completed = false; this.hasKey = false; this.buttonPulseTimer = null;
   }
 
   start() {
