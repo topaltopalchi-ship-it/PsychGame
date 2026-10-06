@@ -95,21 +95,48 @@ function scheduleRoomTransition(callback, delay = 900) {
   roomTransitionPending = true;
   roomTransitionLabel.textContent = "در حال ورود به بخش بعدی…";
   roomTransitionOverlay.style.opacity = "1";
+
   const timer = setTimeout(() => {
     roomTransitionTimers.delete(timer);
     roomTransitionPending = false;
+
     if (gameFinished) {
       roomTransitionOverlay.style.opacity = "0";
       return;
     }
-    try {
-      callback();
-      requestAnimationFrame(() => { roomTransitionOverlay.style.opacity = "0"; });
-    } catch (error) {
-      roomTransitionOverlay.style.opacity = "0";
-      console.error("[PsychGame] room transition failed", error);
-    }
+
+    // Let the browser finish the previous room's GPU cleanup before creating
+    // the next room. This is especially important on mobile/WebKit.
+    requestAnimationFrame(() => {
+      try {
+        callback();
+        roomTransitionOverlay.style.opacity = "0";
+      } catch (error) {
+        console.error("[PsychGame] room transition failed", error);
+        tracker.log("ROOM_TRANSITION_ERROR", {
+          error: String(error?.message || error),
+          roomNumber: interaction.roomNumber,
+          activeRoom: activeRoom?.constructor?.name || null
+        });
+
+        // One automatic retry prevents a transient WebGL/resource timing
+        // failure from dropping the player back into the previous room.
+        setTimeout(() => {
+          if (gameFinished || roomTransitionPending) return;
+          try {
+            callback();
+            roomTransitionOverlay.style.opacity = "0";
+          } catch (retryError) {
+            console.error("[PsychGame] room transition retry failed", retryError);
+            roomTransitionLabel.textContent = "ورود به اتاق بعدی ناموفق بود — دوباره تعامل کن.";
+            roomTransitionOverlay.style.opacity = "1";
+            setTimeout(() => { roomTransitionOverlay.style.opacity = "0"; }, 1400);
+          }
+        }, 180);
+      }
+    });
   }, delay);
+
   roomTransitionTimers.add(timer);
   return timer;
 }
