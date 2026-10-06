@@ -9,34 +9,51 @@ export class AudioManager {
     this.voiceBase = "./audio/companion/";
   }
 
-  playCompanionVoice(fileName, volume = 0.95) {
-    if (!fileName || typeof Audio === "undefined") return false;
+  playCompanionVoice(fileName, volume = 0.95, callbacks = {}) {
+    if (!fileName || typeof Audio === "undefined") {
+      callbacks.onError?.();
+      return null;
+    }
     const generation = ++this.voiceGeneration;
     try {
       if (this.voiceAudio) {
-        this.voiceAudio.pause();
-        this.voiceAudio.currentTime = 0;
+        try { this.voiceAudio.pause(); this.voiceAudio.currentTime = 0; } catch {}
       }
-      const audio = new Audio(this.voiceBase + fileName);
+
+      const audio = new Audio(this.voiceBase + encodeURIComponent(fileName));
       audio.preload = "auto";
       audio.volume = Math.max(0, Math.min(1, volume));
+      let settled = false;
+      const cleanup = () => {
+        if (generation === this.voiceGeneration) this.voiceAudio = null;
+      };
+      const fail = (reason = "audio_error") => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        callbacks.onError?.(reason);
+      };
       audio.onended = () => {
-        if (generation === this.voiceGeneration) this.voiceAudio = null;
+        if (settled) return;
+        settled = true;
+        cleanup();
+        callbacks.onEnded?.();
       };
-      audio.onerror = () => {
-        if (generation === this.voiceGeneration) this.voiceAudio = null;
-      };
+      audio.onerror = () => fail("audio_load_error");
       this.voiceAudio = audio;
-      const result = audio.play();
-      if (result?.catch) result.catch(() => {
-        if (generation === this.voiceGeneration) {
-          this.voiceAudio = null;
-          audio.onerror?.();
-        }
-      });
+
+      const playResult = audio.play();
+      if (playResult?.then) {
+        playResult.then(() => {
+          if (generation === this.voiceGeneration) callbacks.onStarted?.();
+        }).catch(() => fail("audio_play_rejected"));
+      } else {
+        callbacks.onStarted?.();
+      }
       return audio;
     } catch {
-      return false;
+      callbacks.onError?.("audio_exception");
+      return null;
     }
   }
 
