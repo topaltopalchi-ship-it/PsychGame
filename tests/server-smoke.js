@@ -65,7 +65,8 @@ async function request(url, options = {}) {
 
 try {
   await assertProductionGuard({ AUTHOR_TOKEN: "", CORS_ORIGIN: "http://test.local" }, "AUTHOR_TOKEN must be configured in production");
-  await assertProductionGuard({ AUTHOR_TOKEN: "production-test-token", CORS_ORIGIN: "*" }, "CORS_ORIGIN must be an exact origin in production");
+  await assertProductionGuard({ AUTHOR_TOKEN: "production-test-token", ADMIN_TOKEN: "", CORS_ORIGIN: "http://test.local" }, "ADMIN_TOKEN must be configured in production");
+  await assertProductionGuard({ AUTHOR_TOKEN: "production-test-token", ADMIN_TOKEN: "admin-test-token", CORS_ORIGIN: "*" }, "CORS_ORIGIN must be an exact origin in production");
 
   const qualityReport = SpecialistReport.build({
     sessionId: "quality-smoke",
@@ -195,7 +196,7 @@ try {
   assert.equal(retentionCreated.status, 201);
 
   const retentionList = await request("/api/sessions", {
-    headers: { Authorization: "Bearer test-token" }
+    headers: { Authorization: "Bearer admin-token" }
   });
   const retentionSessions = await retentionList.json();
   assert.equal(retentionSessions.sessions.length, 5000);
