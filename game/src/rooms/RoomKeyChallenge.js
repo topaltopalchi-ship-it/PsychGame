@@ -53,6 +53,7 @@ export function attachRoomKey(scene, tracker, roomNumber) {
   );
   clue.position.set(...cfg.clue);
   clue.scale.setScalar(1.35);
+  clue.scale.setScalar(1.35);
   clue.userData.objectId = `KEY_CLUE_${String(roomNumber).padStart(2,"0")}`;
   clue.userData.isKeyClue = true;
   scene.add(clue);
