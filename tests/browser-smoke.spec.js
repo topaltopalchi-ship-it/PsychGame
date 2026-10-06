@@ -89,37 +89,37 @@ async function walk(page, key, ms) {
 }
 
 async function completeRooms04To08(page) {
-  // Room 04: exit is sufficient; mark inspection is optional.
+  // Room 04: use the stable exit object directly after walking the hall.
   await walk(page, "KeyW", 22000);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("HALL_EXIT") === true)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۵", { timeout: 5000 });
 
   // Room 05: inspect a mirror, then return to the exit.
   await walk(page, "KeyW", 3000);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("MIRROR_CENTER") === true)).toBe(true);
   await walk(page, "KeyS", 4000);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("MIRROR_EXIT") === true)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۶", { timeout: 5000 });
 
   // Room 06: inspect one recording before leaving.
   await walk(page, "KeyW", 3000);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("REC_FAMILIAR") === true)).toBe(true);
   await walk(page, "KeyS", 4000);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("REC_EXIT") === true)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۷", { timeout: 5000 });
 
   // Room 07: make one trust choice, then leave.
   await walk(page, "KeyW", 3000);
-  expect(await interactCenter(page, 0.35)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("FOLLOW_COMPANION") === true)).toBe(true);
   await walk(page, "KeyS", 4000);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("COMP_EXIT") === true)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۸", { timeout: 5000 });
 
   // Room 08: inspect the core, then take the exit.
   await walk(page, "KeyW", 2200);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("TRUTH_CORE") === true)).toBe(true);
   await walk(page, "KeyS", 5000);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("TRUTH_EXIT") === true)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("پایان", { timeout: 5000 });
 }
 
