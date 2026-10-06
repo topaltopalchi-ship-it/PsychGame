@@ -66,8 +66,8 @@ async function completeRoom01(page) {
   await page.keyboard.up("KeyD");
 
   const doorInteracted = await page.evaluate(() => {
-    const xs = [0.56, 0.62, 0.68, 0.74, 0.80, 0.86, 0.92];
-    const ys = [0.42, 0.50, 0.58];
+    const xs = [0.78, 0.82, 0.86, 0.90, 0.94, 0.97, 0.99];
+    const ys = [0.34, 0.40, 0.46, 0.52, 0.58, 0.64, 0.70];
     return xs.some((x) => ys.some((y) =>
       window.psychGame?.interactAt?.(
         window.innerWidth * x,
