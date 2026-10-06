@@ -10,7 +10,7 @@ export class SessionManager {
     this.tracker = new BehaviorTracker();
     this.tracker.setEnabled(PsychGameConfig.dataCollectionEnabled);
     this.analyzer = new BehaviorAnalyzer();
-    this.playerCode = this.generatePlayerCode();
+    this.playerCode = this.resolvePlayerCode();
     this.sessionStart = new Date().toISOString();
     // Consent is opt-in: telemetry stays disabled until the player explicitly accepts.\n    this.playerConsent = false;
     this.storageKey = `psychgame_${this.playerCode}`;
@@ -24,6 +24,20 @@ export class SessionManager {
     window.addEventListener("psychgame-training-room-complete", (event) => {
       if (event?.detail?.trainingResult) this.saveSession({ completed: true });
     });
+  }
+
+  resolvePlayerCode() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const requested = String(params.get("patientCode") || params.get("p") || "").trim().toUpperCase();
+      if (requested && /^[A-Z0-9_-]{4,64}$/.test(requested)) {
+        localStorage.setItem("psychgame_patient_code_v1", requested);
+        return requested;
+      }
+      const stored = String(localStorage.getItem("psychgame_patient_code_v1") || "").trim().toUpperCase();
+      if (stored && /^[A-Z0-9_-]{4,64}$/.test(stored)) return stored;
+    } catch (_) {}
+    return this.generatePlayerCode();
   }
 
   generatePlayerCode() {
