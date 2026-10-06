@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>YOL — پنل متخصص</title>
+<style>
+:root{font-family:Tahoma,Arial,sans-serif;color:#eef2f7;background:#081018}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#172b38 0,#081018 48%,#05080c 100%);min-height:100vh}
+button,input{font:inherit}button{cursor:pointer}.shell{max-width:1120px;margin:auto;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+h1{font-size:22px;margin:0}.muted{color:#91a0af;font-size:13px}.card{background:rgba(15,24,34,.92);border:1px solid #263646;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 14px 45px rgba(0,0,0,.22)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.wide{grid-column:1/-1}
+label{display:block;color:#aeb9c5;font-size:12px;margin-bottom:6px}input{width:100%;padding:12px;border-radius:12px;border:1px solid #344657;background:#0a1119;color:#fff;outline:none}input:focus{border-color:#c89b58}
+button.primary{border:0;border-radius:12px;padding:12px 16px;background:#c89b58;color:#111;font-weight:700}button.secondary{border:1px solid #3a4c5d;border-radius:12px;padding:10px 14px;background:#111b25;color:#eef2f7}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.status{padding:10px 12px;border-radius:10px;background:#0c151e;color:#aebdca;font-size:12px}
+.results button{width:100%;text-align:right;margin-top:7px}.patient{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #23313f}.patient:last-child{border-bottom:0}
+.session{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #23313f}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#183126;color:#8ee0b0;font-size:11px}
+.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.metric{padding:13px;border:1px solid #263746;border-radius:14px;background:#0b141d}.metric b{display:block;font-size:20px;margin-top:6px}.room-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.room{border:1px solid #263746;border-radius:14px;padding:13px}.room h3{margin:0 0 9px;font-size:14px}.kv{display:flex;justify-content:space-between;gap:8px;border-top:1px solid #1e2b38;padding:7px 0;font-size:12px}.kv span:last-child{color:#d9e2ea}
+.notice{border-right:3px solid #c89b58;padding:10px 12px;background:#101923;color:#c6d0da;line-height:1.9;font-size:12px}
+.error{color:#ff9f9f}.empty{padding:20px;text-align:center;color:#81909e}
+@media(max-width:700px){.shell{padding:12px}.grid,.room-grid,.metric-grid{grid-template-columns:1fr}.wide{grid-column:auto}header{align-items:flex-start;flex-direction:column}.session,.patient{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><div><h1>YOL · پنل متخصص</h1><div class="muted">پرونده‌های رفتاری — فقط برای استفاده متخصص</div></div><button class="secondary" id="logout">خروج</button></header>
+
+<section class="card" id="authCard">
+<div class="notice">برای دسترسی به پرونده‌ها، رمز دسترسی متخصص را وارد کنید. این رمز داخل کد بازی قرار نگرفته و فقط در همین مرورگر نگه‌داری می‌شود.</div>
+<div class="grid" style="margin-top:12px"><div><label>رمز دسترسی متخصص</label><input id="adminToken" type="password" autocomplete="off"></div></div>
+<div class="actions"><button class="primary" id="login">ورود به پنل</button></div><div id="authStatus" class="status" style="margin-top:10px">وارد نشده‌اید.</div>
+</section>
+
+<main id="app" style="display:none">
+<section class="card">
+<h2 style="font-size:17px;margin-top:0">جست‌وجوی بیمار</h2>
+<div class="grid"><div class="wide"><label>نام بیمار یا کد بیمار</label><input id="search" placeholder="مثلاً علی یا P-10482"></div></div>
+<div class="actions"><button class="primary" id="searchBtn">جست‌وجو</button><button class="secondary" id="newPatientBtn">ثبت بیمار جدید</button></div>
+<div id="results" class="results" style="margin-top:12px"></div>
+</section>
+
+<section class="card" id="patientCard" style="display:none"></section>
+<section class="card" id="reportCard" style="display:none"></section>
+</main>
+</div>
+
+<script>
+const API="https://psychgame-api.topaltopalchi.workers.dev";
+const tokenKey="psychgame_clinician_token";
+let token=sessionStorage.getItem(tokenKey)||"";
+let currentPatient=null;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtMs=v=>Number.isFinite(Number(v))?((Number(v)/1000)<60?Math.round(Number(v)/100)/10+" ثانیه":Math.round(Number(v)/60000*10)/10+" دقیقه"):"—";
+const authHeaders=()=>token?{Authorization:"Bearer "+token}:{}; 
+async function api(path,opts={}){const r=await fetch(API+path,{...opts,headers:{"Content-Type":"application/json",...authHeaders(),...(opts.headers||{})}});let data={};try{data=await r.json()}catch{}if(!r.ok)throw new Error(data.error||("HTTP "+r.status));return data}
+function showAuth(ok,msg){$("authStatus").textContent=msg;$("authStatus").className="status"+(ok?"":" error");$("authCard").style.display=ok?"none":"block";$("app").style.display=ok?"block":"none"}
+async function login(){token=$("adminToken").value.trim();if(!token)return;try{await api("/api/patients?search=%20");sessionStorage.setItem(tokenKey,token);showAuth(true,"دسترسی تأیید شد.");await searchPatients();}catch(e){token="";sessionStorage.removeItem(tokenKey);showAuth(false,"دسترسی رد شد: "+e.message)}}
+async function searchPatients(){
+ const q=encodeURIComponent($("search").value.trim());
+ if(!q){$("results").innerHTML='<div class="empty">نام یا کد بیمار را وارد کنید.</div>';return}
+ try{const data=await api("/api/patients?search="+q);const list=data.patients||[];$("results").innerHTML=list.length?list.map(p=>'<div class="patient"><div><b>'+esc(p.name)+'</b><div class="muted">'+esc(p.code)+'</div></div><button class="secondary" data-code="'+esc(p.code)+'">باز کردن پرونده</button></div>').join(""):'<div class="empty">بیماری با این مشخصات پیدا نشد.</div>';$("results").querySelectorAll("[data-code]").forEach(b=>b.onclick=()=>openPatient(b.dataset.code));}catch(e){$("results").innerHTML='<div class="error">'+esc(e.message)+'</div>'}
+}
+async function openPatient(code){
+ try{const pd=await api("/api/patients?search="+encodeURIComponent(code));currentPatient=(pd.patients||[]).find(p=>p.code===code)||{code,name:"—"};const sd=await api("/api/sessions?patientCode="+encodeURIComponent(code));const sessions=sd.sessions||[];
+ $("patientCard").style.display="block";$("patientCard").innerHTML='<h2 style="font-size:17px;margin-top:0">'+esc(currentPatient.name)+'</h2><div class="muted">کد بیمار: '+esc(currentPatient.code)+'</div><div class="actions"><button class="secondary" id="copyLink">ساخت لینک ورود بیمار</button></div><div id="patientLink" class="status" style="display:none;margin-top:10px"></div><h3 style="font-size:14px;margin-top:18px">جلسه‌ها</h3><div>'+ (sessions.length?sessions.map(s=>'<div class="session"><div><b>'+esc(new Date(s.receivedAt||Date.now()).toLocaleString("fa-IR"))+'</b><div class="muted">'+esc(s.sessionId)+' · '+esc(String(s.eventCount??0))+' رویداد</div></div><div><span class="badge">'+(s.completed?"تکمیل‌شده":"در حال ثبت")+'</span><br><button class="secondary" data-session="'+esc(s.sessionId)+'" style="margin-top:7px">مشاهده گزارش</button></div></div>').join(""):'<div class="empty">هنوز جلسه‌ای برای این کد ثبت نشده است.</div>')+'</div>';
+ $("patientCard").querySelector("#copyLink").onclick=()=>{const link=location.origin+location.pathname.replace(/clinician\.html$/,"")+"?patientCode="+encodeURIComponent(code);const box=$("patientLink");box.style.display="block";box.textContent="لینک بیمار: "+link;navigator.clipboard?.writeText(link).catch(()=>{});};
+ $("patientCard").querySelectorAll("[data-session]").forEach(b=>b.onclick=()=>openReport(b.dataset.session));
+ $("reportCard").style.display="none";$("patientCard").scrollIntoView({behavior:"smooth"});
+ }catch(e){alert("خطا در دریافت پرونده: "+e.message)}
+}
+function metric(title,value){return '<div class="metric"><div class="muted">'+esc(title)+'</div><b>'+esc(value)+'</b></div>'}
+function renderIndicators(report){
+ const bi=report?.indicators?.behavioralIndicators||report?.fullAnalysis?.behavioralIndicators||report?.analysis?.behavioralIndicators||{};
+ const labels={stress:"فشار / واکنش به شکست",anxiety:"بررسی و عدم‌قطعیت",excitement:"هیجان و ریسک",hesitation:"تعلل و تغییر تصمیم",compulsiveChecking:"بررسی تکراری",impulsivity:"تکانشگری",attention:"توجه",suspiciousness:"بررسی منبع",pessimism:"گرایش منفی",trust:"اعتماد",independence:"استقلال",persistence:"پشتکار",threatSensitivity:"حساسیت به تهدید",frustrationTolerance:"تحمل ناکامی",intoleranceOfUncertainty:"تحمل ابهام",cognitiveFlexibility:"انعطاف شناختی",noveltyResponse:"واکنش به تازگی",rewardSensitivity:"حساسیت به پاداش",ruleFollowing:"پایبندی به قواعد",socialDependency:"وابستگی اجتماعی"};
+ return Object.entries(labels).map(([k,l])=>{const v=bi[k];if(!v)return "";const vals=Object.entries(v).filter(([,x])=>x!==null&&x!==undefined).slice(0,3).map(([a,x])=>a+":"+x).join(" · ");return '<div class="room"><h3>'+esc(l)+'</h3><div class="kv"><span>شواهد ثبت‌شده</span><span>'+esc(vals||"—")+'</span></div></div>'}).join("");
+}
+async function openReport(id){
+ try{const data=await api("/api/sessions/"+encodeURIComponent(id));const report=data.report||{};const q=report["کیفیت_داده"]||report.dataQuality||{};const rooms=report["خلاصه_اتاق‌ها"]||report.roomSummaries||{};const session=report.session||{};
+ $("reportCard").style.display="block";$("reportCard").innerHTML='<h2 style="font-size:17px;margin-top:0">گزارش رفتاری جلسه</h2><div class="notice">'+esc(report.methodology||"این گزارش برای تفسیر متخصص تهیه شده و تشخیص بالینی نیست.")+'</div><div class="metric-grid" style="margin-top:12px">'+metric("کد بیمار",currentPatient?.code||session.playerCode||"—")+metric("تعداد رویداد",session["تعداد_رویدادها"]??report.eventCount??0)+metric("مدت جلسه",fmtMs(session["مدت_جلسه_میلی_ثانیه"]??report.sessionDurationMs))+metric("اتاق تکمیل‌شده",(report["اتاق‌های_تکمیل‌شده"]||report.completedRooms||[]).length)+metric("تعداد تصمیم",session["تعداد_تصمیم‌ها"]??"—")+metric("کیفیت داده",q.completeRoomCount!=null?(q.completeRoomCount+"/8"):"—")+'</div><h3 style="font-size:15px;margin-top:20px">شاخص‌های رفتاری مشاهده‌شده</h3><div class="room-grid">'+renderIndicators(report)+'</div><h3 style="font-size:15px;margin-top:20px">خلاصه اتاق‌ها</h3><div class="room-grid">'+Object.entries(rooms).map(([id,r])=>'<div class="room"><h3>'+esc(r["عنوان"]||id)+'</h3>'+Object.entries(r).filter(([k])=>k!=="عنوان").slice(0,7).map(([k,v])=>'<div class="kv"><span>'+esc(k.replaceAll("_"," "))+'</span><span>'+esc(v==null?"—":v)+'</span></div>').join("")+'</div>').join("")+'</div><div class="actions"><button class="secondary" id="closeReport">بستن گزارش</button></div>';
+ $("reportCard").querySelector("#closeReport").onclick=()=>{$("reportCard").style.display="none"};$("reportCard").scrollIntoView({behavior:"smooth"});
+ }catch(e){alert("خطا در گزارش: "+e.message)}
+}
+async function newPatient(){
+ const name=prompt("نام یا نام مستعار بیمار را وارد کنید:");if(!name?.trim())return;
+ try{const data=await api("/api/patients",{method:"POST",body:JSON.stringify({name:name.trim()})});$("search").value=data.patient.code;await openPatient(data.patient.code);alert("بیمار ثبت شد. کد بیمار: "+data.patient.code+"\nاین کد را برای شروع بازی به بیمار بدهید.");}catch(e){alert("ثبت بیمار ناموفق بود: "+e.message)}
+}
+$("login").onclick=login;$("searchBtn").onclick=searchPatients;$("search").onkeydown=e=>{if(e.key==="Enter")searchPatients()};$("newPatientBtn").onclick=newPatient;$("logout").onclick=()=>{sessionStorage.removeItem(tokenKey);token="";location.reload()};
+if(token)login();
+</script>
+</body></html>
