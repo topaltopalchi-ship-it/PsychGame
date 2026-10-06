@@ -75,16 +75,35 @@ let trainingFinished = false;
 const roomTransitionTimers = new Set();
 let roomTransitionPending = false;
 
+const roomTransitionOverlay = document.createElement("div");
+roomTransitionOverlay.id = "pg-room-transition";
+Object.assign(roomTransitionOverlay.style, {
+  position: "fixed", inset: "0", zIndex: "15000", display: "grid", placeItems: "center",
+  pointerEvents: "none", opacity: "0", background: "rgba(3,5,8,.96)",
+  transition: "opacity 260ms ease", direction: "rtl", fontFamily: "Tahoma,Arial,sans-serif",
+  color: "#fff"
+});
+roomTransitionOverlay.innerHTML = '<div id="pg-room-transition-label" style="padding:12px 18px;border-right:2px solid #a74b3c;font-size:15px;letter-spacing:.2px">در حال ورود به بخش بعدی…</div>';
+document.body.appendChild(roomTransitionOverlay);
+const roomTransitionLabel = roomTransitionOverlay.querySelector("#pg-room-transition-label");
+
 function scheduleRoomTransition(callback, delay = 900) {
   if (roomTransitionPending) return null;
   roomTransitionPending = true;
+  roomTransitionLabel.textContent = "در حال ورود به بخش بعدی…";
+  roomTransitionOverlay.style.opacity = "1";
   const timer = setTimeout(() => {
     roomTransitionTimers.delete(timer);
     roomTransitionPending = false;
-    if (gameFinished) return;
+    if (gameFinished) {
+      roomTransitionOverlay.style.opacity = "0";
+      return;
+    }
     try {
       callback();
+      requestAnimationFrame(() => { roomTransitionOverlay.style.opacity = "0"; });
     } catch (error) {
+      roomTransitionOverlay.style.opacity = "0";
       console.error("[PsychGame] room transition failed", error);
     }
   }, delay);
@@ -96,6 +115,7 @@ function clearRoomTransitionTimers() {
   roomTransitionTimers.forEach((timer) => clearTimeout(timer));
   roomTransitionTimers.clear();
   roomTransitionPending = false;
+  roomTransitionOverlay.style.opacity = "0";
 }
 
 room01.start();
@@ -137,7 +157,6 @@ document.body.appendChild(hud);
 const style = document.createElement("style");
 style.textContent = "#pg-crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;color:rgba(255,255,255,.65);text-shadow:0 1px 5px #000}#pg-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 16px;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:rgba(5,7,10,.58);backdrop-filter:blur(8px);font-size:13px;color:rgba(255,255,255,.78)}#pg-title{position:absolute;top:18px;right:20px;padding:8px 12px;border-right:2px solid #a74b3c;background:rgba(5,7,10,.42);font-size:14px;color:rgba(255,255,255,.8)}#pg-target{position:absolute;left:50%;top:54%;transform:translateX(-50%);padding:8px 14px;border-radius:18px;background:rgba(5,7,10,.78);border:1px solid rgba(255,255,255,.2);font-size:13px;color:#fff;white-space:nowrap}@media(max-width:700px){#pg-hint{font-size:10px;bottom:9px;max-width:76%;text-align:center;opacity:.72;padding:7px 12px}#pg-title{font-size:11px;top:9px;right:9px;padding:6px 9px;opacity:.82}#pg-target{top:55%;font-size:11px;padding:7px 11px;max-width:72vw;overflow:hidden;text-overflow:ellipsis;opacity:.9}#pg-crosshair{font-size:17px;opacity:.7}}";
 document.head.appendChild(style);
-
 
 function showConsentGate() {
   if (!PsychGameConfig.dataCollectionEnabled) return;
@@ -368,4 +387,3 @@ window.addEventListener("psychgame-room-complete",(event)=>{
     scheduleRoomTransition(()=>startRoom08?.({previousRoom:"ROOM_07",companion}));
   }
 });
-
