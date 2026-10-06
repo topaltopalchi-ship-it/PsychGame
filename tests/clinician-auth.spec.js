@@ -20,11 +20,10 @@ test("clinician can authenticate against the protected report API", async ({ pag
   await page.locator("#adminToken").fill(token);
   await page.locator("#login").click();
 
-  await expect(page.locator("#authStatus")).toContainText("دسترسی", { timeout: 10000 });
+  await expect(page.locator("#authStatus")).toHaveText("دسترسی تأیید شد.", { timeout: 10000 });
+  expect(apiStatuses).toContain(200);
   await expect(page.locator("#app")).toBeVisible({ timeout: 10000 });
   await expect(page.locator("#authCard")).toBeHidden();
-  await expect(page.locator("#authStatus")).toContainText("دسترسی تأیید شد");
-  expect(apiStatuses).toContain(200);
 
   // The token must never be rendered into the page as visible text.
   await expect(page.locator("body")).not.toContainText(token);
