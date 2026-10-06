@@ -10,7 +10,14 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "firefox", use: {
+      ...devices["Desktop Firefox"],
+      firefoxUserPrefs: {
+        "webgl.force-enabled": true,
+        "layers.acceleration.force-enabled": true,
+        "gfx.webrender.all": true
+      }
+    } },
     { name: "webkit", use: { ...devices["Desktop Safari"] } }
   ]
 });
