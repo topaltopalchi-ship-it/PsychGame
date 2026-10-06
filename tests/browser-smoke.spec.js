@@ -96,7 +96,7 @@ async function walk(page, key, ms) {
 
 async function completeRooms04To08(page) {
   // Room 04: exit is sufficient; mark inspection is optional.
-  await walk(page, "KeyW", 20000);
+  await walk(page, "KeyW", 22000);
   expect(await interactCenter(page)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۵", { timeout: 5000 });
 
