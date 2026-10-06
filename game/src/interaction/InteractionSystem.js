@@ -146,6 +146,30 @@ export class InteractionSystem {
     const reactionTimeMs = this.lastLookedObject === objectId && this.lookStartTime !== null
       ? Math.round(performance.now() - this.lookStartTime)
       : null;
+    if (String(objectId).startsWith("ROOM_KEY_")) {
+      this.collectRoomKey(objectId);
+      return;
+    }
+
+    if (String(objectId).startsWith("KEY_CLUE_")) {
+      this.tracker.log("KEY_CLUE_INSPECTED", {
+        roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
+        objectId
+      });
+      this.companion?.say("اینجا یه نشانه‌ی ظریفه... اطرافش رو دقیق‌تر بگرد.");
+      return;
+    }
+
+    const roomExitIds = {3:"WAIT_EXIT",4:"HALL_EXIT",5:"MIRROR_EXIT",6:"REC_EXIT",7:"COMP_EXIT",8:"TRUTH_EXIT"};
+    if (this.roomNumber >= 3 && this.roomNumber <= 8 && roomExitIds[this.roomNumber] === objectId && !this.keyFound) {
+      this.tracker.log("ROOM_EXIT_BLOCKED_BY_KEY", {
+        roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
+        exitId: objectId
+      });
+      this.companion?.say("این در هنوز باز نمی‌شه. اول باید کلید همین اتاق رو پیدا کنی.");
+      return;
+    }
+
     this.tracker.log("OBJECT_INTERACTION", {
       objectId,
       attempt: this.interactionCounts[objectId],
@@ -179,6 +203,24 @@ export class InteractionSystem {
       case "BROKEN_CLOCK": this.handleClock(); break;
       case "OLD_PAINTING": this.handlePainting(); break;
     }
+  }
+
+  collectRoomKey(objectId) {
+    if (this.keyFound) return;
+    this.keyFound = true;
+    this.tracker.log("KEY_FOUND", {
+      objectId,
+      roomId: `ROOM_${String(this.roomNumber).padStart(2, "0")}`,
+      source: "HIDDEN_ROOM_KEY"
+    });
+    const key = this.interactables.find(object => object?.userData?.objectId === objectId);
+    if (key) {
+      key.visible = false;
+      this.interactables = this.interactables.filter(object => object !== key);
+      if (this.currentTarget === key) this.currentTarget = null;
+    }
+    if (this.room?.roomKeyChallenge?.key) this.room.roomKeyChallenge.key.visible = false;
+    this.companion?.say("کلید رو پیدا کردی. حالا می‌تونی مسیر خروج رو امتحان کنی.", 0, "calm");
   }
 
   handleRedButton() {
@@ -328,6 +370,11 @@ InteractionSystem.prototype.handleRoom2 = function(objectId) {
     return;
   }
   if (objectId === "PATH_CENTER") {
+    if (!this.keyFound) {
+      this.tracker.log("ROOM_EXIT_BLOCKED_BY_KEY", { roomId:"ROOM_02", exitId:"PATH_CENTER" });
+      this.companion?.say?.("مسیر درست رو پیدا کردی، ولی هنوز کلید این اتاق رو نداری.");
+      return;
+    }
     const reactionTimeMs = this.lastLookedObject === objectId && this.lookStartTime !== null
       ? Math.round(performance.now() - this.lookStartTime)
       : null;
