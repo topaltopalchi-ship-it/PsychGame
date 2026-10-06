@@ -95,14 +95,24 @@ Server variables:
 
 If `AUTHOR_TOKEN` is enabled, the client must be configured with the matching token for uploads. Never expose `ADMIN_TOKEN` through any `VITE_*` variable.
 
+## Clinician dashboard
+
+A separate mobile-friendly clinician dashboard is built at `clinician.html`. It is not part of the player UI. The dashboard requires the server-side `ADMIN_TOKEN` and supports patient registration, patient-code/name search, session history, and specialist report viewing.
+
+A specialist can create a patient record, give the generated patient code to the patient, and start the game with `?patientCode=P-xxxxxx`. The game records that assigned code instead of generating a new player code.
+
+**Important:** the dashboard must never receive the ingestion `AUTHOR_TOKEN` and `ADMIN_TOKEN` must never be placed in a `VITE_*` variable. Production clinical use also requires HTTPS, access control, retention policy, consent, and appropriate privacy/legal safeguards.
+
 ## Session API
 
 The server exposes:
 
 - `GET /api/health` — public health check.
 - `POST /api/sessions` — stores a validated session report.
-- `GET /api/sessions` — returns session metadata.
+- `GET /api/sessions?patientCode=...` — returns metadata only for one patient code.
 - `GET /api/sessions/:id` — returns a full stored session.
+- `POST /api/patients` — creates a protected patient record.
+- `GET /api/patients?search=...` — searches protected patient records by name or code.
 
 Session uploads are limited to 2 MB and stored locally in `server/data/sessions.json`. The server keeps the most recent 5,000 session records.
 
