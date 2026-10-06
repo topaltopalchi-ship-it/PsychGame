@@ -49,8 +49,36 @@ async function handlePost(request, env) {
   await trimSessions(env);
   return json(env, 201, {ok:true,id});
 }
-async function handleList(env) {
-  const {results} = await env.DB.prepare("SELECT id, player_code, received_at, completed, report_json FROM sessions ORDER BY received_at DESC").all();
+async function handlePatientPost(request, env) {
+  if (!authorized(request, env.ADMIN_TOKEN)) return json(env,401,{error:"Unauthorized"});
+  const payload = await parseJson(request);
+  const name = String(payload?.name || "").trim();
+  let code = String(payload?.code || "").trim().toUpperCase();
+  if (!name || name.length > 200) return json(env,400,{error:"Invalid patient name"});
+  if (!code) code = "P-" + crypto.randomInt(100000, 1000000);
+  if (!/^[A-Z0-9_-]{4,64}$/.test(code)) return json(env,400,{error:"Invalid patient code"});
+  const exists = await env.DB.prepare("SELECT code FROM patients WHERE code = ?").bind(code).first();
+  if (exists) return json(env,409,{error:"Patient code already exists"});
+  const patient = {code,name,createdAt:new Date().toISOString()};
+  await env.DB.prepare("INSERT INTO patients (code,name,created_at) VALUES (?,?,?)").bind(code,name,patient.createdAt).run();
+  return json(env,201,{ok:true,patient});
+}
+async function handlePatientList(url, env) {
+  if (!authorized(new Request(url), env.ADMIN_TOKEN)) return json(env,401,{error:"Unauthorized"});
+  const search = String(new URL(url).searchParams.get("search") || "").trim();
+  let rows;
+  if (search) {
+    const like = "%" + search.replace(/[%_]/g, "\\async function handleList(url,env) {") + "%";
+    rows = (await env.DB.prepare("SELECT code,name,created_at FROM patients WHERE code LIKE ? ESCAPE \\\\ OR name LIKE ? ESCAPE \\\\ ORDER BY created_at DESC LIMIT 100").bind(like,like).all()).results;
+  } else rows = (await env.DB.prepare("SELECT code,name,created_at FROM patients ORDER BY created_at DESC LIMIT 100").all()).results;
+  return json(env,200,{patients:rows.map(r=>({code:r.code,name:r.name,createdAt:r.created_at}))});
+}
+async function handleList(url, env) {
+  const patientCode = String(url.searchParams.get("patientCode") || "").trim();
+  const query = patientCode
+    ? "SELECT id, player_code, received_at, completed, report_json FROM sessions WHERE player_code = ? ORDER BY received_at DESC"
+    : "SELECT id, player_code, received_at, completed, report_json FROM sessions ORDER BY received_at DESC";
+  const {results} = patientCode ? await env.DB.prepare(query).bind(patientCode).all() : await env.DB.prepare(query).all();
   const sessions = results.map(row => {
     const report = JSON.parse(row.report_json);
     return {id:row.id,playerCode:row.player_code,receivedAt:row.received_at,completed:Boolean(row.completed),
@@ -71,6 +99,19 @@ export default {
     if (url.pathname === "/api/health" && request.method === "GET") return json(env,200,{ok:true});
     if (url.pathname === "/api/sessions" && request.method === "POST") {
       try { return await handlePost(request,env); } catch (error) { console.error(error); return json(env,500,{error:"Storage failure"}); }
+    }
+    if (url.pathname === "/api/patients" && request.method === "POST") {
+      try { return await handlePatientPost(request,env); } catch (error) { console.error(error); return json(env,500,{error:"Storage failure"}); }
+    }
+    if (url.pathname === "/api/patients" && request.method === "GET") {
+      if (!authorized(request,env.ADMIN_TOKEN)) return json(env,401,{error:"Unauthorized"});
+      try {
+        const search = String(url.searchParams.get("search") || "").trim();
+        let results;
+        if (search) { const like = "%" + search.replace(/[%_]/g, "\\if (url.pathname === "/api/sessions" && request.method === "GET") {") + "%"; results=(await env.DB.prepare("SELECT code,name,created_at FROM patients WHERE code LIKE ? ESCAPE \\\\ OR name LIKE ? ESCAPE \\\\ ORDER BY created_at DESC LIMIT 100").bind(like,like).all()).results; }
+        else results=(await env.DB.prepare("SELECT code,name,created_at FROM patients ORDER BY created_at DESC LIMIT 100").all()).results;
+        return json(env,200,{patients:results.map(r=>({code:r.code,name:r.name,createdAt:r.created_at}))});
+      } catch(error){console.error(error);return json(env,500,{error:"Storage failure"});}
     }
     if (url.pathname === "/api/sessions" && request.method === "GET") {
       if (!authorized(request,env.ADMIN_TOKEN)) return json(env,401,{error:"Unauthorized"});
