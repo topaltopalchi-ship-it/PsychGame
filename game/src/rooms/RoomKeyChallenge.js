@@ -16,7 +16,8 @@ export function attachRoomKey(scene, tracker, roomNumber) {
 
   const group = new THREE.Group();
   group.position.set(...cfg.position);
-  group.rotation.set(0.12, -0.25, 0.18);
+  group.rotation.set(0.18, 0.35, -0.12);
+  group.scale.setScalar(1.65);
 
   const metal = new THREE.MeshStandardMaterial({
     color: cfg.color, roughness: .24, metalness: .82,
@@ -24,24 +25,34 @@ export function attachRoomKey(scene, tracker, roomNumber) {
   });
   const ring = new THREE.Mesh(new THREE.TorusGeometry(.13,.035,10,24), metal);
   ring.rotation.x = Math.PI / 2;
-  const stem = new THREE.Mesh(new THREE.BoxGeometry(.32,.045,.055), metal);
-  stem.position.x = .2;
-  const tooth1 = new THREE.Mesh(new THREE.BoxGeometry(.055,.09,.055), metal);
-  tooth1.position.set(.3,-.035,0);
-  const tooth2 = tooth1.clone();
-  tooth2.position.set(.39,.01,0);
-  group.add(ring, stem, tooth1, tooth2);
+  const stem = new THREE.Mesh(new THREE.BoxGeometry(.42,.065,.075), metal);
+  stem.position.x = .22;
+  const shoulder = new THREE.Mesh(new THREE.BoxGeometry(.10,.14,.075), metal);
+  shoulder.position.set(.38,0,0);
+  const tooth1 = new THREE.Mesh(new THREE.BoxGeometry(.07,.13,.075), metal);
+  tooth1.position.set(.45,-.055,0);
+  const tooth2 = new THREE.Mesh(new THREE.BoxGeometry(.07,.09,.075), metal);
+  tooth2.position.set(.56,-.025,0);
+  group.add(ring, stem, shoulder, tooth1, tooth2);
   group.userData.objectId = `ROOM_KEY_${String(roomNumber).padStart(2,"0")}`;
   group.userData.isRoomKey = true;
   group.userData.roomNumber = roomNumber;
   group.traverse(node => { if (node.isMesh) { node.castShadow=true; node.receiveShadow=true; } });
   scene.add(group);
 
+  const pedestal = new THREE.Mesh(
+    new THREE.CylinderGeometry(.26,.30,.18,24),
+    new THREE.MeshStandardMaterial({color:0x5b5144,roughness:.72,metalness:.12})
+  );
+  pedestal.position.set(cfg.position[0],0.12,cfg.position[2]);
+  scene.add(pedestal);
+
   const clue = new THREE.Mesh(
     new THREE.BoxGeometry(.32,.018,.2),
     new THREE.MeshStandardMaterial({ color:0x756347, roughness:.82, metalness:.05 })
   );
   clue.position.set(...cfg.clue);
+  clue.scale.setScalar(1.35);
   clue.userData.objectId = `KEY_CLUE_${String(roomNumber).padStart(2,"0")}`;
   clue.userData.isKeyClue = true;
   scene.add(clue);
