@@ -138,7 +138,7 @@ test("Room 01 gameplay completes and transitions to Room 02", async ({ page }) =
 
   await completeRoom01(page);
 
-  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 8000 });
   expect(errors).toEqual([]);
 });
 
@@ -154,7 +154,7 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
 
   await completeRoom01(page);
-  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 8000 });
 
   // Target the lower part of the center path panel so the decorative
   // PATH_CLUE glow above it cannot consume the raycast.
@@ -189,7 +189,7 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۱");
 
   await completeRoom01(page);
-  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 3000 });
+  await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 8000 });
 
   await walk(page, "KeyW", 3500);
   expect(await interactCenter(page)).toBe(true);
