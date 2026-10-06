@@ -19,8 +19,22 @@ function json(env, status, body) {
   });
 }
 
+function decodeUtf8Base64(value) {
+  try {
+    const binary = atob(value);
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  } catch {
+    return null;
+  }
+}
+
 function authorized(request, token) {
-  return Boolean(token) && request.headers.get("Authorization") === "Bearer " + token;
+  if (!token) return false;
+  const header = request.headers.get("Authorization") || "";
+  if (header === "Bearer " + token) return true;
+  if (!header.startsWith("Bearer b64.")) return false;
+  return decodeUtf8Base64(header.slice("Bearer b64.".length)) === token;
 }
 
 function validReport(report) {
