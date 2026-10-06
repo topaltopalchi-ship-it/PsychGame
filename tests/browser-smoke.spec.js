@@ -43,32 +43,13 @@ test("mobile touch UI smoke test", async ({ browser }) => {
 });
 
 async function completeRoom01(page) {
-  await page.keyboard.down("KeyA");
-  await page.waitForTimeout(2400);
-  await page.keyboard.up("KeyA");
-  await page.keyboard.down("KeyW");
-  await page.waitForTimeout(1250);
-  await page.keyboard.up("KeyW");
-  await page.keyboard.press("KeyE");
-
-  await page.keyboard.down("KeyD");
-  await page.waitForTimeout(3000);
-  await page.keyboard.up("KeyD");
-  await page.keyboard.down("KeyW");
-  await page.waitForTimeout(1400);
-  await page.keyboard.up("KeyW");
-  await page.keyboard.press("KeyE");
-  await page.waitForTimeout(200);
-  await page.keyboard.press("KeyE");
-
-  await page.keyboard.down("KeyD");
-  await page.waitForTimeout(2500);
-  await page.keyboard.up("KeyD");
-
-  const doorInteracted = await page.evaluate(() =>
-    window.psychGame?.interactObject?.("EXIT_DOOR") === true
-  );
-  expect(doorInteracted).toBe(true);
+  // Use stable object ids here too; movement/camera timing is intentionally
+  // covered by the dedicated UI smoke tests, while gameplay transitions
+  // should remain deterministic across browser engines.
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("RED_BUTTON") === true)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("HALF_OPEN_DRAWER") === true)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("KEY_FROM_DRAWER") === true)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("EXIT_DOOR") === true)).toBe(true);
 }
 
 async function interactCenter(page, xRatio = 0.5, yRatios = [0.45, 0.5, 0.55, 0.6]) {
