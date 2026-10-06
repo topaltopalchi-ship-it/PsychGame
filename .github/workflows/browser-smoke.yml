@@ -28,7 +28,7 @@ jobs:
         run: npm run test:api
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: npx playwright install --with-deps chromium
 
       - name: Build game
         run: npm run build
