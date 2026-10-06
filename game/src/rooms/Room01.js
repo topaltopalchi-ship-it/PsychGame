@@ -178,15 +178,43 @@ export class Room01 {
 
     const keyGroup = new THREE.Group();
     keyGroup.position.set(.8, 1.24, -1.0);
+    keyGroup.rotation.set(.18, -.35, .12);
     keyGroup.scale.setScalar(0.27);
-    const keyMaterial = new THREE.MeshStandardMaterial({ color: 0xffd34f, emissive: 0x8f5b00, emissiveIntensity: 2.2, metalness: .8, roughness: .18 });
-    const shaft = new THREE.Mesh(new THREE.BoxGeometry(.56, .075, .09), keyMaterial);
-    shaft.rotation.y = Math.PI / 2;
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(.13, .042, 16, 28), keyMaterial);
-    ring.rotation.x = Math.PI / 2; ring.position.x = -.31;
-    const tooth = new THREE.Mesh(new THREE.BoxGeometry(.13, .08, .11), keyMaterial);
-    tooth.position.set(.30, -.02, 0);
-    keyGroup.add(shaft, ring, tooth);
+
+    // A recognizable old brass key: bow, neck, shoulder and multiple teeth.
+    const keyMaterial = new THREE.MeshStandardMaterial({
+      color: 0xc79a52, emissive: 0x4b2c0b, emissiveIntensity: .18,
+      metalness: .86, roughness: .22
+    });
+
+    const bow = new THREE.Mesh(new THREE.TorusGeometry(.20, .055, 14, 32), keyMaterial);
+    bow.rotation.x = Math.PI / 2;
+    bow.position.x = -.34;
+
+    const bowInner = new THREE.Mesh(
+      new THREE.TorusGeometry(.095, .018, 10, 24),
+      new THREE.MeshStandardMaterial({ color: 0x6e4a22, roughness: .3, metalness: .55 })
+    );
+    bowInner.rotation.x = Math.PI / 2;
+    bowInner.position.x = -.34;
+
+    const neck = new THREE.Mesh(new THREE.BoxGeometry(.22, .075, .065), keyMaterial);
+    neck.position.x = -.17;
+
+    const shaft = new THREE.Mesh(new THREE.BoxGeometry(.64, .065, .065), keyMaterial);
+    shaft.position.x = .19;
+
+    const shoulder = new THREE.Mesh(new THREE.BoxGeometry(.10, .20, .075), keyMaterial);
+    shoulder.position.set(.43, -.005, 0);
+
+    const tooth1 = new THREE.Mesh(new THREE.BoxGeometry(.08, .15, .075), keyMaterial);
+    tooth1.position.set(.53, -.065, 0);
+    const tooth2 = new THREE.Mesh(new THREE.BoxGeometry(.08, .22, .075), keyMaterial);
+    tooth2.position.set(.65, -.035, 0);
+    const tooth3 = new THREE.Mesh(new THREE.BoxGeometry(.07, .13, .075), keyMaterial);
+    tooth3.position.set(.76, -.075, 0);
+
+    keyGroup.add(bow, bowInner, neck, shaft, shoulder, tooth1, tooth2, tooth3);
     keyGroup.userData.objectId = "KEY_FROM_DRAWER";
     keyGroup.userData.interactable = true;
     keyGroup.visible = false;
