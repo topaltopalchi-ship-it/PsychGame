@@ -37,7 +37,7 @@ jobs:
         run: npm run preview -- --host 127.0.0.1 > /tmp/psychgame-preview.log 2>&1 &
 
       - name: Run cross-browser smoke tests
-        run: timeout 10m npx playwright test --project=chromium --project=firefox --project=webkit
+        run: xvfb-run -a timeout 10m npx playwright test --project=chromium --project=firefox --project=webkit
 
       - name: Upload Playwright diagnostics on failure
         if: failure()
