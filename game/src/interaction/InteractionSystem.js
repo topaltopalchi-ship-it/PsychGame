@@ -287,22 +287,14 @@ export class InteractionSystem {
   handleDoor() {
     const locked = this.exitDoor?.userData.locked === true;
 
-    // If the player never pressed the red button, the door remains unlocked.
+    // Room 1 always requires the hidden key. Checking the door before
+    // finding it must never complete the room or dispatch a room-complete event.
     if (!this.keyFound) {
-      this.tracker.log("DOOR_CHECKED", { status: locked ? "LOCKED" : "UNLOCKED", result: "NEEDS_KEY" });
-      if (!this.completed) {
-        this.completed = true;
-        this.room?.completeRoom?.();
-        this.companion?.say("در هنوز باز نمی‌شه. اول کلید اتاق رو پیدا کن.");
-        window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01" } }));
-      }
-      return;
-    }
-
-    // After the red button is pressed, the door is locked and the golden key is required.
-    if (locked && !this.keyFound) {
-      this.tracker.log("DOOR_CHECKED", { status: "LOCKED", result: "NEEDS_KEY" });
-      this.companion?.say("در قفله. اول کلید طلایی داخل کشو رو بردار.");
+      this.tracker.log("DOOR_CHECKED", {
+        status: locked ? "LOCKED" : "UNLOCKED",
+        result: "NEEDS_KEY"
+      });
+      this.companion?.say("در هنوز باز نمی‌شه. اول کلید اتاق رو پیدا کن.");
       return;
     }
 
