@@ -24,7 +24,7 @@ const child = spawn(process.execPath, ["server/index.js"], {
 });
 
 const productionGuardScript = path.join(tempDir, "production-guard-smoke.mjs");
-fs.writeFileSync(productionGuardScript, `import "../server/index.js";\n`, "utf8");
+fs.writeFileSync(productionGuardScript, `import ${JSON.stringify(path.resolve(process.cwd(), "server/index.js"))};\n`, "utf8");
 
 async function assertProductionGuard(envPatch, expectedMessage) {
   const probe = spawn(process.execPath, [productionGuardScript], {
