@@ -12,7 +12,7 @@ export class SessionManager {
     this.analyzer = new BehaviorAnalyzer();
     this.playerCode = this.generatePlayerCode();
     this.sessionStart = new Date().toISOString();
-    this.playerConsent = PsychGameConfig.dataCollectionEnabled;
+    // Consent is opt-in: telemetry stays disabled until the player explicitly accepts.\n    this.playerConsent = false;
     this.storageKey = `psychgame_${this.playerCode}`;
     this.trainingPlanKey = `psychgame_training_${this.playerCode}`;
     this.uploader = new SessionUploader({ endpoint: PsychGameConfig.dataUploadEnabled ? (import.meta.env.VITE_API_URL || "") : "", token: import.meta.env.VITE_AUTHOR_TOKEN || "" });
