@@ -13,6 +13,7 @@ import { Room08 } from "./rooms/Room08.js";
 import { AuthorPanel } from "./ui/AuthorPanel.js";
 import { Companion } from "./ui/Companion.js";
 import { AudioManager } from "./audio/AudioManager.js";
+import { PsychGameConfig } from "./config/PsychGameConfig.js";
 import { Room09 } from "./rooms/Room09.js";
 import { Room10 } from "./rooms/Room10.js";
 import { Room11 } from "./rooms/Room11.js";
@@ -103,7 +104,7 @@ interaction.setRoom(room01, 1);
 audioManager.setRoom(1);
 interaction.setCompanion(companion);
 
-session.setConsent(true);
+session.setConsent(false);
 tracker.log("GAME_START", { playerCode: session.getPlayerCode() });
 
 let audioUnlocked = false;
@@ -136,6 +137,39 @@ document.body.appendChild(hud);
 const style = document.createElement("style");
 style.textContent = "#pg-crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;color:rgba(255,255,255,.65);text-shadow:0 1px 5px #000}#pg-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 16px;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:rgba(5,7,10,.58);backdrop-filter:blur(8px);font-size:13px;color:rgba(255,255,255,.78)}#pg-title{position:absolute;top:18px;right:20px;padding:8px 12px;border-right:2px solid #a74b3c;background:rgba(5,7,10,.42);font-size:14px;color:rgba(255,255,255,.8)}#pg-target{position:absolute;left:50%;top:54%;transform:translateX(-50%);padding:8px 14px;border-radius:18px;background:rgba(5,7,10,.78);border:1px solid rgba(255,255,255,.2);font-size:13px;color:#fff;white-space:nowrap}@media(max-width:700px){#pg-hint{font-size:10px;bottom:9px;max-width:76%;text-align:center;opacity:.72;padding:7px 12px}#pg-title{font-size:11px;top:9px;right:9px;padding:6px 9px;opacity:.82}#pg-target{top:55%;font-size:11px;padding:7px 11px;max-width:72vw;overflow:hidden;text-overflow:ellipsis;opacity:.9}#pg-crosshair{font-size:17px;opacity:.7}}";
 document.head.appendChild(style);
+
+
+function showConsentGate() {
+  if (!PsychGameConfig.dataCollectionEnabled) return;
+  const overlay = document.createElement("div");
+  overlay.id = "pg-consent";
+  Object.assign(overlay.style, {
+    position:"fixed", inset:"0", zIndex:"20000", display:"grid", placeItems:"center",
+    padding:"20px", background:"rgba(3,5,8,.88)", backdropFilter:"blur(10px)",
+    direction:"rtl", fontFamily:"Tahoma,Arial,sans-serif", color:"#fff"
+  });
+  overlay.innerHTML = `
+    <div style="width:min(520px,92vw);padding:24px;border:1px solid rgba(255,255,255,.16);border-radius:18px;background:rgba(12,15,20,.96);box-shadow:0 20px 60px rgba(0,0,0,.45)">
+      <div style="font-size:19px;font-weight:700;margin-bottom:12px">قبل از شروع</div>
+      <div style="font-size:13px;line-height:1.9;color:rgba(255,255,255,.78)">
+        این بازی برخی رویدادهای مربوط به نحوه بازی و انتخاب‌های شما را برای بررسی تخصصی ثبت می‌کند.
+        این داده‌ها نتیجه روان‌شناختی یا تشخیص خودکار نیستند. با انتخاب «موافقم»، ثبت این داده‌ها را می‌پذیرید.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-start;flex-wrap:wrap;margin-top:20px">
+        <button id="pg-consent-accept" type="button" style="padding:11px 18px;border:0;border-radius:10px;background:#a74b3c;color:#fff;font:inherit;cursor:pointer">موافقم و شروع بازی</button>
+        <button id="pg-consent-decline" type="button" style="padding:11px 18px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:transparent;color:#fff;font:inherit;cursor:pointer">ادامه بدون ثبت رفتار</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = (accepted) => {
+    session.setConsent(accepted);
+    overlay.remove();
+    if (accepted) tracker.log("CONSENT_GRANTED");
+  };
+  overlay.querySelector("#pg-consent-accept")?.addEventListener("click", () => close(true));
+  overlay.querySelector("#pg-consent-decline")?.addEventListener("click", () => close(false));
+}
+showConsentGate();
 
 let authorTapCount = 0;
 let authorTapTimer = null;
