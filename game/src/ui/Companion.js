@@ -16,6 +16,9 @@ export class Companion {
     this.lastSpokenMessage = "";
     this.lastSpokenAt = 0;
     this.sayTimers = new Set();
+    this.reactionCooldownMs = 5200;
+    this.lastReactionAt = 0;
+    this.reactionCounts = {};
     this.createUI();
     this.installVoiceUnlock();
     this.say("خب... بریم ببینیم راه خروج کجاست.", 900, "calm", "intro.mp3");
@@ -132,7 +135,28 @@ export class Companion {
   }
 
   remember(event){switch(event.type){case"RED_BUTTON_FIRST_SEEN":this.memory.sawButton=true;break;case"RED_BUTTON_PRESS":this.memory.pressedButton=true;break;case"FAILURE":this.memory.failed=true;break;case"RETRY_AFTER_FAILURE":this.memory.retriedButton=true;break;case"DRAWER_INSPECTED":this.memory.searchedDrawer=true;break;case"DOOR_BLOCKED":this.memory.checkedDoorAfterFailure=true;break;case"OBJECT_INTERACTION":if(!this.memory.failed)this.memory.exploredBeforeFailure=true;break;}}
-  react(event){if(event.type==="RED_BUTTON_FIRST_SEEN"&&!this.memory.pressedButton){this.say("اون رو دیدی؟ من جای تو بودم... دست بهش نمی‌زدم.",0,"tense");return;}if(event.type==="FAILURE"){this.say(this.memory.sawButton?"خب... همون شد که ازش می‌ترسیدم. آروم باش... یه راه دیگه پیدا کنیم.":"اوه... این یکی خوب پیش نرفت. بیا یه راه دیگه رو امتحان کنیم.",0,this.memory.sawButton?"fear":"tense");return;}if(event.type==="RETRY_AFTER_FAILURE"){this.say(this.memory.searchedDrawer?"هنوز سرنخ کشو رو داریم. قبل از دوباره امتحان کردن، بیا همونو دنبال کنیم.":"باز می‌خوای امتحانش کنی؟ من ترجیح می‌دم اول یه دور اطراف رو بگردیم.",0,this.memory.searchedDrawer?"calm":"stress");return;}if(event.type==="DRAWER_INSPECTED"){this.say(this.memory.failed?"خوبه... بعد از اون اتفاق، بهتره سرنخ رو دنبال کنیم.":"بالاخره یه سرنخ پیدا شد. شاید همین کلید به کارمون بیاد.",0,"calm");return;}if(event.type==="DOOR_BLOCKED")this.say(this.memory.retriedButton?"در هنوز قفله... فکر کنم وقتشه راه قبلی رو بی‌خیال بشیم.":"در قفله. بیا یه کم دقیق‌تر اطراف رو بگردیم.",0,this.memory.retriedButton?"tense":"calm");}
+  react(event){
+    const type=event.type;
+    this.reactionCounts[type]=(this.reactionCounts[type]||0)+1;
+    const now=Date.now();
+    const important=new Set(["FAILURE","RED_BUTTON_FIRST_SEEN","DOOR_BLOCKED","ROOM_06_RECORDING_CHECKED","ROOM_07_COMPANION_PROMPT","ROOM_EXIT_BLOCKED_BY_KEY","KEY_CLUE_INSPECTED","KEY_FOUND"]);
+    if(!important.has(type)&&now-this.lastReactionAt<this.reactionCooldownMs)return;
+    const say=(message,mood="calm",voiceFile=null)=>{this.lastReactionAt=Date.now();this.say(message,0,mood,voiceFile);};
+
+    if(type==="RED_BUTTON_FIRST_SEEN"&&!this.memory.pressedButton){say("اون رو دیدی؟ من جای تو بودم... اول یه دور اطرافش رو نگاه می‌کردم.","tense");return;}
+    if(type==="FAILURE"){say(this.memory.sawButton?"خب... همون شد که ازش می‌ترسیدم. آروم باش؛ هنوز راه داریم.":"اوه... این یکی خوب پیش نرفت. عجله نکن، یه راه دیگه پیدا کنیم.",this.memory.sawButton?"fear":"tense");return;}
+    if(type==="RETRY_AFTER_FAILURE"){say(this.memory.searchedDrawer?"هنوز سرنخ کشو رو داریم. قبل از تکرار، همونو دنبال کنیم.":"دوباره می‌خوای امتحانش کنی؟ این بار قبلش یه لحظه صبر کن.","stress");return;}
+    if(type==="DRAWER_INSPECTED"){say(this.memory.failed?"خوبه... بعد از اون اتفاق، دنبال سرنخ رفتی.":"بالاخره یه سرنخ پیدا شد. شاید همین به کارمون بیاد.");return;}
+    if(type==="DOOR_BLOCKED"){say(this.memory.retriedButton?"در هنوز قفله... شاید بهتره مسیر قبلی رو رها کنیم.":"در قفله. اطراف رو دقیق‌تر ببین.","tense");return;}
+    if(type==="ROOM_04_MOVEMENT"&&this.reactionCounts[type]===3){say("داری مسیر رو دوباره امتحان می‌کنی... این بار ببین چیزی عوض شده یا نه.","calm");return;}
+    if(type==="ROOM_05_MIRROR_INSPECTED"&&event.count>=2){say("دوباره همون رو نگاه کردی. مطمئنی این بار دنبال چیز تازه‌ای هستی؟","tense");return;}
+    if(type==="ROOM_06_RECORDING_CHECKED"&&event.switchCount>=2){say("صدای قبلی رو عوض کردی... انگار هنوز مطمئن نیستی کدومش قابل اعتماده.","stress");return;}
+    if(type==="ROOM_07_COMPANION_PROMPT"){say("لازم نیست به انتخاب من تکیه کنی. این یکی رو خودت تصمیم بگیر.","calm");return;}
+    if(type==="KEY_CLUE_INSPECTED"&&event.clueNumber===1){say("نشونه رو دیدی. لازم نیست فوراً جوابش رو بدونی؛ اطرافش رو هم بررسی کن.","calm","calm_hint.mp3");return;}
+    if(type==="ROOM_EXIT_BLOCKED_BY_KEY"){say("در باز نمی‌شه. یعنی هنوز یه چیز مهم این اطراف جا مونده.","tense","exit_blocked.mp3");return;}
+    if(type==="KEY_FOUND"){say("خوبه... کلید رو پیدا کردی. حالا می‌تونیم جلو بریم.","calm","room_key_found.mp3");return;}
+    if(type==="ROOM_KEY_PLACED"&&event.roomId==="ROOM_02"){say("قبل از انتخاب مسیر، یه چیز مهم اینجاست که باید خودت پیداش کنی.","calm");}
+  }
   observe(){const events=this.tracker.getEvents();if(events.length<=this.lastEventCount)return;const fresh=events.slice(this.lastEventCount);this.lastEventCount=events.length;for(const event of fresh){this.remember(event);this.react(event);}}
   destroy(){clearInterval(this.timer);clearTimeout(this.hideTimer);for(const timer of this.sayTimers)clearTimeout(timer);this.sayTimers.clear();this.queuedVoice=null;this.pendingVoice=null;this.speechActive=false;this.speechSequence++;if("speechSynthesis"in window)window.speechSynthesis.cancel();this.panel.remove();}
 }
