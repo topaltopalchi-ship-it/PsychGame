@@ -287,7 +287,7 @@ export class InteractionSystem {
   handleDoor() {
     // Hard gate: Room 1's exit is impossible until the drawer key has
     // actually been collected. Do not trust generic locked state here.
-    if (this.roomNumber === 1 && this.keyFound !== true) {
+    if (this.roomNumber === 1 && (this.keyFound !== true || this.room?.hasKey !== true)) {
       this.tracker.log("DOOR_CHECKED", { status: "LOCKED", result: "NEEDS_KEY" });
       this.companion?.say("در قفله. اول کلید داخل کشو رو بردار.");
       return;
@@ -306,7 +306,7 @@ export class InteractionSystem {
       this.completed = true;
       this.room?.completeRoom?.();
       this.companion?.say("بازش کردی... فکر کنم آماده‌ای بریم اتاق بعدی.");
-      window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01" } }));
+      window.dispatchEvent(new CustomEvent("psychgame-room-complete", { detail: { roomId: "ROOM_01", keyCollected: this.keyFound === true && this.room?.hasKey === true } }));
     }
   }
 
@@ -327,7 +327,8 @@ export class InteractionSystem {
       return;
     }
     this.keyFound = true;
-    this.tracker.log("KEY_FOUND", { source: "KEY_FROM_DRAWER" });
+    if (this.roomNumber === 1 && this.room) this.room.hasKey = true;
+    this.tracker.log("KEY_FOUND", { source: "KEY_FROM_DRAWER", roomKeyConfirmed: this.roomNumber === 1 ? true : undefined });
     const key = this.room?.objects?.drawerKey;
     if (key) {
       this.interactables = this.interactables.filter(object => object !== key);
