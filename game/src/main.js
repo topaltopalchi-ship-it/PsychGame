@@ -228,7 +228,9 @@ const targetLabels = {
   MIRROR_LEFT: "آینه چپ — بررسی کن", MIRROR_CENTER: "آینه وسط — بررسی کن", MIRROR_RIGHT: "آینه راست — بررسی کن", MIRROR_EXIT: "در خروج — باز کن",
   REC_FAMILIAR: "صدای آشنا — گوش بده", REC_UNKNOWN: "صدای ناشناس — گوش بده", REC_STATIC: "نویز — گوش بده", REC_EXIT: "در خروج — باز کن",
   FOLLOW_COMPANION: "اعتماد به همراه — انتخاب کن", GO_ALONE: "تنهایی — انتخاب کن", COMP_EXIT: "در خروج — باز کن",
-  TRUTH_CORE: "هسته — بررسی کن", TRUTH_EXIT: "در خروج — پایان"
+  TRUTH_CORE: "هسته — بررسی کن", TRUTH_EXIT: "در خروج — پایان",
+  ROOM_KEY_02: "کلید اتاق — بردار", ROOM_KEY_03: "کلید اتاق — بردار", ROOM_KEY_04: "کلید اتاق — بردار", ROOM_KEY_05: "کلید اتاق — بردار", ROOM_KEY_06: "کلید اتاق — بردار", ROOM_KEY_07: "کلید اتاق — بردار", ROOM_KEY_08: "کلید اتاق — بردار",
+  KEY_CLUE_02: "نشانه — بررسی کن", KEY_CLUE_03: "نشانه — بررسی کن", KEY_CLUE_04: "نشانه — بررسی کن", KEY_CLUE_05: "نشانه — بررسی کن", KEY_CLUE_06: "نشانه — بررسی کن", KEY_CLUE_07: "نشانه — بررسی کن", KEY_CLUE_08: "نشانه — بررسی کن"
 };
 const targetNames = {
   RED_BUTTON: "دکمه قرمز", EXIT_DOOR: "در", HALF_OPEN_DRAWER: "کشو", KEY_FROM_DRAWER: "کلید طلایی", CLOSED_BOX: "جعبه", OLD_DESK: "میز قدیمی", BROKEN_CLOCK: "ساعت خراب", OLD_PAINTING: "تابلو",
