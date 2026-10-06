@@ -1,6 +1,7 @@
 export class Companion {
-  constructor(tracker) {
+  constructor(tracker, audioManager = null) {
     this.tracker = tracker;
+    this.audioManager = audioManager;
     this.lastEventCount = 0;
     this.memory = { sawButton:false, pressedButton:false, failed:false, retriedButton:false, searchedDrawer:false, checkedDoorAfterFailure:false, exploredBeforeFailure:false };
     this.voiceEnabled = true;
@@ -17,7 +18,7 @@ export class Companion {
     this.sayTimers = new Set();
     this.createUI();
     this.installVoiceUnlock();
-    this.say("خب... بریم ببینیم راه خروج کجاست.", 900, "calm");
+    this.say("خب... بریم ببینیم راه خروج کجاست.", 900, "calm", "intro.mp3");
     this.timer = setInterval(() => this.observe(), 350);
   }
 
@@ -33,8 +34,8 @@ export class Companion {
     document.head.appendChild(style);
   }
 
-  say(message,delay=0,mood="calm") {
-    const timer=setTimeout(()=>{this.sayTimers.delete(timer);this.text.textContent=message;this.voiceMood=this.normalizeMood(mood,message);this.pendingVoice={message,mood:this.voiceMood};this.speak(message,this.voiceMood);if(!this.showText)return;this.panel.style.opacity="1";this.panel.querySelector("#pg-companion-avatar").style.animation="pgCompanionPulse .9s ease-out";this.panel.style.transform="translate(-50%,0)";clearTimeout(this.hideTimer);this.hideTimer=setTimeout(()=>{this.panel.style.opacity="0";this.panel.style.transform="translate(-50%,10px)";},5200);},delay);this.sayTimers.add(timer);
+  say(message,delay=0,mood="calm",voiceFile=null) {
+    const timer=setTimeout(()=>{this.sayTimers.delete(timer);this.text.textContent=message;this.voiceMood=this.normalizeMood(mood,message);this.pendingVoice={message,mood:this.voiceMood,voiceFile};this.speak(message,this.voiceMood,false,voiceFile);if(!this.showText)return;this.panel.style.opacity="1";this.panel.querySelector("#pg-companion-avatar").style.animation="pgCompanionPulse .9s ease-out";this.panel.style.transform="translate(-50%,0)";clearTimeout(this.hideTimer);this.hideTimer=setTimeout(()=>{this.panel.style.opacity="0";this.panel.style.transform="translate(-50%,10px)";},5200);},delay);this.sayTimers.add(timer);
   }
 
   installVoiceUnlock(){
@@ -46,7 +47,7 @@ export class Companion {
         synth.cancel();
         synth.resume();
         this.voiceReady=synth.getVoices().length>0;
-        if(this.pendingVoice)this.speak(this.pendingVoice.message,this.pendingVoice.mood,true);else this.speak("صدای همراه فعال شد.", "calm", true);
+        if(this.pendingVoice)this.speak(this.pendingVoice.message,this.pendingVoice.mood,true,this.pendingVoice.voiceFile);else this.speak("صدای همراه فعال شد.", "calm", true);
       }catch(error){console.warn("Companion voice unlock failed",error);}
     };
     ["pointerdown","touchstart","click","keydown"].forEach(type=>window.addEventListener(type,unlock,{passive:true}));
@@ -66,13 +67,26 @@ export class Companion {
     return voices.find(v=>/^fa(-|_)/i.test(v.lang))||voices.find(v=>/^tr(-|_)/i.test(v.lang))||voices.find(v=>/^ar(-|_)/i.test(v.lang))||voices.find(v=>/persian|farsi|iran|turkish/i.test(v.name))||voices.find(v=>v.default)||voices[0]||null;
   }
 
-  speak(message,mood="calm",force=false){
-    if(!this.voiceEnabled||!("speechSynthesis"in window))return;
-    if(!this.voiceUnlocked){this.pendingVoice={message,mood};return;}
+  speak(message,mood="calm",force=false,voiceFile=null){
+    if(!this.voiceEnabled)return;
+    if(voiceFile && this.audioManager){
+      const audio=this.audioManager.playCompanionVoice(voiceFile, mood==="fear" ? 0.9 : 0.95);
+      if(audio){
+        this.speechActive=true;
+        this.lastSpokenMessage=message;
+        this.lastSpokenAt=Date.now();
+        const fallback=()=>{this.speechActive=false;this.speak(message,mood,true,null);};
+        audio.onended=()=>{this.speechActive=false;if(this.pendingVoice?.message===message)this.pendingVoice=null;};
+        audio.onerror=fallback;
+        return;
+      }
+    }
+    if(!("speechSynthesis"in window))return;
+    if(!this.voiceUnlocked){this.pendingVoice={message,mood,voiceFile};return;}
     const now=Date.now();
     if(!force&&message===this.lastSpokenMessage&&now-this.lastSpokenAt<1400)return;
     const synth=window.speechSynthesis;
-    if(this.speechActive){this.queuedVoice={message,mood};return;}
+    if(this.speechActive){this.queuedVoice={message,mood,voiceFile};return;}
     this.pendingVoice={message,mood};
     try{
       synth.cancel();
@@ -88,7 +102,7 @@ export class Companion {
       this.lastSpokenAt=now;
       const seq=++this.speechSequence;
       utterance.onstart=()=>{this.voiceReady=true;};
-      utterance.onend=()=>{this.speechActive=false;if(this.pendingVoice?.message===message)this.pendingVoice=null;const next=this.queuedVoice;this.queuedVoice=null;if(next&&seq===this.speechSequence)setTimeout(()=>this.speak(next.message,next.mood),80);};
+      utterance.onend=()=>{this.speechActive=false;if(this.pendingVoice?.message===message)this.pendingVoice=null;const next=this.queuedVoice;this.queuedVoice=null;if(next&&seq===this.speechSequence)setTimeout(()=>this.speak(next.message,next.mood,false,next.voiceFile),80);};
       utterance.onerror=(event)=>{this.speechActive=false;this.pendingVoice=null;this.queuedVoice=null;console.warn("Companion TTS error:",event.error);};
       if(this.voiceUnlocked&&seq===this.speechSequence){
         synth.resume();
