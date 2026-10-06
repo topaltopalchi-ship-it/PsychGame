@@ -12,7 +12,9 @@ test("clinician can authenticate against the protected report API", async ({ pag
     }
   });
 
-  await page.goto("/clinician.html", { waitUntil: "networkidle" });
+  // The app is deployed under the Vite base path /PsychGame/.
+  // Keep this relative so Playwright's baseURL is preserved.
+  await page.goto("clinician.html", { waitUntil: "networkidle" });
   await expect(page.locator("#authCard")).toBeVisible();
   await page.locator("#adminToken").fill(token);
   await page.locator("#login").click();
