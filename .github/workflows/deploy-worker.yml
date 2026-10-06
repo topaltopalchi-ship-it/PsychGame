@@ -78,6 +78,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: wrangler deploy --config=worker/wrangler.toml
 
+      - name: Set Worker secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          AUTHOR_TOKEN: ${{ secrets.PSYCHGAME_AUTHOR_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
+        run: |
+          printf '%s' "$AUTHOR_TOKEN" | wrangler secret put AUTHOR_TOKEN --config=worker/wrangler.toml
+          printf '%s' "$ADMIN_TOKEN" | wrangler secret put ADMIN_TOKEN --config=worker/wrangler.toml
+
       - name: Verify deployed admin API
         env:
           ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
@@ -92,12 +101,3 @@ jobs:
             exit 1
           fi
           echo "Admin API verification passed (HTTP 200)."
-
-      - name: Set Worker secrets
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          AUTHOR_TOKEN: ${{ secrets.PSYCHGAME_AUTHOR_TOKEN }}
-          ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
-        run: |
-          printf '%s' "$AUTHOR_TOKEN" | wrangler secret put AUTHOR_TOKEN --config=worker/wrangler.toml
-          printf '%s' "$ADMIN_TOKEN" | wrangler secret put ADMIN_TOKEN --config=worker/wrangler.toml
