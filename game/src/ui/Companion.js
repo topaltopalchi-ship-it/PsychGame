@@ -25,11 +25,11 @@ export class Companion {
     this.panel = document.createElement("div");
     this.panel.id = "pg-companion";
     this.panel.innerHTML = '<div id="pg-companion-avatar"><span></span></div><div id="pg-companion-body"><div id="pg-companion-name">همراه</div><div id="pg-companion-text"></div></div>';
-    Object.assign(this.panel.style,{position:"fixed",left:"50%",bottom:"88px",transform:"translate(-50%,10px)",display:"flex",alignItems:"center",gap:"12px",width:"min(430px,calc(100vw - 28px))",padding:"16px 18px",borderRadius:"14px",background:"rgba(10,12,17,.88)",border:"1px solid rgba(255,255,255,.13)",backdropFilter:"blur(12px)",boxShadow:"0 12px 35px rgba(0,0,0,.35)",direction:"rtl",fontFamily:"Tahoma,Arial,sans-serif",color:"#eee",zIndex:"6000",opacity:"0",transition:"opacity .25s,transform .25s",pointerEvents:"none"});
+    Object.assign(this.panel.style,{position:"fixed",left:"50%",bottom:"88px",transform:"translate(-50%,10px)",display:"flex",alignItems:"center",gap:"13px",width:"min(500px,calc(100vw - 24px))",padding:"17px 20px",borderRadius:"18px",background:"linear-gradient(135deg,rgba(18,22,31,.96),rgba(10,13,19,.93))",border:"1px solid rgba(255,214,145,.32)",backdropFilter:"blur(14px)",boxShadow:"0 14px 42px rgba(0,0,0,.42),0 0 24px rgba(255,190,100,.08)",direction:"rtl",fontFamily:"Tahoma,Arial,sans-serif",color:"#fff",zIndex:"6000",opacity:"0",transition:"opacity .25s,transform .25s",pointerEvents:"none"});
     document.body.appendChild(this.panel);
     this.text=this.panel.querySelector("#pg-companion-text");
     const style=document.createElement("style");
-    style.textContent="@keyframes pgCompanionPulse{0%{transform:scale(.92);filter:brightness(1.4)}100%{transform:scale(1);filter:brightness(1)}}#pg-companion-avatar{width:44px;height:44px;min-width:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f2c59b 0 12%,#9a5f4b 14% 28%,#252a34 30% 65%,#101218 66%);border:1px solid rgba(255,255,255,.22);box-shadow:0 0 18px rgba(170,105,85,.35);position:relative}#pg-companion-avatar span{position:absolute;width:7px;height:7px;border-radius:50%;background:#e8c49b;left:11px;top:15px;box-shadow:15px 0 0 #e8c49b}#pg-companion-body{min-width:0;flex:1}#pg-companion-name{font-size:11px;color:#c58d7c;margin-bottom:5px}#pg-companion-text{font-size:16px;line-height:1.9;font-weight:500}";
+    style.textContent="@keyframes pgCompanionPulse{0%{transform:scale(.92);filter:brightness(1.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes pgCompanionGlow{0%,100%{box-shadow:0 0 18px rgba(255,190,100,.25)}50%{box-shadow:0 0 28px rgba(255,210,130,.55)}}#pg-companion-avatar{width:48px;height:48px;min-width:48px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe0b2 0 12%,#b87352 14% 28%,#303846 30% 65%,#11151d 66%);border:1px solid rgba(255,224,170,.48);box-shadow:0 0 20px rgba(255,190,100,.3);position:relative;animation:pgCompanionGlow 2.4s ease-in-out infinite}#pg-companion-avatar span{position:absolute;width:7px;height:7px;border-radius:50%;background:#fff0cf;left:12px;top:16px;box-shadow:17px 0 0 #fff0cf}#pg-companion-body{min-width:0;flex:1}#pg-companion-name{font-size:12px;font-weight:700;letter-spacing:.2px;color:#ffd58f;margin-bottom:6px;text-shadow:0 1px 8px rgba(255,190,100,.22)}#pg-companion-text{font-size:18px;line-height:1.95;font-weight:600;color:#fff4df;text-shadow:0 1px 10px rgba(0,0,0,.55)}@media(max-width:700px){#pg-companion{bottom:68px!important;padding:13px 14px!important;width:calc(100vw - 18px)!important;gap:10px!important}#pg-companion-avatar{width:42px;height:42px;min-width:42px}#pg-companion-name{font-size:11px}#pg-companion-text{font-size:16px;line-height:1.85}}";
     document.head.appendChild(style);
   }
 
@@ -90,7 +90,17 @@ export class Companion {
       utterance.onstart=()=>{this.voiceReady=true;};
       utterance.onend=()=>{this.speechActive=false;if(this.pendingVoice?.message===message)this.pendingVoice=null;const next=this.queuedVoice;this.queuedVoice=null;if(next&&seq===this.speechSequence)setTimeout(()=>this.speak(next.message,next.mood),80);};
       utterance.onerror=(event)=>{this.speechActive=false;this.pendingVoice=null;this.queuedVoice=null;console.warn("Companion TTS error:",event.error);};
-      if(this.voiceUnlocked&&seq===this.speechSequence){synth.resume();synth.speak(utterance);}
+      if(this.voiceUnlocked&&seq===this.speechSequence){
+        synth.resume();
+        synth.speak(utterance);
+        // بعضی مرورگرهای موبایل اگر در لحظه‌ی اول صدا را شروع نکنند،
+        // با یک تلاش کوتاه دوباره فعال می‌شوند.
+        setTimeout(()=>{
+          if(!this.speechActive && this.voiceUnlocked && this.pendingVoice?.message===message){
+            try{ synth.resume(); synth.speak(utterance); }catch(_){}
+          }
+        },220);
+      }
     }catch(error){this.speechActive=false;console.warn("Companion voice unavailable",error);}
   }
 
