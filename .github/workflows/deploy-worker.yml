@@ -23,55 +23,11 @@ jobs:
 
       - name: Resolve Cloudflare account
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CONFIGURED_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          api="https://api.cloudflare.com/client/v4"
-          account_id="${CONFIGURED_ACCOUNT_ID:-}"
-
-          if [ -n "$account_id" ]; then
-            status="$(curl -sS -o /tmp/account.json -w "%{http_code}" \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              "$api/accounts/$account_id")"
-            if [ "$status" = "200" ] && jq -e '.success == true' /tmp/account.json >/dev/null; then
-              echo "Using configured Cloudflare account."
-              echo "CLOUDFLARE_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
-              exit 0
-            fi
-            echo "Configured Cloudflare account ID is not valid for this token; discovering the correct account."
-          fi
-
-          curl -sS -f \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "$api/accounts?per_page=50" > /tmp/accounts.json
-
-          mapfile -t account_ids < <(jq -r '.result[]?.id' /tmp/accounts.json)
-          if [ "${#account_ids[@]}" -eq 1 ]; then
-            echo "Using the only Cloudflare account available to the token."
-            echo "CLOUDFLARE_ACCOUNT_ID=${account_ids[0]}" >> "$GITHUB_ENV"
-            exit 0
-          fi
-
-          matches=()
-          for id in "${account_ids[@]}"; do
-            status="$(curl -sS -o /tmp/worker.json -w "%{http_code}" \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              "$api/accounts/$id/workers/scripts/psychgame-api/settings" || true)"
-            if [ "$status" = "200" ] && jq -e '.success == true' /tmp/worker.json >/dev/null 2>&1; then
-              matches+=( "$id" )
-            fi
-          done
-
-          if [ "${#matches[@]}" -eq 1 ]; then
-            echo "Found psychgame-api in the correct Cloudflare account."
-            echo "CLOUDFLARE_ACCOUNT_ID=${matches[0]}" >> "$GITHUB_ENV"
-            exit 0
-          fi
-
-          echo "::error::Could not uniquely resolve the Cloudflare account for psychgame-api."
-          echo "Available account count: ${#account_ids[@]}"
-          exit 1
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID" >> "$GITHUB_ENV"
 
       - name: Deploy Worker
         env:
