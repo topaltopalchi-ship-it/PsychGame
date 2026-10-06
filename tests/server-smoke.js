@@ -23,6 +23,28 @@ const child = spawn(process.execPath, ["server/index.js"], {
   stdio: ["ignore", "pipe", "pipe"]
 });
 
+const productionGuardScript = path.join(tempDir, "production-guard-smoke.mjs");
+fs.writeFileSync(productionGuardScript, `import "../server/index.js";\n`, "utf8");
+
+async function assertProductionGuard(envPatch, expectedMessage) {
+  const probe = spawn(process.execPath, [productionGuardScript], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      NODE_ENV: "production",
+      PORT: "0",
+      DATA_DIR: path.join(tempDir, "guard-data"),
+      ...envPatch
+    },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  let stderr = "";
+  probe.stderr.on("data", chunk => { stderr += chunk.toString(); });
+  const code = await new Promise(resolve => probe.on("exit", resolve));
+  assert.notEqual(code, 0);
+  assert.match(stderr, new RegExp(expectedMessage));
+}
+
 const base = `http://127.0.0.1:${port}`;
 
 async function waitForServer() {
@@ -41,6 +63,9 @@ async function request(url, options = {}) {
 }
 
 try {
+  await assertProductionGuard({ AUTHOR_TOKEN: "", CORS_ORIGIN: "http://test.local" }, "AUTHOR_TOKEN must be configured in production");
+  await assertProductionGuard({ AUTHOR_TOKEN: "production-test-token", CORS_ORIGIN: "*" }, "CORS_ORIGIN must be an exact origin in production");
+
   const qualityReport = SpecialistReport.build({
     sessionId: "quality-smoke",
     playerCode: "PLAYER-QUALITY",
