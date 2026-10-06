@@ -58,3 +58,12 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify deployed clinician authentication
+        env:
+          PSYCHGAME_ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
+          CLINICIAN_BASE_URL: https://topaltopalchi-ship-it.github.io/PsychGame/clinician.html
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+          xvfb-run -a timeout 2m npx playwright test tests/clinician-auth.spec.js --project=chromium --trace=off
