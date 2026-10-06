@@ -11,12 +11,17 @@ concurrency:
 jobs:
   browser-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 6
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -37,7 +42,7 @@ jobs:
         run: npm run preview -- --host 127.0.0.1 > /tmp/psychgame-preview.log 2>&1 &
 
       - name: Run Chromium smoke tests
-        run: timeout 8m npx playwright test --project=chromium
+        run: timeout 3m npx playwright test --project=chromium
 
       - name: Upload Playwright diagnostics on failure
         if: failure()
