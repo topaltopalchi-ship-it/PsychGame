@@ -8,11 +8,13 @@ const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path
 const dataFile = path.join(dataDir, "sessions.json");
 const PORT = Number(process.env.PORT || 8787);
 const AUTHOR_TOKEN = process.env.AUTHOR_TOKEN || "";
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "";
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 const NODE_ENV = String(process.env.NODE_ENV || "development").toLowerCase();
 
 if (NODE_ENV === "production") {
   if (!AUTHOR_TOKEN) throw new Error("AUTHOR_TOKEN must be configured in production");
+  if (!ADMIN_TOKEN) throw new Error("ADMIN_TOKEN must be configured in production");
   if (!CORS_ORIGIN || CORS_ORIGIN === "*") throw new Error("CORS_ORIGIN must be an exact origin in production");
 }
 
@@ -45,9 +47,14 @@ function isValidSessionReport(report) {
   );
 }
 
-function authorized(req) {
+function ingestAuthorized(req) {
   if (!AUTHOR_TOKEN) return true;
   return req.headers.authorization === "Bearer " + AUTHOR_TOKEN;
+}
+
+function adminAuthorized(req) {
+  if (!ADMIN_TOKEN) return false;
+  return req.headers.authorization === "Bearer " + ADMIN_TOKEN;
 }
 
 function send(res, status, body) {
@@ -65,7 +72,7 @@ const server = http.createServer((req, res) => {
   if (req.url === "/api/health" && req.method === "GET") return send(res, 200, { ok: true });
 
   if (req.url === "/api/sessions" && req.method === "POST") {
-    if (!authorized(req)) return send(res, 401, { error: "Unauthorized" });
+    if (!ingestAuthorized(req)) return send(res, 401, { error: "Unauthorized" });
     const MAX_BODY_BYTES = 2_000_000;
     const contentLength = Number(req.headers["content-length"] || 0);
     if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
@@ -123,7 +130,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.url === "/api/sessions" && req.method === "GET") {
-    if (!authorized(req)) return send(res, 401, { error: "Unauthorized" });
+    if (!adminAuthorized(req)) return send(res, 401, { error: "Unauthorized" });
     const sessions = readSessions().map(({ report, ...meta }) => ({
       ...meta,
       playerCode: report.playerCode,
@@ -137,7 +144,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.url.startsWith("/api/sessions/") && req.method === "GET") {
-    if (!authorized(req)) return send(res, 401, { error: "Unauthorized" });
+    if (!adminAuthorized(req)) return send(res, 401, { error: "Unauthorized" });
     const id = decodeURIComponent(req.url.slice("/api/sessions/".length));
     const record = readSessions().find(item => item.id === id);
     return record ? send(res, 200, record) : send(res, 404, { error: "Not found" });
