@@ -4,6 +4,45 @@ export class AudioManager {
     this.master = null;
     this.started = false;
     this.nodes = [];
+    this.voiceAudio = null;
+    this.voiceGeneration = 0;
+    this.voiceBase = "./audio/companion/";
+  }
+
+  playCompanionVoice(fileName, volume = 0.95) {
+    if (!fileName || typeof Audio === "undefined") return false;
+    const generation = ++this.voiceGeneration;
+    try {
+      if (this.voiceAudio) {
+        this.voiceAudio.pause();
+        this.voiceAudio.currentTime = 0;
+      }
+      const audio = new Audio(this.voiceBase + fileName);
+      audio.preload = "auto";
+      audio.volume = Math.max(0, Math.min(1, volume));
+      audio.onended = () => {
+        if (generation === this.voiceGeneration) this.voiceAudio = null;
+      };
+      audio.onerror = () => {
+        if (generation === this.voiceGeneration) this.voiceAudio = null;
+      };
+      this.voiceAudio = audio;
+      const result = audio.play();
+      if (result?.catch) result.catch(() => {});
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  stopCompanionVoice() {
+    this.voiceGeneration++;
+    if (!this.voiceAudio) return;
+    try {
+      this.voiceAudio.pause();
+      this.voiceAudio.currentTime = 0;
+    } catch {}
+    this.voiceAudio = null;
   }
 
   unlock() {
