@@ -46,7 +46,7 @@ export class Companion {
         synth.cancel();
         synth.resume();
         this.voiceReady=synth.getVoices().length>0;
-        if(this.pendingVoice)this.speak(this.pendingVoice.message,this.pendingVoice.mood,true);
+        if(this.pendingVoice)this.speak(this.pendingVoice.message,this.pendingVoice.mood,true);else this.speak("صدای همراه فعال شد.", "calm", true);
       }catch(error){console.warn("Companion voice unlock failed",error);}
     };
     ["pointerdown","touchstart","click","keydown"].forEach(type=>window.addEventListener(type,unlock,{passive:true}));
@@ -90,7 +90,7 @@ export class Companion {
       utterance.onstart=()=>{this.voiceReady=true;};
       utterance.onend=()=>{this.speechActive=false;if(this.pendingVoice?.message===message)this.pendingVoice=null;const next=this.queuedVoice;this.queuedVoice=null;if(next&&seq===this.speechSequence)setTimeout(()=>this.speak(next.message,next.mood),80);};
       utterance.onerror=(event)=>{this.speechActive=false;this.pendingVoice=null;this.queuedVoice=null;console.warn("Companion TTS error:",event.error);};
-      setTimeout(()=>{if(this.voiceUnlocked&&seq===this.speechSequence){synth.resume();synth.speak(utterance);}},80);
+      if(this.voiceUnlocked&&seq===this.speechSequence){synth.resume();synth.speak(utterance);}
     }catch(error){this.speechActive=false;console.warn("Companion voice unavailable",error);}
   }
 
