@@ -486,9 +486,9 @@ test("Session uploader reports when local queue storage is unavailable", async (
     const uploader = createSessionUploader({ endpoint: "http://upload.test" });
     const storage = window.localStorage;
     const originalFetch = window.fetch;
-    const originalSetItem = storage.setItem.bind(storage);
+    const originalSetItem = Storage.prototype.setItem;
     window.fetch = async () => { throw new Error("simulated outage"); };
-    storage.setItem = () => { throw new Error("simulated storage failure"); };
+    Storage.prototype.setItem = function () { throw new Error("simulated storage failure"); };
 
     try {
       return await uploader.upload({
@@ -497,7 +497,7 @@ test("Session uploader reports when local queue storage is unavailable", async (
         events: []
       });
     } finally {
-      storage.setItem = originalSetItem;
+      Storage.prototype.setItem = originalSetItem;
       window.fetch = originalFetch;
       storage.removeItem("psychgame_upload_queue_v1");
     }
