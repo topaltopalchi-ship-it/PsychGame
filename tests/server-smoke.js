@@ -18,6 +18,7 @@ const child = spawn(process.execPath, ["server/index.js"], {
     PORT: String(port),
     DATA_DIR: dataDir,
     AUTHOR_TOKEN: "test-token",
+    ADMIN_TOKEN: "admin-token",
     CORS_ORIGIN: "http://test.local"
   },
   stdio: ["ignore", "pipe", "pipe"]
@@ -134,7 +135,7 @@ try {
   assert.equal(created.status, 201);
 
   const fetched = await request("/api/sessions/smoke-session", {
-    headers: { Authorization: "Bearer test-token" }
+    headers: { Authorization: "Bearer admin-token" }
   });
   assert.equal(fetched.status, 200);
   const stored = await fetched.json();
@@ -153,7 +154,7 @@ try {
   assert.equal((await progressAfterCompletion.json()).preservedCompleted, true);
 
   const listed = await request("/api/sessions", {
-    headers: { Authorization: "Bearer test-token" }
+    headers: { Authorization: "Bearer admin-token" }
   });
   assert.equal(listed.status, 200);
   const listedSessions = await listed.json();
