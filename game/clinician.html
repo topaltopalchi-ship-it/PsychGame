@@ -54,7 +54,14 @@ let currentPatient=null;
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmtMs=v=>Number.isFinite(Number(v))?((Number(v)/1000)<60?Math.round(Number(v)/100)/10+" ثانیه":Math.round(Number(v)/60000*10)/10+" دقیقه"):"—";
-const authHeaders=()=>token?{Authorization:"Bearer "+token}:{}; 
+function encodeTokenForHeader(value) {
+  if (/^[\\x00-\\x7F]*$/.test(value)) return value;
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return "b64." + btoa(binary);
+}
+const authHeaders=()=>token?{Authorization:"Bearer "+encodeTokenForHeader(token)}:{};
 async function api(path,opts={}){const r=await fetch(API+path,{...opts,headers:{"Content-Type":"application/json",...authHeaders(),...(opts.headers||{})}});let data={};try{data=await r.json()}catch{}if(!r.ok)throw new Error(data.error||("HTTP "+r.status));return data}
 function showAuth(ok,msg){$("authStatus").textContent=msg;$("authStatus").className="status"+(ok?"":" error");$("authCard").style.display=ok?"none":"block";$("app").style.display=ok?"block":"none"}
 async function login(){token=$("adminToken").value.trim();if(!token)return;try{await api("/api/patients?search=%20");sessionStorage.setItem(tokenKey,token);showAuth(true,"دسترسی تأیید شد.");await searchPatients();}catch(e){token="";sessionStorage.removeItem(tokenKey);showAuth(false,"دسترسی رد شد: "+e.message)}}
