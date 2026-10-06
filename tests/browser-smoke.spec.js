@@ -226,7 +226,7 @@ test("Session upload queues failed payloads and flushes them after recovery", as
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
-    const { SessionUploader } = null;
+    const createSessionUploader = window.psychGame?.createSessionUploader;
     const queueKey = "psychgame_upload_queue_v1";
     localStorage.removeItem(queueKey);
 
@@ -282,7 +282,7 @@ test("Session upload queue preserves completed sessions and deduplicates progres
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
-    const { SessionUploader } = null;
+    const createSessionUploader = window.psychGame?.createSessionUploader;
     const uploader = createSessionUploader({ endpoint: "http://upload.test" });
     const queueKey = "psychgame_upload_queue_v1";
     localStorage.removeItem(queueKey);
@@ -336,7 +336,7 @@ test("Session upload queue retains only failed payloads during partial flush", a
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
-    const { SessionUploader } = null;
+    const createSessionUploader = window.psychGame?.createSessionUploader;
     const uploader = createSessionUploader({ endpoint: "http://upload.test" });
     const queueKey = "psychgame_upload_queue_v1";
     localStorage.removeItem(queueKey);
@@ -387,7 +387,7 @@ test("Concurrent session uploads are serialized without duplicate queue entries"
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
-    const { SessionUploader } = null;
+    const createSessionUploader = window.psychGame?.createSessionUploader;
     const uploader = createSessionUploader({ endpoint: "http://upload.test" });
     const queueKey = "psychgame_upload_queue_v1";
     localStorage.removeItem(queueKey);
@@ -440,7 +440,7 @@ test("Session uploader tolerates corrupted local upload queue storage", async ({
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
-    const { SessionUploader } = null;
+    const createSessionUploader = window.psychGame?.createSessionUploader;
     const uploader = createSessionUploader({ endpoint: "http://upload.test" });
     const queueKey = "psychgame_upload_queue_v1";
     localStorage.setItem(queueKey, "{not-valid-json");
@@ -482,7 +482,7 @@ test("Session uploader reports when local queue storage is unavailable", async (
   await page.locator("#pg-consent-accept").click();
 
   const result = await page.evaluate(async () => {
-    const { SessionUploader } = null;
+    const createSessionUploader = window.psychGame?.createSessionUploader;
     const uploader = createSessionUploader({ endpoint: "http://upload.test" });
     const storage = window.localStorage;
     const originalFetch = window.fetch;
