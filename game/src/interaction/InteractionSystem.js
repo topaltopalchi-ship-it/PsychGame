@@ -43,7 +43,21 @@ export class InteractionSystem {
   }
 
   setCompanion(companion) { this.companion = companion; }
-  setRoom(room, roomNumber = 1) { this.room = room; this.roomNumber = roomNumber; this.gameFinished = false; this.roomEntryAt = performance.now(); this.keyClueCount = 0; this.exitBlockCount = 0; this.clearTargets(); if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId)); }
+  setRoom(room, roomNumber = 1) {
+    this.room = room;
+    this.roomNumber = roomNumber;
+    this.gameFinished = false;
+    this.roomEntryAt = performance.now();
+    this.keyClueCount = 0;
+    this.exitBlockCount = 0;
+    this.clearTargets();
+    if (room?.getInteractableObjects) room.getInteractableObjects().forEach(o => this.register(o, o.userData.objectId));
+    // Hidden room keys are attached to the scene rather than the room's own
+    // object registry, so explicitly register them after the room is set.
+    const keyChallenge = room?.roomKeyChallenge;
+    if (keyChallenge?.key) this.register(keyChallenge.key, keyChallenge.key.userData.objectId);
+    if (keyChallenge?.clue) this.register(keyChallenge.clue, keyChallenge.clue.userData.objectId);
+  }
 
   clearTargets() { if (this.room8CompletionTimer) clearTimeout(this.room8CompletionTimer); if (this.room3CompletionTimer) clearTimeout(this.room3CompletionTimer); this.room8CompletionTimer = null; this.room3CompletionTimer = null; this.finishLook(); this.lastLookedObject = null; this.lookStartTime = null; this.interactables = []; this.currentTarget = null; this.exitDoor = null; this.keyFound = false; this.completed = false; this.buttonPressed = false; this.buttonAttempts = 0; this.buttonFirstSeenTime = null; this.room8GameCompleteDispatched = false; this.interactionCounts = {}; this.roomEntryAt = performance.now(); this.keyClueCount = 0; this.exitBlockCount = 0; }
 
