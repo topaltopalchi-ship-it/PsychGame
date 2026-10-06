@@ -40,6 +40,7 @@ jobs:
         run: xvfb-run -a timeout 10m npx playwright test --project=chromium --project=firefox --project=webkit
 
       - name: Verify clinician authentication
+        if: always()
         env:
           PSYCHGAME_ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
         run: xvfb-run -a timeout 2m npx playwright test tests/clinician-auth.spec.js --project=chromium --trace=off
