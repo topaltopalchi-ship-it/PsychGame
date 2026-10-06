@@ -26,8 +26,12 @@ export class PlayerController {
     window.addEventListener("click", () => {
       if (!window.matchMedia("(pointer:fine)").matches) return;
       if (new URLSearchParams(window.location.search).has("browserSmoke")) return;
-      const request = document.body.requestPointerLock?.();
-      request?.catch?.(() => {});
+      try {
+        const request = document.body.requestPointerLock?.();
+        request?.catch?.(() => {});
+      } catch (_) {
+        // Pointer lock is optional; some browsers reject it when the window is not focused.
+      }
     });
     document.addEventListener("mousemove", e => { if(document.pointerLockElement !== document.body) return; this.look(e.movementX,e.movementY); });
   }
