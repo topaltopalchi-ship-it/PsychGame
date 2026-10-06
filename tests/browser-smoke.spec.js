@@ -71,8 +71,6 @@ async function completeRoom01(page) {
   expect(doorInteracted).toBe(true);
 }
 
-
-
 async function interactCenter(page, xRatio = 0.5, yRatios = [0.45, 0.5, 0.55, 0.6]) {
   return page.evaluate(({ xRatio, yRatios }) => {
     return yRatios.some((ratio) =>
@@ -152,18 +150,13 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
   await completeRoom01(page);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 8000 });
 
-  // Target the lower part of the center path panel so the decorative
-  // PATH_CLUE glow above it cannot consume the raycast.
+  // Target the center path by stable object id after walking into the decision area.
   await page.keyboard.down("KeyW");
   await page.waitForTimeout(3500);
   await page.keyboard.up("KeyW");
-  const pathInteracted = await page.evaluate(() => {
-    const ys = [0.54, 0.56, 0.58, 0.60];
-    return ys.some((ratio) => window.psychGame?.interactAt?.(
-      window.innerWidth * 0.5,
-      window.innerHeight * ratio
-    ) === true);
-  });
+  const pathInteracted = await page.evaluate(() =>
+    window.psychGame?.interactObject?.("PATH_CENTER") === true
+  );
   expect(pathInteracted).toBe(true);
 
   await page.waitForTimeout(1500);
@@ -171,7 +164,6 @@ test("Room 02 gameplay completes and transitions to Room 03", async ({ page }) =
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 5000 });
   expect(errors).toEqual([]);
 });
-
 
 test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) => {
   test.setTimeout(90000);
@@ -188,7 +180,7 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۲", { timeout: 8000 });
 
   await walk(page, "KeyW", 3500);
-  expect(await interactCenter(page)).toBe(true);
+  expect(await page.evaluate(() => window.psychGame?.interactObject?.("PATH_CENTER") === true)).toBe(true);
   await expect(page.locator("#pg-title")).toContainText("اتاق ۰۳", { timeout: 5000 });
 
   // Room 03 is intentionally wait-based; allow its completion timer to fire.
@@ -215,7 +207,6 @@ test("Rooms 03 through 08 complete and Room 08 ends the game", async ({ page }) 
   expect(sessionSnapshot.eventCount).toBeGreaterThan(0);
   expect(sessionSnapshot.eventTypes).toContain("ROOM_08_FINAL_SEQUENCE");
 });
-
 
 test("Session upload queues failed payloads and flushes them after recovery", async ({ page }) => {
   await page.goto("/?browserSmoke=1", { waitUntil: "networkidle" });
@@ -272,7 +263,6 @@ test("Session upload queues failed payloads and flushes them after recovery", as
   expect(result.attempts).toBe(3);
 });
 
-
 test("Session upload queue preserves completed sessions and deduplicates progress", async ({ page }) => {
   await page.goto("/?browserSmoke=1", { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
@@ -326,7 +316,6 @@ test("Session upload queue preserves completed sessions and deduplicates progres
   expect(result.afterLateProgress).toEqual([true]);
 });
 
-
 test("Session upload queue retains only failed payloads during partial flush", async ({ page }) => {
   await page.goto("/?browserSmoke=1", { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
@@ -376,7 +365,6 @@ test("Session upload queue retains only failed payloads during partial flush", a
   expect(result.calls).toBe(2);
   expect(result.remaining).toEqual(["flush-fail"]);
 });
-
 
 test("Concurrent session uploads are serialized without duplicate queue entries", async ({ page }) => {
   await page.goto("/?browserSmoke=1", { waitUntil: "networkidle" });
@@ -430,7 +418,6 @@ test("Concurrent session uploads are serialized without duplicate queue entries"
   expect(result.results.every(item => item.queued === true)).toBe(true);
 });
 
-
 test("Session uploader tolerates corrupted local upload queue storage", async ({ page }) => {
   await page.goto("/?browserSmoke=1", { waitUntil: "networkidle" });
   await page.locator("#pg-consent-accept").click();
@@ -471,7 +458,6 @@ test("Session uploader tolerates corrupted local upload queue storage", async ({
   expect(result.result.queued).toBe(true);
   expect(JSON.parse(result.stored)).toHaveLength(1);
 });
-
 
 test("Session uploader reports when local queue storage is unavailable", async ({ page }) => {
   await page.goto("/?browserSmoke=1", { waitUntil: "networkidle" });
