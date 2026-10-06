@@ -5,7 +5,8 @@
 Set these server-side before starting the API:
 
 - `NODE_ENV=production`
-- `AUTHOR_TOKEN` — ingestion bearer token exposed to the browser; it is **not** a secret and must only authorize session submission. Never use it for reading session data.\n- `ADMIN_TOKEN` — strong server-side bearer secret; never expose it to the browser. It is required for reading session data.
+- `AUTHOR_TOKEN` — ingestion bearer token exposed to the browser; it is **not** a secret and must only authorize session submission. Never use it for reading session data.
+- `ADMIN_TOKEN` — strong server-side bearer secret; never expose it to the browser. It is required for reading session data.
 - `CORS_ORIGIN` — exact public game origin.
 - `PORT` — normally 8787 behind the reverse proxy.
 - `DATA_DIR` — persistent directory for session storage.
@@ -28,7 +29,8 @@ Before release:
 2. Restrict filesystem permissions so only the API service account can read/write it.
 3. Configure encrypted backups appropriate to the sensitivity of behavioral data.
 4. Define and enforce a retention/deletion policy.
-5. Restrict production API access to authorized personnel.\n6. Keep `ADMIN_TOKEN` only in the server environment; never put it in any `VITE_*` variable.
+5. Restrict production API access to authorized personnel.
+6. Keep `ADMIN_TOKEN` only in the server environment; never put it in any `VITE_*` variable.
 
 ## Consent
 
@@ -46,3 +48,17 @@ Release is approved only after the operator verifies:
 - consent is in place;
 - authorized personnel are the only users with access to session data;
 - CI Browser Smoke and deployment checks are green for the release commit.
+
+## Current repository deployment boundary
+
+The repository deployment workflow publishes the browser application to GitHub Pages only. It does **not** deploy `server/index.js` or provide persistent API storage.
+
+For a production release, deploy the Node API separately on a service that supports:
+
+- a persistent `DATA_DIR` volume;
+- server-side `AUTHOR_TOKEN` and `ADMIN_TOKEN` environment variables;
+- HTTPS at the public API origin;
+- a stable API URL configured as `VITE_API_URL` when building the frontend;
+- an exact `CORS_ORIGIN` matching the published game origin.
+
+Do not mark the production release gate complete until the separate API deployment has been verified.
