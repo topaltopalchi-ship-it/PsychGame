@@ -28,8 +28,13 @@ export class AudioManager {
       };
       this.voiceAudio = audio;
       const result = audio.play();
-      if (result?.catch) result.catch(() => {});
-      return true;
+      if (result?.catch) result.catch(() => {
+        if (generation === this.voiceGeneration) {
+          this.voiceAudio = null;
+          // The caller can fall back to browser TTS when playback is blocked.
+        }
+      });
+      return audio;
     } catch {
       return false;
     }
