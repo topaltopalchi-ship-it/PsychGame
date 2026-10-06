@@ -32,12 +32,12 @@ export const BehavioralAssessmentConfig = Object.freeze({
   }),
   rooms: Object.freeze({
     ROOM_01: ["impulsivity","rule_following","reward_sensitivity","frustration_tolerance","attention"],
-    ROOM_02: ["risk_taking","hesitation","decision_making","confidence","cognitive_flexibility"],
+    ROOM_02: ["excitement","hesitation","confidence","cognitive_flexibility"],
     ROOM_03: ["intolerance_of_uncertainty","persistence","anxiety","impulsivity","frustration_tolerance"],
-    ROOM_04: ["working_memory","attention","confidence","cognitive_flexibility","navigation"],
+    ROOM_04: ["working_memory","attention","confidence","cognitive_flexibility","independence"],
     ROOM_05: ["compulsive_checking","anxiety","threat_sensitivity","intolerance_of_uncertainty"],
-    ROOM_06: ["suspiciousness","pessimism","trust","attention","source_verification"],
-    ROOM_07: ["trust","independence","social_dependency","confidence","decision_switching"],
+    ROOM_06: ["suspiciousness","pessimism","trust","attention","intolerance_of_uncertainty"],
+    ROOM_07: ["trust","independence","social_dependency","confidence","hesitation"],
     ROOM_08: ["stress","emotional_control","avoidance","threat_sensitivity","persistence"]
   })
 });
