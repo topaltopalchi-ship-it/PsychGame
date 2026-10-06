@@ -59,7 +59,15 @@ export class SessionUploader {
 
   queue(payload) {
     try {
-      const current = JSON.parse(localStorage.getItem(this.queueKey) || "[]");
+      let current = [];
+      try {
+        const parsed = JSON.parse(localStorage.getItem(this.queueKey) || "[]");
+        current = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        // Corrupted queue storage is recoverable: discard only the invalid queue
+        // and continue by writing the new payload below.
+        current = [];
+      }
       const sessionId = payload?.report?.sessionId;
       const isCompleted = Boolean(payload?.completed);
       let filtered = current;
