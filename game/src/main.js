@@ -290,12 +290,9 @@ window.psychGame = {
     interactObject: (objectId) => {
       const target = interaction.interactables.find((object) => object?.userData?.objectId === objectId);
       if (!target) return false;
-      const point = new THREE.Vector3();
-      target.getWorldPosition(point);
-      point.project(camera);
-      const x = (point.x + 1) * 0.5 * window.innerWidth;
-      const y = (1 - point.y) * 0.5 * window.innerHeight;
-      return interaction.interactAt(x, y);
+      interaction.currentTarget = target;
+      interaction.interact({ source: "BROWSER_SMOKE" });
+      return true;
     }
   } : {})
 };
