@@ -32,7 +32,8 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: wrangler d1 execute psychgame-sessions-2026 --remote --file=worker/schema.sql --config=worker/wrangler.toml
+          D1_DATABASE_ID: ${{ secrets.PSYCHGAME_D1_DATABASE_ID }}
+        run: wrangler d1 execute "$D1_DATABASE_ID" --remote --file=worker/schema.sql
 
       - name: Set Worker secrets
         env:
