@@ -12,13 +12,15 @@ test("clinician can authenticate against the protected report API", async ({ pag
     }
   });
 
-  // The app is deployed under the Vite base path /PsychGame/.
-  // Keep this relative so Playwright's baseURL is preserved.
-  await page.goto("clinician.html", { waitUntil: "networkidle" });
+  // In CI, test the deployed GitHub Pages origin so the production CORS policy
+  // is exercised. Local runs can still use Playwright's local baseURL.
+  const clinicianUrl = process.env.CLINICIAN_BASE_URL || "clinician.html";
+  await page.goto(clinicianUrl, { waitUntil: "networkidle" });
   await expect(page.locator("#authCard")).toBeVisible();
   await page.locator("#adminToken").fill(token);
   await page.locator("#login").click();
 
+  await expect(page.locator("#authStatus")).toContainText("دسترسی", { timeout: 10000 });
   await expect(page.locator("#app")).toBeVisible({ timeout: 10000 });
   await expect(page.locator("#authCard")).toBeHidden();
   await expect(page.locator("#authStatus")).toContainText("دسترسی تأیید شد");
