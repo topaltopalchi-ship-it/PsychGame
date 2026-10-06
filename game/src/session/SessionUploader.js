@@ -65,15 +65,16 @@ export class SessionUploader {
       let filtered = current;
 
       if (sessionId) {
-        if (isCompleted) {
-          filtered = current.filter(item => item?.report?.sessionId !== sessionId);
-        } else {
-          const hasCompleted = current.some(item =>
-            item?.report?.sessionId === sessionId && Boolean(item.completed)
-          );
-          if (hasCompleted) return true;
-          filtered = current.filter(item => item?.report?.sessionId !== sessionId);
+        const sameSession = current.filter(item => item?.report?.sessionId === sessionId);
+        const completedItem = sameSession.find(item => Boolean(item.completed));
+        if (!isCompleted && completedItem) {
+          // A completed session always wins over any late progress retry.
+          const normalized = current.filter(item => item?.report?.sessionId !== sessionId);
+          normalized.push(completedItem);
+          localStorage.setItem(this.queueKey, JSON.stringify(normalized.slice(-20)));
+          return true;
         }
+        filtered = current.filter(item => item?.report?.sessionId !== sessionId);
       }
 
       filtered.push(payload);
