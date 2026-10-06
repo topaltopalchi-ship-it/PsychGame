@@ -85,25 +85,45 @@ export class Companion {
 
   speak(message,mood="calm",force=false,voiceFile=null){
     if(!this.voiceEnabled)return;
+
+    // Prefer a real companion recording when it exists. If the file is
+    // missing, blocked, or rejected by the browser, immediately fall back
+    // to the browser's speech engine instead of getting stuck "speaking".
     if(voiceFile && this.audioManager){
-      const audio=this.audioManager.playCompanionVoice(voiceFile, mood==="fear" ? 0.9 : 0.95);
-      if(audio){
-        this.speechActive=true;
-        this.lastSpokenMessage=message;
-        this.lastSpokenAt=Date.now();
-        const fallback=()=>{this.speechActive=false;this.speak(message,mood,true,null);};
-        audio.onended=()=>{this.speechActive=false;if(this.pendingVoice?.message===message)this.pendingVoice=null;};
-        audio.onerror=fallback;
-        return;
-      }
+      this.audioManager.playCompanionVoice(voiceFile, mood==="fear" ? 0.9 : 0.95, {
+        onStarted:()=>{
+          this.speechActive=true;
+          this.lastSpokenMessage=message;
+          this.lastSpokenAt=Date.now();
+        },
+        onEnded:()=>{
+          this.speechActive=false;
+          if(this.pendingVoice?.message===message)this.pendingVoice=null;
+        },
+        onError:()=>{
+          this.speechActive=false;
+          this.speak(message,mood,true,null);
+        }
+      });
+      // Do not mark speechActive here: play() can reject asynchronously.
+      return;
     }
+
     if(!("speechSynthesis"in window))return;
     if(!this.voiceUnlocked){this.pendingVoice={message,mood,voiceFile};return;}
+
     const now=Date.now();
     if(!force&&message===this.lastSpokenMessage&&now-this.lastSpokenAt<1400)return;
     const synth=window.speechSynthesis;
-    if(this.speechActive){this.queuedVoice={message,mood,voiceFile};return;}
+    if(this.speechActive){
+      this.queuedVoice={message,mood,voiceFile};
+      return;
+    }
+
     this.pendingVoice={message,mood,voiceFile};
+    const profile={calm:{rate:.88,pitch:.90,volume:1},tense:{rate:.96,pitch:.78,volume:1},stress:{rate:1.02,pitch:.74,volume:1},fear:{rate:.72,pitch:.68,volume:.95}}[mood]||{rate:.88,pitch:.90,volume:1};
+    const seq=++this.speechSequence;
+
     try{
       synth.cancel();
       synth.resume();
@@ -111,29 +131,44 @@ export class Companion {
       const utterance=new SpeechSynthesisUtterance(message);
       utterance.lang=voice?.lang||"fa-IR";
       utterance.voice=voice||null;
-      const profile={calm:{rate:.88,pitch:.90,volume:1},tense:{rate:.96,pitch:.78,volume:1},stress:{rate:1.02,pitch:.74,volume:1},fear:{rate:.72,pitch:.68,volume:.95}}[mood]||{rate:.88,pitch:.90,volume:1};
       Object.assign(utterance,profile);
+
       this.speechActive=true;
       this.lastSpokenMessage=message;
       this.lastSpokenAt=now;
-      const seq=++this.speechSequence;
       utterance.onstart=()=>{this.voiceReady=true;};
-      utterance.onend=()=>{this.speechActive=false;if(this.pendingVoice?.message===message)this.pendingVoice=null;const next=this.queuedVoice;this.queuedVoice=null;if(next&&seq===this.speechSequence)setTimeout(()=>this.speak(next.message,next.mood,false,next.voiceFile),80);};
-      utterance.onerror=(event)=>{this.speechActive=false;this.pendingVoice=null;this.queuedVoice=null;console.warn("Companion TTS error:",event.error);};
-      if(this.voiceUnlocked&&seq===this.speechSequence){
-        synth.resume();
-        synth.speak(utterance);
-        // بعضی مرورگرهای موبایل اگر در لحظه‌ی اول صدا را شروع نکنند،
-        // با یک تلاش کوتاه دوباره فعال می‌شوند.
-        setTimeout(()=>{
-          if(!this.speechActive && this.voiceUnlocked && this.pendingVoice?.message===message){
-            try{ synth.resume(); synth.speak(utterance); }catch(_){}
-          }
-        },220);
-      }
-    }catch(error){this.speechActive=false;console.warn("Companion voice unavailable",error);}
-  }
+      utterance.onend=()=>{
+        if(seq!==this.speechSequence)return;
+        this.speechActive=false;
+        if(this.pendingVoice?.message===message)this.pendingVoice=null;
+        const next=this.queuedVoice;
+        this.queuedVoice=null;
+        if(next)setTimeout(()=>this.speak(next.message,next.mood,false,next.voiceFile),80);
+      };
+      utterance.onerror=(event)=>{
+        if(seq!==this.speechSequence)return;
+        this.speechActive=false;
+        this.pendingVoice=null;
+        const next=this.queuedVoice;
+        this.queuedVoice=null;
+        console.warn("Companion TTS error:",event.error);
+        if(next)setTimeout(()=>this.speak(next.message,next.mood,true,next.voiceFile),80);
+      };
 
+      synth.speak(utterance);
+
+      // Mobile Safari/Chrome can accept speak() but leave the queue paused.
+      setTimeout(()=>{
+        if(seq===this.speechSequence && this.voiceUnlocked && this.speechActive && synth.paused){
+          try{synth.resume();}catch(_){}
+        }
+      },180);
+    }catch(error){
+      this.speechActive=false;
+      this.pendingVoice=null;
+      console.warn("Companion voice unavailable",error);
+    }
+  }
   remember(event){switch(event.type){case"RED_BUTTON_FIRST_SEEN":this.memory.sawButton=true;break;case"RED_BUTTON_PRESS":this.memory.pressedButton=true;break;case"FAILURE":this.memory.failed=true;break;case"RETRY_AFTER_FAILURE":this.memory.retriedButton=true;break;case"DRAWER_INSPECTED":this.memory.searchedDrawer=true;break;case"DOOR_BLOCKED":this.memory.checkedDoorAfterFailure=true;break;case"OBJECT_INTERACTION":if(!this.memory.failed)this.memory.exploredBeforeFailure=true;break;}}
   react(event){
     const type=event.type;
