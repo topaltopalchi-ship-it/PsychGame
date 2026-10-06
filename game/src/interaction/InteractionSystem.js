@@ -285,18 +285,15 @@ export class InteractionSystem {
   }
 
   handleDoor() {
-    const locked = this.exitDoor?.userData.locked === true;
-
-    // Room 1 always requires the hidden key. Checking the door before
-    // finding it must never complete the room or dispatch a room-complete event.
-    if (!this.keyFound) {
-      this.tracker.log("DOOR_CHECKED", {
-        status: locked ? "LOCKED" : "UNLOCKED",
-        result: "NEEDS_KEY"
-      });
-      this.companion?.say("در هنوز باز نمی‌شه. اول کلید اتاق رو پیدا کن.");
+    // Hard gate: Room 1's exit is impossible until the drawer key has
+    // actually been collected. Do not trust generic locked state here.
+    if (this.roomNumber === 1 && this.keyFound !== true) {
+      this.tracker.log("DOOR_CHECKED", { status: "LOCKED", result: "NEEDS_KEY" });
+      this.companion?.say("در قفله. اول کلید داخل کشو رو بردار.");
       return;
     }
+
+    const locked = this.exitDoor?.userData.locked === true;
 
     if (locked && this.keyFound) {
       this.exitDoor.userData.locked = false;
