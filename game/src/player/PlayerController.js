@@ -23,7 +23,12 @@ export class PlayerController {
     });
   }
   setupMouse() {
-    window.addEventListener("click", () => { if (window.matchMedia("(pointer:fine)").matches) document.body.requestPointerLock?.(); });
+    window.addEventListener("click", () => {
+      if (!window.matchMedia("(pointer:fine)").matches) return;
+      if (new URLSearchParams(window.location.search).has("browserSmoke")) return;
+      const request = document.body.requestPointerLock?.();
+      request?.catch?.(() => {});
+    });
     document.addEventListener("mousemove", e => { if(document.pointerLockElement !== document.body) return; this.look(e.movementX,e.movementY); });
   }
   setupTouch() {
