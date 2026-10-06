@@ -280,7 +280,12 @@ function setRoomMovementBounds(roomNumber) {
 }
 
 function startRoom02(previousPath = "ROOM_01") {
-  if (activeRoom !== room01 || !room01.completed) return;
+  // Defense-in-depth: Room 1 cannot transition to Room 2 unless its key
+  // was actually collected. This blocks any accidental completion event.
+  if (activeRoom !== room01 || !room01.completed || room01.hasKey !== true) {
+    companion?.say("اول باید کلید اتاق اول رو برداری.", 0, "calm");
+    return;
+  }
   clearRoomGeometry(); interaction.clearTargets?.(); activeRoom = new Room02(scene, tracker); activeRoom.start({ previousPath }); armRoomKey(2); interaction.setRoom(activeRoom, 2); audioManager.setRoom(2); camera.position.set(0, 1.7, 3.5); camera.rotation.set(0, 0, 0); player.rotation.set(0, 0, 0); setRoomMovementBounds(2); mainLight.intensity = 34; companion?.say("اتاق دومه... سه تا مسیر جلوت داری. انتخاب کن ببین چی می‌شه.", 0, "tense"); document.getElementById("pg-title").textContent = "YOL · اتاق ۰۲ — چند مسیر";
 }
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_01" || activeRoom !== room01 || !room01.completed) return; scheduleRoomTransition(() => startRoom02("ROOM_01")); });
