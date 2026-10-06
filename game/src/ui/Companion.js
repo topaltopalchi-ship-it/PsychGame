@@ -34,8 +34,21 @@ export class Companion {
     document.head.appendChild(style);
   }
 
+  voiceFileFor(message) {
+    const files = {
+      "خب... بریم ببینیم راه خروج کجاست.":"intro.mp3",
+      "کلید رو پیدا کردی. حالا می‌تونی مسیر خروج رو امتحان کنی.":"room_key_found.mp3",
+      "این در هنوز باز نمی‌شه. اول باید کلید همین اتاق رو پیدا کنی.":"exit_blocked.mp3",
+      "بالاخره یه سرنخ پیدا شد. شاید همین کلید به کارمون بیاد.":"calm_hint.mp3",
+      "خوبه... بعد از اون اتفاق، بهتره سرنخ رو دنبال کنیم.":"calm_hint.mp3",
+      "باز می‌خوای امتحانش کنی؟ من ترجیح می‌دم اول یه دور اطراف رو بگردیم.":"stress_hint.mp3"
+    };
+    return files[message] || null;
+  }
+
   say(message,delay=0,mood="calm",voiceFile=null) {
-    const timer=setTimeout(()=>{this.sayTimers.delete(timer);this.text.textContent=message;this.voiceMood=this.normalizeMood(mood,message);this.pendingVoice={message,mood:this.voiceMood,voiceFile};this.speak(message,this.voiceMood,false,voiceFile);if(!this.showText)return;this.panel.style.opacity="1";this.panel.querySelector("#pg-companion-avatar").style.animation="pgCompanionPulse .9s ease-out";this.panel.style.transform="translate(-50%,0)";clearTimeout(this.hideTimer);this.hideTimer=setTimeout(()=>{this.panel.style.opacity="0";this.panel.style.transform="translate(-50%,10px)";},5200);},delay);this.sayTimers.add(timer);
+    const resolvedVoiceFile=voiceFile||this.voiceFileFor(message);
+    const timer=setTimeout(()=>{this.sayTimers.delete(timer);this.text.textContent=message;this.voiceMood=this.normalizeMood(mood,message);this.pendingVoice={message,mood:this.voiceMood,voiceFile:resolvedVoiceFile};this.speak(message,this.voiceMood,false,resolvedVoiceFile);if(!this.showText)return;this.panel.style.opacity="1";this.panel.querySelector("#pg-companion-avatar").style.animation="pgCompanionPulse .9s ease-out";this.panel.style.transform="translate(-50%,0)";clearTimeout(this.hideTimer);this.hideTimer=setTimeout(()=>{this.panel.style.opacity="0";this.panel.style.transform="translate(-50%,10px)";},5200);},delay);this.sayTimers.add(timer);
   }
 
   installVoiceUnlock(){
@@ -54,7 +67,7 @@ export class Companion {
     if("speechSynthesis"in window){
       window.speechSynthesis.addEventListener("voiceschanged",()=>{
         this.voiceReady=window.speechSynthesis.getVoices().length>0;
-        if(this.voiceUnlocked&&this.pendingVoice&&!this.speechActive)this.speak(this.pendingVoice.message,this.pendingVoice.mood,true);
+        if(this.voiceUnlocked&&this.pendingVoice&&!this.speechActive)this.speak(this.pendingVoice.message,this.pendingVoice.mood,true,this.pendingVoice.voiceFile);
       });
     }
   }
@@ -87,7 +100,7 @@ export class Companion {
     if(!force&&message===this.lastSpokenMessage&&now-this.lastSpokenAt<1400)return;
     const synth=window.speechSynthesis;
     if(this.speechActive){this.queuedVoice={message,mood,voiceFile};return;}
-    this.pendingVoice={message,mood};
+    this.pendingVoice={message,mood,voiceFile};
     try{
       synth.cancel();
       synth.resume();
