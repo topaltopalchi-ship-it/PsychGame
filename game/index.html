@@ -3,34 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="theme-color" content="#07080d">
   <title>YOL — مسیر</title>
-
   <style>
-    html,
-    body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #080a0d;
+    :root{color-scheme:dark}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07080d}
+    #game{width:100%;height:100%}
+    #game::after{content:"YOL  •  مسیر";position:fixed;top:14px;left:18px;color:rgba(220,226,238,.72);font:600 12px system-ui,sans-serif;letter-spacing:.16em;pointer-events:none;text-shadow:0 1px 8px #000}
+    #pg-entry{position:fixed;inset:0;z-index:30000;display:grid;place-items:center;overflow:hidden;background:
+      radial-gradient(circle at 50% 42%,rgba(157,76,59,.16),transparent 28%),
+      radial-gradient(circle at 18% 82%,rgba(72,91,120,.14),transparent 32%),
+      linear-gradient(135deg,#06070b 0%,#0b0d13 52%,#07080c 100%);
+      color:#f4f1eb;font-family:Tahoma,Arial,sans-serif;transition:opacity .9s ease,visibility .9s ease}
+    #pg-entry::before{content:"";position:absolute;inset:-20%;background:repeating-radial-gradient(ellipse at center,transparent 0 12%,rgba(255,255,255,.018) 12.1% 12.25%);transform:rotate(-8deg);opacity:.5;pointer-events:none}
+    #pg-entry::after{content:"";position:absolute;width:42vw;height:42vw;min-width:300px;min-height:300px;border:1px solid rgba(190,132,110,.12);border-radius:50%;box-shadow:0 0 90px rgba(165,73,54,.08),inset 0 0 90px rgba(165,73,54,.04);pointer-events:none}
+    #pg-entry-card{position:relative;z-index:1;width:min(720px,88vw);text-align:center;padding:54px 28px 46px;box-sizing:border-box}
+    #pg-entry-mark{width:72px;height:72px;margin:0 auto 25px;border:1px solid rgba(205,144,124,.45);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.025);box-shadow:0 0 45px rgba(170,73,54,.13);font-size:26px;color:#d8b0a1}
+    #pg-entry-eyebrow{margin:0 0 13px;font-size:11px;letter-spacing:.32em;color:rgba(222,213,204,.55)}
+    #pg-entry-title{margin:0;font-size:clamp(42px,9vw,82px);font-weight:500;letter-spacing:.18em;line-height:1;color:#f3eee8;text-shadow:0 8px 35px rgba(0,0,0,.55)}
+    #pg-entry-subtitle{margin:18px 0 0;font-size:clamp(14px,2.2vw,18px);font-weight:400;color:rgba(235,229,221,.7);letter-spacing:.04em}
+    #pg-entry-line{width:70px;height:1px;margin:27px auto;background:linear-gradient(90deg,transparent,#a75b49,transparent)}
+    #pg-entry-copy{max-width:520px;margin:0 auto 30px;font-size:13px;line-height:2;color:rgba(230,228,225,.55)}
+    #pg-entry-start{appearance:none;border:1px solid rgba(205,144,124,.52);border-radius:999px;padding:14px 34px;background:linear-gradient(180deg,rgba(171,78,58,.96),rgba(126,57,44,.96));color:#fff;font:600 14px Tahoma,Arial,sans-serif;cursor:pointer;box-shadow:0 10px 35px rgba(116,52,40,.22),inset 0 1px rgba(255,255,255,.15);transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
+    #pg-entry-start:hover{transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 14px 42px rgba(116,52,40,.32),inset 0 1px rgba(255,255,255,.18)}
+    #pg-entry-start:active{transform:translateY(0) scale(.98)}
+    #pg-entry-note{margin-top:17px;font-size:10px;color:rgba(230,228,225,.34)}
+    #pg-entry.hide{opacity:0;visibility:hidden;pointer-events:none}
+    @media(max-width:600px){
+      #pg-entry-card{padding:36px 22px 30px}
+      #pg-entry-mark{width:60px;height:60px;margin-bottom:20px}
+      #pg-entry-copy{font-size:12px;line-height:1.9}
+      #pg-entry-start{width:min(280px,82vw);padding:13px 24px}
     }
-
-    #game {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-<style>
-    #game::after{content:"YOL  •  مسیر";position:fixed;top:14px;left:18px;color:rgba(220,226,238,.72);font:600 12px system-ui,sans-serif;letter-spacing:.16em;pointer-events:none;text-shadow:0 1px 8px #000;}
   </style>
 </head>
-
 <body>
-
   <div id="game"></div>
 
-  <script type="module" src="./src/main.js"></script>
+  <div id="pg-entry" aria-label="صفحه ورود بازی">
+    <main id="pg-entry-card">
+      <div id="pg-entry-mark" aria-hidden="true">Y</div>
+      <p id="pg-entry-eyebrow">یک تجربه تعاملی</p>
+      <h1 id="pg-entry-title">YOL</h1>
+      <p id="pg-entry-subtitle">مسیر، همیشه آن چیزی نیست که می‌بینی.</p>
+      <div id="pg-entry-line"></div>
+      <p id="pg-entry-copy">وارد یک سفر کوتاه و ناشناخته شو. نگاه کن، انتخاب کن و به واکنش خودت توجه کن؛ هر اتاق بخشی از مسیر را آشکار می‌کند.</p>
+      <button id="pg-entry-start" type="button">شروع سفر</button>
+      <div id="pg-entry-note">برای تجربه بهتر، صدا را روشن کنید.</div>
+    </main>
+  </div>
 
+  <script type="module">
+    import "./src/main.js";
+
+    const entry = document.getElementById("pg-entry");
+    const start = document.getElementById("pg-entry-start");
+
+    start.addEventListener("click", () => {
+      entry.classList.add("hide");
+      window.dispatchEvent(new PointerEvent("pointerdown", {bubbles:true}));
+      setTimeout(() => entry.remove(), 950);
+    }, {once:true});
+  </script>
 </body>
 </html>
