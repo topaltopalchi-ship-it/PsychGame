@@ -324,6 +324,10 @@ function startRoom04(context = { previousRoom: "ROOM_03" }) { if (interaction.ro
 window.addEventListener("psychgame-room-complete", (event) => { if (event.detail?.roomId !== "ROOM_03" || interaction.roomNumber !== 3 || interaction.room !== activeRoom || !activeRoom.completed) return; scheduleRoomTransition(() => startRoom04({ previousRoom:"ROOM_03", companion })); });
 
 window.psychGame = {
+  unlockAudio: () => {
+    audioUnlocked = false;
+    unlockGameAudio();
+  },
   interact: () => interaction.interact(),
   interactAt: (x, y) => interaction.interactAt(x, y),
   getPlayerCode: () => session.getPlayerCode(),
