@@ -35,13 +35,10 @@ jobs:
           echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Deploy Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: wrangler deploy --config=worker/wrangler.toml
 
       - name: Set Worker secrets
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           AUTHOR_TOKEN: ${{ secrets.PSYCHGAME_AUTHOR_TOKEN }}
           ADMIN_TOKEN: ${{ secrets.PSYCHGAME_ADMIN_TOKEN }}
         run: |
