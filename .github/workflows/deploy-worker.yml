@@ -23,11 +23,20 @@ jobs:
 
       - name: Resolve Cloudflare account
         env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CONFIGURED_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID" >> "$GITHUB_ENV"
+          if [ -n "${CONFIGURED_ACCOUNT_ID:-}" ]; then
+            echo "Using configured Cloudflare account ID."
+            echo "CLOUDFLARE_ACCOUNT_ID=$CONFIGURED_ACCOUNT_ID" >> "$GITHUB_ENV"
+          else
+            echo "Resolving Cloudflare account from API token..."
+            curl -sS -f -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"               "https://api.cloudflare.com/client/v4/accounts?per_page=50" -o /tmp/cf-accounts.json
+            account_id="$(jq -r '.result[0].id // empty' /tmp/cf-accounts.json)"
+            test -n "$account_id"
+            echo "CLOUDFLARE_ACCOUNT_ID=$account_id" >> "$GITHUB_ENV"
+          fi
 
       - name: Deploy Worker
         env:
