@@ -21,16 +21,6 @@ jobs:
       - name: Install Wrangler
         run: npm install --global wrangler
 
-      - name: Verify Cloudflare token
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          echo "Verifying Cloudflare API token..."
-          curl -sS -f -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"             "https://api.cloudflare.com/client/v4/user/tokens/verify" -o /tmp/cf-token.json
-          jq -e '.success == true' /tmp/cf-token.json >/dev/null
-          echo "Cloudflare token is valid."
-
       - name: Resolve Cloudflare account
         env:
           CONFIGURED_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
