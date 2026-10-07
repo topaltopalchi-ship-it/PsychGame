@@ -4,9 +4,12 @@ export class AudioManager {
     this.master = null;
     this.started = false;
     this.nodes = [];
+    this.musicNodes = [];
+    this.musicTimer = null;
     this.voiceAudio = null;
     this.voiceGeneration = 0;
     this.voiceBase = "./audio/companion/";
+    this.currentRoom = 1;
   }
 
   playCompanionVoice(fileName, volume = 0.95, callbacks = {}) {
@@ -19,7 +22,6 @@ export class AudioManager {
       if (this.voiceAudio) {
         try { this.voiceAudio.pause(); this.voiceAudio.currentTime = 0; } catch {}
       }
-
       const audio = new Audio(this.voiceBase + encodeURIComponent(fileName));
       audio.preload = "auto";
       audio.volume = Math.max(0, Math.min(1, volume));
@@ -41,15 +43,12 @@ export class AudioManager {
       };
       audio.onerror = () => fail("audio_load_error");
       this.voiceAudio = audio;
-
       const playResult = audio.play();
       if (playResult?.then) {
         playResult.then(() => {
           if (generation === this.voiceGeneration) callbacks.onStarted?.();
         }).catch(() => fail("audio_play_rejected"));
-      } else {
-        callbacks.onStarted?.();
-      }
+      } else callbacks.onStarted?.();
       return audio;
     } catch {
       callbacks.onError?.("audio_exception");
@@ -84,34 +83,87 @@ export class AudioManager {
 
   startAmbient() {
     if (!this.ctx || this.nodes.length) return;
+
     this.master = this.ctx.createGain();
-    this.master.gain.value = 0.10;
+    this.master.gain.value = 0.11;
     this.master.connect(this.ctx.destination);
 
     const filter = this.ctx.createBiquadFilter();
     filter.type = "lowpass";
-    filter.frequency.value = 700;
+    filter.frequency.value = 850;
+    filter.Q.value = 0.45;
     filter.connect(this.master);
 
     const drone = this.ctx.createOscillator();
     drone.type = "sine";
     drone.frequency.value = 55;
     const droneGain = this.ctx.createGain();
-    droneGain.gain.value = 0.42;
+    droneGain.gain.value = 0.30;
     drone.connect(droneGain);
     droneGain.connect(filter);
 
-    const air = this.ctx.createOscillator();
-    air.type = "triangle";
-    air.frequency.value = 92;
-    const airGain = this.ctx.createGain();
-    airGain.gain.value = 0.08;
-    air.connect(airGain);
-    airGain.connect(filter);
+    const fifth = this.ctx.createOscillator();
+    fifth.type = "triangle";
+    fifth.frequency.value = 82.41;
+    const fifthGain = this.ctx.createGain();
+    fifthGain.gain.value = 0.035;
+    fifth.connect(fifthGain);
+    fifthGain.connect(filter);
 
     drone.start();
-    air.start();
-    this.nodes.push(drone, air, filter, droneGain, airGain);
+    fifth.start();
+    this.nodes.push(drone, fifth, filter, droneGain, fifthGain);
+
+    this.startMusic();
+  }
+
+  startMusic() {
+    if (!this.ctx || this.musicTimer) return;
+    this.musicTimer = window.setInterval(() => this.playMusicNote(), 2600);
+    this.playMusicNote();
+  }
+
+  playMusicNote() {
+    if (!this.ctx || !this.started || !this.master) return;
+
+    const now = this.ctx.currentTime;
+    const profiles = {
+      1:[55,65.41,73.42,82.41],
+      2:[55,61.74,73.42,87.31],
+      3:[49,58.27,65.41,77.78],
+      4:[43.65,51.91,65.41,77.78],
+      5:[51.91,58.27,69.30,77.78],
+      6:[46.25,55,69.30,82.41],
+      7:[55,65.41,77.78,92.50],
+      8:[41.20,49,61.74,73.42],
+      15:[49,58.27,65.41,77.78],
+      16:[46.25,55,65.41,73.42],
+      17:[51.91,61.74,73.42,82.41],
+      18:[43.65,55,65.41,77.78],
+      19:[49,58.27,69.30,87.31],
+      20:[36.71,43.65,55,65.41]
+    };
+    const notes = profiles[this.currentRoom] || profiles[1];
+    const note = notes[Math.floor(Math.random() * notes.length)];
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = this.currentRoom >= 15 ? "sine" : "triangle";
+    osc.frequency.setValueAtTime(note, now);
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(this.currentRoom === 4 ? 420 : 680, now);
+
+    const volume = this.currentRoom >= 15 ? 0.018 : 0.022;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.22);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.35);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.master);
+    osc.start(now);
+    osc.stop(now + 2.45);
   }
 
   playPulse(type="dark") {
@@ -138,15 +190,25 @@ export class AudioManager {
   }
 
   setRoom(roomNumber) {
+    this.currentRoom = Number(roomNumber) || 1;
     if (!this.started || !this.master) return;
-    const levels={1:.10,2:.12,3:.09,4:.13,5:.11,6:.14,7:.12,8:.08};
-    this.master.gain.value=levels[roomNumber]??.10;
+    const levels={1:.10,2:.115,3:.09,4:.12,5:.105,6:.13,7:.115,8:.085,15:.10,16:.10,17:.105,18:.09,19:.10,20:.08};
+    const level = levels[this.currentRoom] ?? .10;
+    const now = this.ctx?.currentTime ?? 0;
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setTargetAtTime(level, now, .35);
   }
 
   stop() {
+    if (this.musicTimer) {
+      clearInterval(this.musicTimer);
+      this.musicTimer = null;
+    }
     if (this.ctx) {
       this.nodes.forEach((node)=>{try{node.stop?.();}catch{} try{node.disconnect?.();}catch{}});
+      this.musicNodes.forEach((node)=>{try{node.stop?.();}catch{} try{node.disconnect?.();}catch{}});
       this.nodes=[];
+      this.musicNodes=[];
       this.ctx.close().catch(()=>{});
       this.ctx=null;
     }
