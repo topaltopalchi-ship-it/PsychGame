@@ -71,8 +71,11 @@ export class AudioManager {
     this.started = true;
     this.startEffectsContext();
     if (!this.ctx) return;
-    if (this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
-    this.startAmbient();
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume().then(() => this.startAmbient()).catch(() => {});
+    } else {
+      this.startAmbient();
+    }
   }
 
   startEffectsContext() {
@@ -85,7 +88,7 @@ export class AudioManager {
     if (!this.ctx || this.nodes.length) return;
 
     this.master = this.ctx.createGain();
-    this.master.gain.value = 0.11;
+    this.master.gain.value = 0.24;
     this.master.connect(this.ctx.destination);
 
     const filter = this.ctx.createBiquadFilter();
@@ -98,7 +101,7 @@ export class AudioManager {
     drone.type = "sine";
     drone.frequency.value = 55;
     const droneGain = this.ctx.createGain();
-    droneGain.gain.value = 0.30;
+    droneGain.gain.value = 0.22;
     drone.connect(droneGain);
     droneGain.connect(filter);
 
@@ -106,7 +109,7 @@ export class AudioManager {
     fifth.type = "triangle";
     fifth.frequency.value = 82.41;
     const fifthGain = this.ctx.createGain();
-    fifthGain.gain.value = 0.035;
+    fifthGain.gain.value = 0.08;
     fifth.connect(fifthGain);
     fifthGain.connect(filter);
 
@@ -154,7 +157,7 @@ export class AudioManager {
     filter.type = "lowpass";
     filter.frequency.setValueAtTime(this.currentRoom === 4 ? 420 : 680, now);
 
-    const volume = this.currentRoom >= 15 ? 0.018 : 0.022;
+    const volume = this.currentRoom >= 15 ? 0.055 : 0.065;
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(volume, now + 0.22);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.35);
