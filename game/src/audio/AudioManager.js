@@ -9,6 +9,8 @@ export class AudioManager {
     this.voiceAudio = null;
     this.voiceGeneration = 0;
     this.voiceBase = "./audio/companion/";
+    this.musicAudio = null;
+    this.musicUrl = null;
     this.currentRoom = 1;
   }
 
@@ -197,6 +199,7 @@ export class AudioManager {
     if (!this.started || !this.master) return;
     const levels={1:.10,2:.115,3:.09,4:.12,5:.105,6:.13,7:.115,8:.085,15:.10,16:.10,17:.105,18:.09,19:.10,20:.08};
     const level = levels[this.currentRoom] ?? .10;
+    if (this.musicAudio) this.musicAudio.volume = Math.min(0.72, Math.max(0.28, level * 5.5));
     const now = this.ctx?.currentTime ?? 0;
     this.master.gain.cancelScheduledValues(now);
     this.master.gain.setTargetAtTime(level, now, .35);
@@ -216,6 +219,14 @@ export class AudioManager {
       this.ctx=null;
     }
     this.master=null;
+    if (this.musicAudio) {
+      try { this.musicAudio.pause(); this.musicAudio.currentTime = 0; } catch {}
+    }
+    if (this.musicUrl) {
+      try { URL.revokeObjectURL(this.musicUrl); } catch {}
+    }
+    this.musicAudio = null;
+    this.musicUrl = null;
     this.started=false;
   }
 }
