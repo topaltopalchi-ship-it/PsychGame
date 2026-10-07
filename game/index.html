@@ -60,6 +60,7 @@
     const start = document.getElementById("pg-entry-start");
 
     start.addEventListener("click", () => {
+      window.psychGame?.unlockAudio?.();
       entry.classList.add("hide");
       window.dispatchEvent(new PointerEvent("pointerdown", {bubbles:true}));
       setTimeout(() => entry.remove(), 950);
