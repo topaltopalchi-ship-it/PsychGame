@@ -29,20 +29,6 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID" >> "$GITHUB_ENV"
 
-      - name: Verify Cloudflare token and account
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          echo "Checking Cloudflare token access for the configured account..."
-          curl -sS -f \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID" \
-            -o /tmp/cf-account.json
-          jq -e '.success == true' /tmp/cf-account.json >/dev/null
-          echo "Cloudflare account is reachable with the configured token."
-
       - name: Deploy Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
